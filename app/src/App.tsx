@@ -1,15 +1,12 @@
 import "./App.css";
-import Login from "./components/Login";
+import { AppRouter } from "./components/AppRouter";
 import { AuthProvider } from "./context/auth/AuthContextProvider";
-import { SupabaseProvider } from "./context/supabase/SupabaseContextProvider";
 
 function App() {
   return (
-    <SupabaseProvider>
-      <AuthProvider>
-        <Login />
-      </AuthProvider>
-    </SupabaseProvider>
+    <AuthProvider>
+      <AppRouter />
+    </AuthProvider>
   );
 }
 

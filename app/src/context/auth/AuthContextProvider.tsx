@@ -1,7 +1,7 @@
 import type { Session } from "@supabase/supabase-js";
-import { useSupabase } from "../supabase/useSupabase";
 import { AuthContext } from "./AuthContext";
 import { useEffect, useState, type ReactNode } from "react";
+import supabase from "@/supabase";
 
 // Provider props type
 interface AuthProviderProps {
@@ -9,26 +9,35 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const { client } = useSupabase();
   const [session, setSession] = useState<Session | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!client) {
-      console.error("Supabase client is not initialized.");
-      return;
-    }
-    client.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-    });
+    // Get initial session
+    supabase()
+      .auth.getSession()
+      .then(({ data: { session } }) => {
+        setSession(session);
+        setIsLoading(false);
+      });
+
+    // Listen for auth changes
     const {
       data: { subscription },
-    } = client.auth.onAuthStateChange((_event, session) => {
+    } = supabase().auth.onAuthStateChange((_event, session) => {
       setSession(session);
+      setIsLoading(false);
     });
-    return () => subscription.unsubscribe();
-  }, [client]);
 
-  return (
-    <AuthContext.Provider value={{ session }}>{children}</AuthContext.Provider>
-  );
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  const value = {
+    session,
+    isLoading,
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
