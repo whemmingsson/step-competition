@@ -32,8 +32,8 @@ export const AuthenticatedLayout = () => {
       {/* Content layer (above overlay) */}
       <div className="relative z-10 flex flex-col h-full">
         <Navigation />
-        <div className="flex-1 overflow-y-auto px-4 pb-16 pt-6 overflow-hidden">
-          <div className="container mx-auto max-w-full md:max-w-4xl">
+        <div className="flex-1 px-4 pb-16 pt-6 overflow-hidden">
+          <div className="container mx-auto max-w-full md:max-w-4xl overflow-hidden">
             <Outlet />
           </div>
         </div>
