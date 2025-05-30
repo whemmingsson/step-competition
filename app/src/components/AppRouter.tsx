@@ -7,6 +7,7 @@ import {
 } from "react-router-dom";
 import { useAuth } from "../context/auth/useAuth";
 import Login from "../components/Login";
+import RegisterStepsPage from "@/pages/RegisterStepsPage";
 
 // Loading component
 const LoadingScreen = () => (
@@ -16,10 +17,20 @@ const LoadingScreen = () => (
 );
 
 // Placeholder components for your routes
-const Home = () => <div>Home Page</div>;
+const Home = () => <RegisterStepsPage />;
 const User = () => <div>User Profile</div>;
 const Team = () => <div>Team Page</div>;
 const Leaderboard = () => <div>Leaderboard</div>;
+
+const Layout = () => {
+  return (
+    <div className="flex-container">
+      <div className="card-wrapper">
+        <Outlet />
+      </div>
+    </div>
+  );
+};
 
 // Protected layout component with loading state
 const ProtectedLayout = () => {
@@ -33,12 +44,11 @@ const ProtectedLayout = () => {
     return <Navigate to="/" replace state={{ from: location.pathname }} />;
   }
 
-  return <Outlet />;
+  return <Layout />;
 };
 
 export const AppRouter = () => {
   const { session, isLoading } = useAuth();
-  console.log("AppRouter Session:", session, "Loading:", isLoading);
 
   if (isLoading) {
     return <LoadingScreen />;

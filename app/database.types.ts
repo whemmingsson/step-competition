@@ -24,6 +24,72 @@ export type Database = {
         }
         Relationships: []
       }
+      Steps: {
+        Row: {
+          created_at: string
+          date: string | null
+          id: number
+          steps: number | null
+          uid: string | null
+        }
+        Insert: {
+          created_at?: string
+          date?: string | null
+          id?: number
+          steps?: number | null
+          uid?: string | null
+        }
+        Update: {
+          created_at?: string
+          date?: string | null
+          id?: number
+          steps?: number | null
+          uid?: string | null
+        }
+        Relationships: []
+      }
+      Teams: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: number
+          name: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: number
+          name?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: number
+          name?: string | null
+        }
+        Relationships: []
+      }
+      User_Teams: {
+        Row: {
+          created_at: string
+          id: number
+          team_id: number | null
+          uid: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          team_id?: number | null
+          uid?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          team_id?: number | null
+          uid?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
