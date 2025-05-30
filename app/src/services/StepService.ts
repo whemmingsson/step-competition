@@ -16,7 +16,7 @@ export class StepService {
     steps: number,
     uid: string,
     date: Date
-  ): Promise<{ success: boolean; error?: string; data?: any }> {
+  ): Promise<{ success: boolean; error?: string; data?: unknown }> {
     try {
       // Format the date to ISO string (YYYY-MM-DD) to ensure proper storage in Supabase
       const formattedDate = date.toISOString().split("T")[0];
@@ -64,7 +64,7 @@ export class StepService {
       const { data, error } = await supabase()
         .from("Steps")
         .select("*")
-        .eq("uid", uid)
+        .eq("user_id", uid)
         .order("date", { ascending: false });
 
       if (error) {

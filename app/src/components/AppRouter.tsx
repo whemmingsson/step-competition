@@ -4,10 +4,13 @@ import {
   Route,
   Navigate,
   Outlet,
+  useLocation,
 } from "react-router-dom";
 import { useAuth } from "../context/auth/useAuth";
-import Login from "../components/Login";
 import RegisterStepsPage from "@/pages/RegisterStepsPage";
+import UserPage from "@/pages/UserPage";
+import { Navigation } from "./Navigation";
+import { LoginPage } from "@/pages/LoginPage";
 
 // Loading component
 const LoadingScreen = () => (
@@ -16,39 +19,44 @@ const LoadingScreen = () => (
   </div>
 );
 
-// Placeholder components for your routes
-const Home = () => <RegisterStepsPage />;
-const User = () => <div>User Profile</div>;
-const Team = () => <div>Team Page</div>;
-const Leaderboard = () => <div>Leaderboard</div>;
-
-const Layout = () => {
+// Shared authenticated layout for ALL authenticated routes including home
+const AuthenticatedLayout = () => {
   return (
-    <div className="flex-container">
-      <div className="card-wrapper">
-        <Outlet />
+    <div className="h-screen flex flex-col">
+      <Navigation />
+      <div className="flex-1 overflow-hidden">
+        <div className="container mx-auto">
+          <Outlet />
+        </div>
       </div>
     </div>
   );
 };
 
-// Protected layout component with loading state
-const ProtectedLayout = () => {
+// Page components
+const Home = () => <RegisterStepsPage />;
+const User = () => <UserPage />;
+const Team = () => <div>Team Page</div>;
+const Leaderboard = () => <div>Leaderboard</div>;
+
+// Auth check wrapper that works for all protected routes
+const RequireAuth = () => {
   const { session, isLoading } = useAuth();
+  const location = useLocation();
 
   if (isLoading) {
     return <LoadingScreen />;
   }
 
   if (!session) {
-    return <Navigate to="/" replace state={{ from: location.pathname }} />;
+    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   }
 
-  return <Layout />;
+  return <Outlet />;
 };
 
 export const AppRouter = () => {
-  const { session, isLoading } = useAuth();
+  const { isLoading } = useAuth();
 
   if (isLoading) {
     return <LoadingScreen />;
@@ -57,13 +65,17 @@ export const AppRouter = () => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={session ? <Home /> : <Login />} />
+        {/* Login page - separate from other routes */}
+        <Route path="/login" element={<LoginPage />} />
 
-        {/* Protected routes */}
-        <Route element={<ProtectedLayout />}>
-          <Route path="/user" element={<User />} />
-          <Route path="/team" element={<Team />} />
-          <Route path="/leaderboard" element={<Leaderboard />} />
+        {/* All authenticated routes use the same layout */}
+        <Route element={<RequireAuth />}>
+          <Route element={<AuthenticatedLayout />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/user" element={<User />} />
+            <Route path="/team" element={<Team />} />
+            <Route path="/leaderboard" element={<Leaderboard />} />
+          </Route>
         </Route>
 
         {/* Catch all route */}

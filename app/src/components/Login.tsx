@@ -1,8 +1,8 @@
 import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { useAuth } from "../context/auth/useAuth.tsx";
-import { Button } from "./ui/button.tsx";
 import supabase from "@/supabase.ts";
+import { Navigate } from "react-router-dom";
 
 function Login() {
   const { session } = useAuth();
@@ -15,14 +15,7 @@ function Login() {
   if (!session) {
     return <Auth supabaseClient={client} appearance={{ theme: ThemeSupa }} />;
   } else {
-    return (
-      <div>
-        {" "}
-        <div className="flex flex-col items-center justify-center min-h-svh">
-          <Button>Click me</Button>
-        </div>
-      </div>
-    );
+    return <Navigate to="/" />;
   }
 }
 
