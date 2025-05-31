@@ -2,9 +2,10 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
+import { LogOut, Menu, X } from "lucide-react";
 
 import { DisplayNameBadge } from "./DisplayNameBadge";
+import supabase from "@/supabase";
 
 export function Navigation() {
   const location = useLocation();
@@ -17,25 +18,48 @@ export function Navigation() {
     { name: "Leaderboard", path: "/leaderboard" },
   ];
 
+  async function handleLogout(): Promise<void> {
+    const { error } = await supabase().auth.signOut();
+
+    if (error) {
+      console.error("Logout error:", error.message);
+    } else {
+      window.location.href = "/";
+    }
+  }
+
   return (
     <nav className="bg-background border-b sticky top-0 z-10">
       <div className="container mx-auto px-4 py-3">
         {/* Mobile menu button */}
         <div className="flex justify-between items-center md:hidden">
           <span className="text-lg font-bold">Step Competition</span>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            {mobileMenuOpen ? (
-              <X className="h-6 w-6" />
-            ) : (
-              <Menu className="h-6 w-6" />
-            )}
-          </Button>
-        </div>
+          <div className="flex items-center gap-2">
+            {/* Logout button for mobile */}
 
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleLogout}
+              className="text-foreground/80 hover:text-foreground"
+              title="Logout"
+            >
+              <LogOut className="h-5 w-5" />
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
+            </Button>
+          </div>
+        </div>
         {/* Mobile menu */}
         <div
           className={cn(
@@ -60,7 +84,7 @@ export function Navigation() {
                     : "hover:bg-accent"
                 )}
               >
-                {item.name}
+                {item.name} {item.name === "User" && <DisplayNameBadge />}
               </Link>
             );
           })}
@@ -90,6 +114,17 @@ export function Navigation() {
               </Link>
             );
           })}
+
+          <div className="hidden md:block absolute right-4 top-1/2 -translate-y-1/2">
+            <Button
+              variant="outline"
+              onClick={handleLogout}
+              className="flex items-center gap-2"
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
+            </Button>
+          </div>
         </div>
       </div>
     </nav>
