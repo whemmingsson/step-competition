@@ -25,6 +25,17 @@ import { toast } from "sonner";
 import { Label } from "@radix-ui/react-label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface StepRecord {
   id: number;
@@ -45,6 +56,10 @@ export default function UserPage() {
   const [displayName, setDisplayName] = useState("");
   const [displayNameLoading, setDisplayNameLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+
+  // Add state for deletion confirmation
+  const [recordToDelete, setRecordToDelete] = useState<StepRecord | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   useEffect(() => {
     async function fetchUserSteps() {
@@ -124,6 +139,32 @@ export default function UserPage() {
     }
   };
 
+  // Handle delete confirmation
+  const handleDeleteClick = (record: StepRecord) => {
+    setRecordToDelete(record);
+    setIsDeleteDialogOpen(true);
+  };
+
+  // Handle actual deletion
+  const handleConfirmDelete = async () => {
+    if (!recordToDelete) return;
+
+    try {
+      await StepService.deleteStepRecord(recordToDelete.id);
+      toast.success("Record deleted successfully");
+
+      // Update the UI by removing the deleted record
+      setSteps(steps.filter((record) => record.id !== recordToDelete.id));
+    } catch (error) {
+      toast.error("Failed to delete record");
+      console.error(error);
+    } finally {
+      // Close dialog and clear state
+      setIsDeleteDialogOpen(false);
+      setRecordToDelete(null);
+    }
+  };
+
   // Calculate total steps
   const totalSteps = steps.reduce((sum, record) => sum + record.steps, 0);
 
@@ -190,6 +231,7 @@ export default function UserPage() {
                   <TableRow>
                     <TableHead>Date</TableHead>
                     <TableHead className="text-right">Steps</TableHead>
+                    <TableHead></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -201,6 +243,17 @@ export default function UserPage() {
                       <TableCell className="text-right font-medium">
                         {record.steps.toLocaleString()}
                       </TableCell>
+                      <TableCell>
+                        {" "}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDeleteClick(record)}
+                          className="text-red-500 hover:text-red-700 hover:bg-red-100"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -209,6 +262,34 @@ export default function UserPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Confirmation Dialog */}
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete your step record for{" "}
+              {recordToDelete && format(new Date(recordToDelete.date), "PPP")}{" "}
+              with {recordToDelete?.steps.toLocaleString()} steps.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setRecordToDelete(null)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              className="bg-red-500 hover:bg-red-700"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </PageContainer>
   );
 }

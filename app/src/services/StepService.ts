@@ -166,4 +166,43 @@ export class StepService {
       };
     }
   }
+
+  /**
+   * Delete a specific step record
+   *
+   * @param id - ID of the step record to delete
+   * @returns Promise with the result of the delete operation
+   */
+  static async deleteStepRecord(
+    id: number
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      if (!id) {
+        return {
+          success: false,
+          error: "Record ID is required",
+        };
+      }
+
+      const { error } = await supabase().from("Steps").delete().eq("id", id);
+
+      if (error) {
+        console.error("Error deleting step record:", error);
+        return {
+          success: false,
+          error: error.message,
+        };
+      }
+
+      return {
+        success: true,
+      };
+    } catch (err) {
+      console.error("Unexpected error deleting step record:", err);
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : "Unknown error occurred",
+      };
+    }
+  }
 }
