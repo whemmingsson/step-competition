@@ -43,7 +43,7 @@ Step Competition is a modern web application that allows users to record their d
 
    ```bash
    git clone https://github.com/yourusername/step-competition.git
-   cd step-competition/app
+   cd step-competition
    ```
 
 2. Install dependencies:
