@@ -27,9 +27,21 @@ import { CalendarIcon } from "lucide-react";
 import { StepService } from "@/services/StepService";
 import { useAuth } from "@/context/auth/useAuth";
 import { PageContainer } from "@/components/PageContainer";
+import { useEffect, useState } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { CompetitionService } from "@/services/CompetitionService";
 
-// Form validation schema
+// Form validation schema with competition field
 const formSchema = z.object({
+  competition: z.string({
+    required_error: "Please select a competition",
+  }),
   steps: z
     .number({ required_error: "Number of steps is required" })
     .positive("Steps must be a positive number")
@@ -46,15 +58,63 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export default function RegisterStepsPage() {
+  const [competitionLoading, setCompetitionLoading] = useState(false);
+  const [competitions, setCompetitions] = useState<
+    { id: string; name: string }[]
+  >([]);
+
   const { session } = useAuth();
   const { id: userId } = session?.user || {};
+  // Get saved competition from localStorage on component mount
+  const savedCompetition =
+    typeof window !== "undefined"
+      ? localStorage.getItem("selectedCompetition") ||
+        (competitions[0] && competitions[0].id)
+      : competitions[0].id;
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      competition: savedCompetition,
       steps: 0,
       date: new Date(),
     },
   });
+
+  // Watch for competition changes to save to localStorage
+  const selectedCompetition = form.watch("competition");
+
+  useEffect(() => {
+    if (selectedCompetition) {
+      localStorage.setItem("selectedCompetition", selectedCompetition);
+    }
+  }, [selectedCompetition]);
+
+  useEffect(() => {
+    async function fetchCompetitions() {
+      if (!userId) return;
+
+      setCompetitionLoading(true);
+      try {
+        const result = await CompetitionService.getCompetitions();
+
+        if (result.success && result) {
+          setCompetitions(
+            (result.data ?? []).map((competition) => ({
+              id: String(competition.id),
+              name: competition.name ?? "Unnamed Competition",
+            }))
+          );
+        }
+      } catch (err) {
+        console.error("Error loading display name:", err);
+      } finally {
+        setCompetitionLoading(false);
+      }
+    }
+
+    fetchCompetitions();
+  }, [userId]);
 
   async function onSubmit(data: FormValues) {
     if (!userId) {
@@ -85,6 +145,44 @@ export default function RegisterStepsPage() {
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+              {/* Competition Select Field */}
+              <FormField
+                disabled={competitionLoading}
+                control={form.control}
+                name="competition"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Select Competition</FormLabel>
+                    <Select
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                      }}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a competition" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {competitions.map((competition) => (
+                          <SelectItem
+                            key={competition.id}
+                            value={competition.id}
+                          >
+                            {competition.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>
+                      Choose which competition to record steps for
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <FormField
                 control={form.control}
                 name="steps"

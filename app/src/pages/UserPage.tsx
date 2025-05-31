@@ -3,29 +3,9 @@ import { format } from "date-fns";
 import { useAuth } from "@/context/auth/useAuth";
 import { StepService } from "@/services/StepService";
 
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { PageContainer } from "@/components/PageContainer";
 import { UserService } from "@/services/UserService";
 import { toast } from "sonner";
-import { Label } from "@radix-ui/react-label";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,6 +16,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useUser } from "@/context/user/UserContext";
+import { UserHistoryCard } from "@/components/UserHistoryCard";
+import { UserProfileCard } from "@/components/UserProfileCard";
 
 interface StepRecord {
   id: number;
@@ -46,6 +29,8 @@ interface StepRecord {
 }
 
 export default function UserPage() {
+  // Add this near your other hooks
+  const { refreshUser } = useUser();
   const { session } = useAuth();
   const userId = session?.user?.id;
   const [steps, setSteps] = useState<StepRecord[]>([]);
@@ -128,6 +113,7 @@ export default function UserPage() {
 
       if (result.success) {
         toast.success("Display name updated successfully!");
+        refreshUser(); // Refresh user data to reflect changes
       } else {
         toast.error(`Failed to update display name: ${result.error}`);
       }
@@ -140,8 +126,9 @@ export default function UserPage() {
   };
 
   // Handle delete confirmation
-  const handleDeleteClick = (record: StepRecord) => {
-    setRecordToDelete(record);
+  const handleDeleteClick = (record: { id: number }) => {
+    const fullRecord = steps.find((step) => step.id === record.id) || null;
+    setRecordToDelete(fullRecord);
     setIsDeleteDialogOpen(true);
   };
 
@@ -170,98 +157,21 @@ export default function UserPage() {
 
   return (
     <PageContainer>
-      {/* Display name card */}
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle className="text-xl font-bold">Your Profile</CardTitle>
-          <CardDescription>
-            Set your display name for the leaderboard
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleUpdateDisplayName} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="displayName">Display Name</Label>
-              <Input
-                id="displayName"
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                placeholder="Enter your preferred display name"
-                disabled={displayNameLoading || isSaving}
-              />
-            </div>
-            <Button
-              type="submit"
-              disabled={displayNameLoading || isSaving || !displayName.trim()}
-            >
-              {isSaving ? "Saving..." : "Save Display Name"}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+      <UserProfileCard
+        displayName={displayName}
+        setDisplayName={setDisplayName}
+        displayNameLoading={displayNameLoading}
+        handleUpdateDisplayName={handleUpdateDisplayName}
+        isSaving={isSaving}
+      />
 
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold text-center">
-            Your Step History
-          </CardTitle>
-          <CardDescription className="text-center">
-            Track your progress over time
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="flex justify-center py-8">
-              <div className="animate-spin h-8 w-8 border-4 border-blue-600 rounded-full border-t-transparent"></div>
-            </div>
-          ) : error ? (
-            <div className="text-center text-red-500 py-4">{error}</div>
-          ) : steps.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              No step data available. Start recording your steps!
-            </div>
-          ) : (
-            <>
-              <div className="text-lg font-medium mb-4 text-center">
-                Total Steps: {totalSteps.toLocaleString()}
-              </div>
-              <Table>
-                <TableCaption>A history of your recorded steps</TableCaption>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead className="text-right">Steps</TableHead>
-                    <TableHead></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {steps.map((record) => (
-                    <TableRow key={record.id}>
-                      <TableCell>
-                        {format(new Date(record.date), "PPP")}
-                      </TableCell>
-                      <TableCell className="text-right font-medium">
-                        {record.steps.toLocaleString()}
-                      </TableCell>
-                      <TableCell>
-                        {" "}
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDeleteClick(record)}
-                          className="text-red-500 hover:text-red-700 hover:bg-red-100"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </>
-          )}
-        </CardContent>
-      </Card>
+      <UserHistoryCard
+        steps={steps}
+        totalSteps={totalSteps}
+        loading={loading}
+        handleDeleteClick={handleDeleteClick}
+        error={error}
+      />
 
       {/* Confirmation Dialog */}
       <AlertDialog

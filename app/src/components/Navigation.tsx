@@ -4,6 +4,8 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 
+import { DisplayNameBadge } from "./DisplayNameBadge";
+
 export function Navigation() {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -77,13 +79,14 @@ export function Navigation() {
                 to={item.path}
                 className={cn(
                   "inline-flex items-center justify-center whitespace-nowrap rounded-md px-6 py-3 text-base font-medium transition-colors",
-                  "hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1",
+                  "hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 gap-2",
                   isActive
                     ? "bg-primary text-primary-foreground"
                     : "text-foreground/80"
                 )}
               >
                 {item.name}
+                {item.name === "User" && <DisplayNameBadge />}
               </Link>
             );
           })}

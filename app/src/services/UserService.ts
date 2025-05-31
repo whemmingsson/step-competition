@@ -1,4 +1,5 @@
 import supabase from "@/supabase";
+import type { User } from "@/types/User";
 
 /**
  * Service for user-related operations
@@ -103,6 +104,36 @@ export class UserService {
       return {
         success: false,
         error: err instanceof Error ? err.message : "Unknown error occurred",
+      };
+    }
+  }
+
+  static async getUser(): Promise<{ success: boolean; user: User | null }> {
+    try {
+      const { data, error } = await supabase().auth.getUser();
+
+      if (error) {
+        console.error("Error fetching user:", error);
+        return { success: false, user: null };
+      }
+
+      if (!data.user) {
+        return { success: false, user: null };
+      }
+
+      const displayNameResult = await this.getDisplayName(data.user.id);
+
+      const user: User = {
+        id: data.user.id,
+        displayName: displayNameResult.displayName ?? null,
+      };
+
+      return { success: true, user };
+    } catch (err) {
+      console.error("Unexpected error fetching user:", err);
+      return {
+        success: false,
+        user: null,
       };
     }
   }
