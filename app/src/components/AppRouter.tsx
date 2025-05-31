@@ -6,12 +6,14 @@ import { LoginPage } from "@/pages/LoginPage";
 import { AuthenticatedLayout } from "./AuthenticatedLayout";
 import { RequireAuth } from "./RequireAuth";
 import { LoadingScreen } from "./LoadingScreen";
+import { LeaderboardPage } from "@/pages/LeaderboardPage.";
+import { TeamPage } from "@/pages/TeamPage";
 
 // Page components
 const Home = () => <RegisterStepsPage />;
 const User = () => <UserPage />;
-const Team = () => <div>Team Page</div>;
-const Leaderboard = () => <div>Leaderboard</div>;
+const Team = () => <TeamPage />;
+const Leaderboard = () => <LeaderboardPage />;
 
 export const AppRouter = () => {
   const { isLoading } = useAuth();

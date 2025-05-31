@@ -19,10 +19,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { PageContainer } from "@/components/PageContainer";
+import { UserService } from "@/services/UserService";
+import { toast } from "sonner";
+import { Label } from "@radix-ui/react-label";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 interface StepRecord {
   id: number;
-  uid: string;
+  user_id: string;
   steps: number;
   date: string;
   created_at: string;
@@ -34,6 +40,11 @@ export default function UserPage() {
   const [steps, setSteps] = useState<StepRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Display name state
+  const [displayName, setDisplayName] = useState("");
+  const [displayNameLoading, setDisplayNameLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     async function fetchUserSteps() {
@@ -59,11 +70,95 @@ export default function UserPage() {
     fetchUserSteps();
   }, [userId, session]);
 
+  // Fetch current display name
+  useEffect(() => {
+    async function fetchDisplayName() {
+      if (!userId) return;
+
+      setDisplayNameLoading(true);
+      try {
+        const result = await UserService.getDisplayName(userId);
+
+        if (result.success && result.displayName) {
+          setDisplayName(result.displayName);
+        }
+      } catch (err) {
+        console.error("Error loading display name:", err);
+      } finally {
+        setDisplayNameLoading(false);
+      }
+    }
+
+    fetchDisplayName();
+  }, [userId]);
+
+  // Handle display name update
+  const handleUpdateDisplayName = async (e: { preventDefault: () => void }) => {
+    e.preventDefault();
+
+    if (!userId) {
+      toast.error("You must be logged in to update your display name");
+      return;
+    }
+
+    if (!displayName.trim()) {
+      toast.error("Display name cannot be empty");
+      return;
+    }
+
+    setIsSaving(true);
+
+    try {
+      const result = await UserService.setDisplayName(userId, displayName);
+
+      if (result.success) {
+        toast.success("Display name updated successfully!");
+      } else {
+        toast.error(`Failed to update display name: ${result.error}`);
+      }
+    } catch (error) {
+      toast.error("An error occurred while updating your display name");
+      console.error(error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   // Calculate total steps
   const totalSteps = steps.reduce((sum, record) => sum + record.steps, 0);
 
   return (
-    <div className="container max-w-xl py-10 flex min-h-screen items-center justify-center">
+    <PageContainer>
+      {/* Display name card */}
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle className="text-xl font-bold">Your Profile</CardTitle>
+          <CardDescription>
+            Set your display name for the leaderboard
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleUpdateDisplayName} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="displayName">Display Name</Label>
+              <Input
+                id="displayName"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                placeholder="Enter your preferred display name"
+                disabled={displayNameLoading || isSaving}
+              />
+            </div>
+            <Button
+              type="submit"
+              disabled={displayNameLoading || isSaving || !displayName.trim()}
+            >
+              {isSaving ? "Saving..." : "Save Display Name"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+
       <Card className="w-full">
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-center">
@@ -114,6 +209,6 @@ export default function UserPage() {
           )}
         </CardContent>
       </Card>
-    </div>
+    </PageContainer>
   );
 }

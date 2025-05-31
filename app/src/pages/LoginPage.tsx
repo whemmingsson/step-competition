@@ -1,9 +1,10 @@
 import Login from "@/components/Login";
+import { PageContainer } from "@/components/PageContainer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const LoginPage = () => {
   return (
-    <div className="container max-w-xl py-10 flex min-h-screen items-center justify-center">
+    <PageContainer>
       <Card className="w-full">
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-center">
@@ -14,6 +15,6 @@ export const LoginPage = () => {
           <Login />
         </CardContent>
       </Card>
-    </div>
+    </PageContainer>
   );
 };

@@ -9,84 +9,90 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      instruments: {
-        Row: {
-          id: number
-          name: string
-        }
-        Insert: {
-          id?: never
-          name: string
-        }
-        Update: {
-          id?: never
-          name?: string
-        }
-        Relationships: []
-      }
       Steps: {
         Row: {
           created_at: string
           date: string | null
           id: number
           steps: number | null
-          uid: string | null
+          user_id: string | null
         }
         Insert: {
           created_at?: string
           date?: string | null
           id?: number
           steps?: number | null
-          uid?: string | null
+          user_id?: string | null
         }
         Update: {
           created_at?: string
           date?: string | null
           id?: number
           steps?: number | null
-          uid?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
       Teams: {
         Row: {
           created_at: string
-          created_by: string | null
           id: number
           name: string | null
+          user_id: string | null
         }
         Insert: {
           created_at?: string
-          created_by?: string | null
           id?: number
           name?: string | null
+          user_id?: string | null
         }
         Update: {
           created_at?: string
-          created_by?: string | null
           id?: number
           name?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
-      User_Teams: {
+      Users_Meta: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          id: number
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          id?: number
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          id?: number
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      Users_Teams: {
         Row: {
           created_at: string
           id: number
           team_id: number | null
-          uid: string | null
+          user_id: string | null
         }
         Insert: {
           created_at?: string
           id?: number
           team_id?: number | null
-          uid?: string | null
+          user_id?: string | null
         }
         Update: {
           created_at?: string
           id?: number
           team_id?: number | null
-          uid?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }

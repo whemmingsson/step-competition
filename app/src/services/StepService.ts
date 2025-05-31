@@ -80,4 +80,90 @@ export class StepService {
       };
     }
   }
+
+  /**
+   * Get the top 5 users with the highest total steps
+   *
+   * @param limit - Number of users to return (default 5)
+   * @returns Promise with array of {username, totalSteps}
+   */
+  static async getTopUsers(limit: number = 5) {
+    try {
+      // Get all steps records
+      const { data: stepsData, error: stepsError } = await supabase()
+        .from("Steps")
+        .select("user_id, steps");
+
+      if (stepsError) {
+        throw stepsError;
+      }
+
+      // Group steps by user and calculate totals
+      const userTotals: Record<string, number> = {};
+      for (const record of stepsData) {
+        const userId = record.user_id;
+
+        if (!userId) {
+          console.warn("Skipping record with missing user_id:", record);
+          continue; // Skip records without user_id
+        }
+        if (!userTotals[userId]) {
+          userTotals[userId] = 0;
+        }
+        userTotals[userId] += record.steps ?? 0;
+      }
+
+      // Sort users by total steps and take top ones
+      const sortedUsers = Object.entries(userTotals)
+        .map(([userId, totalSteps]) => ({ userId, totalSteps }))
+        .sort((a, b) => (b.totalSteps as number) - (a.totalSteps as number))
+        .slice(0, limit);
+
+      // Fetch usernames for the top users
+      const userIds = sortedUsers.map((user) => user.userId);
+      const { data: usersData, error: usersError } = await supabase()
+        .from("Users_Meta")
+        .select("user_id, display_name")
+        .in("user_id", userIds);
+
+      // Convert the usersData to a map for easy access
+      let userMetaMap: Record<string, string> = {};
+      if (usersData) {
+        userMetaMap = usersData.reduce((acc, user) => {
+          if (user.user_id) {
+            acc[user.user_id] = user.display_name || "Unknown User";
+          }
+          return acc;
+        }, {} as Record<string, string>);
+      }
+
+      if (usersError) {
+        throw usersError;
+      }
+      // Map usernames to the sorted users
+      const result = [];
+      for (const user of sortedUsers) {
+        if (!user.userId) {
+          console.warn("Skipping user with missing user_id:", user);
+          continue; // Skip users without user_id
+        }
+        const username = userMetaMap[user.userId] || "Unknown User";
+        result.push({
+          displayName: username,
+          totalSteps: user.totalSteps,
+        });
+      }
+
+      return {
+        success: true,
+        data: result,
+      };
+    } catch (err) {
+      console.error("Error fetching top users:", err);
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : "Unknown error occurred",
+      };
+    }
+  }
 }

@@ -21,12 +21,12 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { CalendarIcon } from "lucide-react";
 import { StepService } from "@/services/StepService";
 import { useAuth } from "@/context/auth/useAuth";
+import { PageContainer } from "@/components/PageContainer";
 
 // Form validation schema
 const formSchema = z.object({
@@ -75,7 +75,7 @@ export default function RegisterStepsPage() {
   }
 
   return (
-    <div className="container max-w-xl py-10 flex min-h-screen items-center justify-center">
+    <PageContainer>
       <Card className="w-full">
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-center">
@@ -165,7 +165,6 @@ export default function RegisterStepsPage() {
           </Form>
         </CardContent>
       </Card>
-      <Toaster />
-    </div>
+    </PageContainer>
   );
 }
