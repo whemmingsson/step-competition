@@ -26,7 +26,7 @@ export const UserProfileCard = ({
   handleUpdateDisplayName,
 }: UserProfileCardProps) => {
   return (
-    <Card className="w-full">
+    <Card className="w-full" style={{ background: "#ffffffed" }}>
       <CardHeader>
         <CardTitle className="text-xl font-bold">
           Your Profile <DisplayNameBadge />
@@ -40,6 +40,7 @@ export const UserProfileCard = ({
           <div className="space-y-2">
             <Label htmlFor="displayName">Display Name</Label>
             <Input
+              className="bg-white"
               id="displayName"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}

@@ -167,7 +167,7 @@ export default function RegisterStepsPage() {
 
   return (
     <PageContainer>
-      <Card className="w-full">
+      <Card className="w-full" style={{ background: "#ffffffed" }}>
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-center">
             Register Your Daily Steps
@@ -192,7 +192,7 @@ export default function RegisterStepsPage() {
                       }}
                       defaultValue={field.value}
                     >
-                      <FormControl>
+                      <FormControl className="bg-white">
                         <SelectTrigger>
                           <SelectValue placeholder="Select a competition" />
                         </SelectTrigger>
@@ -200,6 +200,7 @@ export default function RegisterStepsPage() {
                       <SelectContent>
                         {competitions.map((competition) => (
                           <SelectItem
+                            className="bg-white"
                             key={competition.id}
                             value={competition.id}
                           >
@@ -226,6 +227,7 @@ export default function RegisterStepsPage() {
                       <Input
                         type="number"
                         placeholder="Enter your step count"
+                        className="bg-white"
                         {...field}
                         onChange={(e) => {
                           field.onChange(
@@ -290,12 +292,12 @@ export default function RegisterStepsPage() {
               />
 
               {/* Team display section - outside of form validation */}
-              <div className="pt-4 mt-4 border-t">
+              <div className="pt-4 mt-4 border-t ">
                 <div className="flex flex-col space-y-1.5">
                   <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                     Contributing to Team
                   </label>
-                  <div className="flex items-center gap-2 h-10 px-3 py-2 text-sm border rounded-md bg-muted">
+                  <div className="flex items-center gap-2 h-10 px-3 py-2 text-sm border rounded-md bg-muted bg-white">
                     <Users className="h-4 w-4 opacity-70" />
                     {teamLoading ? (
                       <span className="text-muted-foreground">

@@ -34,7 +34,7 @@ export const UserHistoryCard = ({
   handleDeleteClick,
 }: UserHistoryCardProps) => {
   return (
-    <Card className="w-full">
+    <Card className="w-full" style={{ background: "#ffffffed" }}>
       <CardHeader>
         <CardTitle className="text-2xl font-bold text-center">
           Your Step History

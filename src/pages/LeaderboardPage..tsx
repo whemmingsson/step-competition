@@ -59,7 +59,7 @@ export const LeaderboardPage = () => {
 
   return (
     <PageContainer>
-      <Card className="w-full">
+      <Card className="w-full" style={{ background: "#ffffffed" }}>
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-center">
             Step Competition Leaderboard

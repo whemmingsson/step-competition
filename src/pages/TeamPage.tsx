@@ -166,7 +166,10 @@ export const TeamPage = () => {
 
   return (
     <PageContainer>
-      <Card className="w-full max-w-2xl mx-auto shadow-md">
+      <Card
+        className="w-full max-w-2xl mx-auto shadow-md"
+        style={{ background: "#ffffffed" }}
+      >
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="h-6 w-6" />
