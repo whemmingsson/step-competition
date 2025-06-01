@@ -23,7 +23,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Users } from "lucide-react";
 import { StepService } from "@/services/StepService";
 import { useAuth } from "@/context/auth/useAuth";
 import { PageContainer } from "@/components/PageContainer";
@@ -36,6 +36,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CompetitionService } from "@/services/CompetitionService";
+import { TeamService } from "@/services/TeamService";
 
 // Form validation schema with competition field
 const formSchema = z.object({
@@ -62,6 +63,10 @@ export default function RegisterStepsPage() {
   const [competitions, setCompetitions] = useState<
     { id: string; name: string }[]
   >([]);
+  const [userTeam, setUserTeam] = useState<{ id: string; name: string } | null>(
+    null
+  );
+  const [teamLoading, setTeamLoading] = useState(false);
 
   const { session } = useAuth();
   const { id: userId } = session?.user || {};
@@ -114,6 +119,31 @@ export default function RegisterStepsPage() {
     }
 
     fetchCompetitions();
+  }, [userId]);
+
+  // Fetch user's team information
+  useEffect(() => {
+    async function fetchUserTeam() {
+      if (!userId) return;
+
+      setTeamLoading(true);
+      try {
+        const result = await TeamService.getTeamByUserId();
+
+        if (result.success && result.data) {
+          setUserTeam({
+            id: String(result.data.id),
+            name: result.data.name || "Unnamed Team",
+          });
+        }
+      } catch (err) {
+        console.error("Error loading user team:", err);
+      } finally {
+        setTeamLoading(false);
+      }
+    }
+
+    fetchUserTeam();
   }, [userId]);
 
   async function onSubmit(data: FormValues) {
@@ -255,6 +285,32 @@ export default function RegisterStepsPage() {
                   </FormItem>
                 )}
               />
+
+              {/* Team display section - outside of form validation */}
+              <div className="pt-4 mt-4 border-t">
+                <div className="flex flex-col space-y-1.5">
+                  <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    Contributing to Team
+                  </label>
+                  <div className="flex items-center gap-2 h-10 px-3 py-2 text-sm border rounded-md bg-muted">
+                    <Users className="h-4 w-4 opacity-70" />
+                    {teamLoading ? (
+                      <span className="text-muted-foreground">
+                        Loading team information...
+                      </span>
+                    ) : userTeam ? (
+                      <span>{userTeam.name}</span>
+                    ) : (
+                      <span className="text-muted-foreground">
+                        Not part of a team
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Your steps also contribute to your team's total
+                  </p>
+                </div>
+              </div>
 
               <Button type="submit" className="w-full">
                 Register Steps
