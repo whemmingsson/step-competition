@@ -1,4 +1,5 @@
 import supabase from "@/supabase";
+import type { Team } from "@/types/Team";
 
 /**
  * Service for user-related operations
@@ -17,13 +18,7 @@ export class TeamService {
   ): Promise<{
     success: boolean;
     error?: string;
-    data?:
-      | {
-          id: string;
-          name: string;
-          user_id: string;
-        }
-      | undefined;
+    data?: Team | null;
   }> {
     try {
       if (!userId || !name.trim()) {
@@ -44,13 +39,14 @@ export class TeamService {
         return { success: false, error: error.message };
       }
 
-      const mappedData = data
+      const mappedData: Team | null = data
         ? {
-            id: String(data.id),
+            id: data.id,
             name: data.name ?? "",
             user_id: data.user_id ?? "",
+            members: [], // Initialize with an empty array, can be populated later
           }
-        : undefined;
+        : null;
       return { success: true, data: mappedData };
     } catch (err) {
       console.error("Unexpected error creating team:", err);
@@ -69,7 +65,7 @@ export class TeamService {
   static async getTeams(): Promise<{
     success: boolean;
     error?: string;
-    data?: { id: string; name: string; user_id: string }[];
+    data?: Team[];
   }> {
     try {
       const { data, error } = await supabase()
@@ -81,12 +77,13 @@ export class TeamService {
         return { success: false, error: error.message };
       }
 
-      const mappedData =
+      const mappedData: Team[] =
         data?.map((team) => ({
-          id: String(team.id),
+          id: team.id,
           name: team.name ?? "",
           user_id: team.user_id ?? "",
         })) ?? [];
+
       return { success: true, data: mappedData };
     } catch (err) {
       console.error("Unexpected error fetching teams:", err);
@@ -100,7 +97,7 @@ export class TeamService {
   public static async getTeamById(teamId: number): Promise<{
     success: boolean;
     error?: string;
-    data?: { id: string; name: string; user_id: string };
+    data?: Team | null;
   }> {
     try {
       if (!teamId) {
@@ -118,13 +115,29 @@ export class TeamService {
         return { success: false, error: error.message };
       }
 
-      const mappedData = data
+      const { data: usersInTeamData, error: teamError } = await supabase()
+        .from("Users_Teams")
+        .select("user_id")
+        .eq("team_id", teamId);
+
+      if (teamError) {
+        console.error("Error fetching users in team:", teamError);
+        return { success: false, error: teamError.message };
+      }
+
+      const mappedData: Team | null = data
         ? {
-            id: String(data.id),
+            id: data.id,
             name: data.name ?? "",
             user_id: data.user_id ?? "",
+            members:
+              (usersInTeamData ?? [])
+                .map((user) => {
+                  return { id: user.user_id ?? "", displayName: "UNSET" };
+                })
+                .filter((id) => id !== null) || [],
           }
-        : undefined;
+        : null;
 
       return { success: true, data: mappedData };
     } catch (err) {
@@ -139,7 +152,7 @@ export class TeamService {
   public static async getTeamByUserId(): Promise<{
     success: boolean;
     error?: string;
-    data?: { id: string; name: string; user_id: string } | null;
+    data?: Team | null;
   }> {
     try {
       const user = await supabase().auth.getUser();
@@ -173,13 +186,14 @@ export class TeamService {
         return { success: false, error: teamError };
       }
 
-      const mappedData = teamData
+      const mappedData: Team | null = teamData
         ? {
-            id: String(teamData.id),
+            id: teamData.id,
             name: teamData.name ?? "",
             user_id: teamData.user_id ?? "",
+            members: teamData.members || [],
           }
-        : undefined;
+        : null;
 
       return { success: true, data: mappedData };
     } catch (err) {

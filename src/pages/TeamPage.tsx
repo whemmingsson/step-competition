@@ -21,14 +21,7 @@ import { Label } from "@/components/ui/label";
 import { Loader2, Users } from "lucide-react";
 import { TeamService } from "@/services/TeamService";
 import { useUser } from "@/context/user/UserContext";
-
-// Mock interfaces - in a real app, these would be in a separate types file
-interface Team {
-  id: string;
-  name: string;
-  totalSteps: number;
-  memberCount: number;
-}
+import type { Team } from "@/types/Team";
 
 export const TeamPage = () => {
   const userContext = useUser();
@@ -45,13 +38,7 @@ export const TeamPage = () => {
       const result = await TeamService.getTeamByUserId();
 
       if (result.success && result.data) {
-        const team = {
-          id: result.data.id,
-          name: result.data.name,
-          totalSteps: 0, // Placeholder, replace with actual logic
-          memberCount: 1, // Placeholder, replace with actual logic
-        };
-        setUserTeam(team);
+        setUserTeam(result.data);
       } else {
         console.error("Failed to load user team:", result.error);
       }
@@ -67,13 +54,7 @@ export const TeamPage = () => {
       const result = await TeamService.getTeams();
 
       if (result.success && result.data) {
-        const teams = result.data.map((team) => ({
-          id: team.id,
-          name: team.name,
-          totalSteps: 0, // Placeholder, replace with actual logic
-          memberCount: 1, // Placeholder, replace with actual logic
-        }));
-        setAvailableTeams(teams);
+        setAvailableTeams(result.data);
       } else {
         console.error("Failed to load teams:", result.error);
       }
@@ -96,14 +77,8 @@ export const TeamPage = () => {
       );
 
       if (result.success && result.data) {
-        const newTeam = {
-          id: result.data.id,
-          name: result.data.name,
-          totalSteps: 0, // Placeholder, replace with actual logic
-          memberCount: 1, // Placeholder, replace with actual logic
-        };
-        //setUserTeam(newTeam);
-        setAvailableTeams((prev) => [...prev, newTeam]);
+        const t = result.data as Team;
+        setAvailableTeams((prev) => [...prev, t]);
         setNewTeamName("");
       } else {
         console.error("Failed to create team:", result.error);
@@ -123,15 +98,12 @@ export const TeamPage = () => {
     try {
       // Find the selected team from available teams
       const teamToJoin = availableTeams.find(
-        (team) => team.id === selectedTeamId
+        (team) => team.id.toString() === selectedTeamId
       );
 
       // Simulate successful team join
       if (teamToJoin && userContext.user && userContext.user.id) {
-        await TeamService.joinTeam(
-          userContext.user?.id,
-          parseInt(teamToJoin.id)
-        );
+        await TeamService.joinTeam(userContext.user?.id, teamToJoin.id);
       }
       setLoading(false);
       setUserTeam(teamToJoin || null);
@@ -148,7 +120,7 @@ export const TeamPage = () => {
 
       const result = await TeamService.leaveTeam(
         userContext.user.id,
-        parseInt(userTeam.id)
+        userTeam.id
       );
 
       if (result.success) {
@@ -193,14 +165,16 @@ export const TeamPage = () => {
                   <div className="bg-background rounded-md p-4">
                     <p className="text-sm text-muted-foreground">Total Steps</p>
                     <p className="text-2xl font-bold">
-                      {userTeam.totalSteps.toLocaleString()}
+                      {userTeam.totalSteps?.toLocaleString() || "0"}
                     </p>
                   </div>
                   <div className="bg-background rounded-md p-4">
                     <p className="text-sm text-muted-foreground">
                       Team Members
                     </p>
-                    <p className="text-2xl font-bold">{userTeam.memberCount}</p>
+                    <p className="text-2xl font-bold">
+                      {userTeam.members?.length ?? 0}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -255,8 +229,8 @@ export const TeamPage = () => {
                     </SelectTrigger>
                     <SelectContent>
                       {availableTeams.map((team) => (
-                        <SelectItem key={team.id} value={team.id}>
-                          {team.name} ({team.memberCount} members)
+                        <SelectItem key={team.id} value={team.id.toString()}>
+                          {team.name} ({team?.members?.length ?? 0} members)
                         </SelectItem>
                       ))}
                     </SelectContent>
