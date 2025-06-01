@@ -227,4 +227,48 @@ export class StepService {
       };
     }
   }
+
+  /**
+   * Get total steps for a list of users
+   *
+   * @param ids - Array of user IDs to fetch total steps for
+   * @returns Promise with the result of the operation
+   */
+  static async getTotalStepsForListOfUsers(
+    ids: string[]
+  ): Promise<{ success: boolean; error?: string; data?: number }> {
+    try {
+      if (!ids) {
+        return {
+          success: false,
+          error: "Ids are required",
+        };
+      }
+
+      const { data, error } = await supabase()
+        .from("Steps")
+        .select("steps")
+        .in("user_id", ids);
+
+      if (error) {
+        console.error("Error fetching total steps for users:", error);
+        return {
+          success: false,
+          error: error.message,
+        };
+      }
+
+      return {
+        success: true,
+        data:
+          data?.reduce((total, record) => total + (record.steps || 0), 0) || 0,
+      };
+    } catch (err) {
+      console.error("Unexpected error fetching total step count for team", err);
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : "Unknown error occurred",
+      };
+    }
+  }
 }

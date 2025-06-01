@@ -1,10 +1,23 @@
 import supabase from "@/supabase";
 import type { Team } from "@/types/Team";
+import { StepService } from "./StepService";
 
 /**
  * Service for user-related operations
  */
 export class TeamService {
+  private static async getTotalStepsForTeam(
+    userIdsInTeam: string[]
+  ): Promise<number> {
+    // This method is a placeholder for future implementation
+    // It should return the total steps for the team
+    const result = await StepService.getTotalStepsForListOfUsers(userIdsInTeam);
+    if (!result.success) {
+      console.error("Error fetching total steps for team:", result.error);
+      return 0; // Return 0 if there's an error
+    }
+    return result.data || 0; // Return the total steps or 0 if data is undefined
+  }
   /**
    * Create a new team
    *
@@ -44,7 +57,8 @@ export class TeamService {
             id: data.id,
             name: data.name ?? "",
             user_id: data.user_id ?? "",
-            members: [], // Initialize with an empty array, can be populated later
+            members: [], // Initialize with an empty array, can be populated later,
+            totalSteps: 0,
           }
         : null;
       return { success: true, data: mappedData };
@@ -136,6 +150,11 @@ export class TeamService {
                   return { id: user.user_id ?? "", displayName: "UNSET" };
                 })
                 .filter((id) => id !== null) || [],
+            totalSteps: await this.getTotalStepsForTeam(
+              (usersInTeamData ?? [])
+                .map((member) => member.user_id)
+                .filter((id) => id !== null)
+            ),
           }
         : null;
 
@@ -192,6 +211,9 @@ export class TeamService {
             name: teamData.name ?? "",
             user_id: teamData.user_id ?? "",
             members: teamData.members || [],
+            totalSteps: await this.getTotalStepsForTeam(
+              (teamData?.members ?? []).map((member) => member.id)
+            ),
           }
         : null;
 
