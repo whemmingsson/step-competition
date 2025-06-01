@@ -1,6 +1,7 @@
 import { Outlet } from "react-router";
 import { Navigation } from "./Navigation";
 import { useEffect, useState } from "react";
+import { Footer } from "./Footer";
 
 // Shared authenticated layout for ALL authenticated routes including home
 export const AuthenticatedLayout = () => {
@@ -37,6 +38,7 @@ export const AuthenticatedLayout = () => {
             <Outlet />
           </div>
         </div>
+        <Footer className="backdrop-blur-sm bg-background/30" />
       </div>
     </div>
   );

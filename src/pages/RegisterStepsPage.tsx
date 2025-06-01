@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/select";
 import { CompetitionService } from "@/services/CompetitionService";
 import { TeamService } from "@/services/TeamService";
+import { SetCompetitionBadge } from "@/components/SetCompetitionBadge";
 
 // Form validation schema with competition field
 const formSchema = z.object({
@@ -182,7 +183,9 @@ export default function RegisterStepsPage() {
                 name="competition"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Select Competition</FormLabel>
+                    <FormLabel>
+                      Select Competition <SetCompetitionBadge />
+                    </FormLabel>
                     <Select
                       onValueChange={(value) => {
                         field.onChange(value);

@@ -2,8 +2,6 @@
 
 A web application for tracking and competing in step challenges with friends, teams, and colleagues.
 
-![Step Competition Banner](public/resources/desktop.jpg)
-
 ## Overview
 
 Step Competition is a modern web application that allows users to record their daily steps, compete with others, view leaderboards, and track their progress over time. Perfect for workplace wellness programs, fitness groups, or friendly challenges among friends.

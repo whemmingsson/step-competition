@@ -30,13 +30,12 @@ export function Navigation() {
 
   return (
     <nav className="bg-background border-b sticky top-0 z-10">
-      <div className="container mx-auto px-4 py-3">
+      <div className="container mx-auto px-4 py-3 relative">
         {/* Mobile menu button */}
         <div className="flex justify-between items-center md:hidden">
           <span className="text-lg font-bold">Step Competition</span>
           <div className="flex items-center gap-2">
             {/* Logout button for mobile */}
-
             <Button
               variant="ghost"
               size="icon"
@@ -60,34 +59,37 @@ export function Navigation() {
             </Button>
           </div>
         </div>
-        {/* Mobile menu */}
+
+        {/* Mobile menu - now absolutely positioned */}
         <div
           className={cn(
-            "md:hidden",
-            mobileMenuOpen ? "block pt-4 pb-2 space-y-2" : "hidden"
+            "md:hidden absolute left-0 right-0 top-full bg-background border-b shadow-lg z-20",
+            mobileMenuOpen ? "block" : "hidden"
           )}
         >
-          {navItems.map((item) => {
-            const isActive =
-              location.pathname === item.path ||
-              (item.path !== "/" && location.pathname.startsWith(item.path));
+          <div className="container mx-auto px-4 py-2 space-y-2">
+            {navItems.map((item) => {
+              const isActive =
+                location.pathname === item.path ||
+                (item.path !== "/" && location.pathname.startsWith(item.path));
 
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                onClick={() => setMobileMenuOpen(false)}
-                className={cn(
-                  "block w-full text-center py-3 px-4 rounded-md",
-                  isActive
-                    ? "bg-primary text-primary-foreground"
-                    : "hover:bg-accent"
-                )}
-              >
-                {item.name} {item.name === "User" && <DisplayNameBadge />}
-              </Link>
-            );
-          })}
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={cn(
+                    "block w-full text-center py-3 px-4 rounded-md",
+                    isActive
+                      ? "bg-primary text-primary-foreground"
+                      : "hover:bg-accent"
+                  )}
+                >
+                  {item.name} {item.name === "User" && <DisplayNameBadge />}
+                </Link>
+              );
+            })}
+          </div>
         </div>
 
         {/* Desktop menu */}
