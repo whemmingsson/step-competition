@@ -1,4 +1,5 @@
 import supabase from "@/supabase";
+import { LocalStorageService } from "./LocalStorageService";
 
 /**
  * Service for handling step-related database operations
@@ -28,6 +29,7 @@ export class StepService {
             user_id: uid,
             steps: steps,
             date: formattedDate,
+            competition_id: LocalStorageService.getSelectedComptetionId(),
           },
         ])
         .select();
@@ -61,11 +63,21 @@ export class StepService {
    */
   static async getUserSteps(uid: string) {
     try {
-      const { data, error } = await supabase()
+      // Start with the base query
+      let query = supabase()
         .from("Steps")
         .select("*")
         .eq("user_id", uid)
         .order("date", { ascending: false });
+
+      // Only apply the competition filter if we have a value
+      const competitionId = LocalStorageService.getSelectedComptetionId();
+      if (competitionId) {
+        query = query.eq("competition_id", competitionId);
+      }
+
+      // Execute the query
+      const { data, error } = await query;
 
       if (error) {
         throw error;
@@ -88,11 +100,21 @@ export class StepService {
    * @returns Promise with array of {username, totalSteps}
    */
   static async getTopUsers(limit: number = 5) {
+    const competitionId = LocalStorageService.getSelectedComptetionId();
+
+    if (!competitionId) {
+      return {
+        success: false,
+        error: "No competition selected",
+      };
+    }
+
     try {
       // Get all steps records
       const { data: stepsData, error: stepsError } = await supabase()
         .from("Steps")
-        .select("user_id, steps");
+        .select("user_id, steps")
+        .eq("competition_id", competitionId);
 
       if (stepsError) {
         throw stepsError;

@@ -13,7 +13,7 @@ export const DisplayNameBadge = () => {
   return (
     <Tooltip>
       <TooltipTrigger>
-        <Badge variant="outline" className="bg-yellow-500">
+        <Badge variant="outline" className="bg-yellow-500 rounded-full">
           !
         </Badge>
       </TooltipTrigger>

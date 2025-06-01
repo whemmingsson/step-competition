@@ -153,15 +153,19 @@ export default function RegisterStepsPage() {
       return;
     }
 
-    console.log("Form data:", data);
+    const result = await StepService.recordSteps(data.steps, userId, data.date);
+    if (!result.success) {
+      toast.error(result.error || "Failed to register steps");
+      return;
+    }
 
-    await StepService.recordSteps(data.steps, userId, data.date);
-    toast("Steps registered successfully!");
+    toast(`${data.steps} steps registered successfully! 🎉`);
 
     // Reset form
     form.reset({
       steps: 0,
       date: new Date(),
+      competition: savedCompetition, // Reset to saved competition
     });
   }
 
@@ -297,7 +301,7 @@ export default function RegisterStepsPage() {
                   <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                     Contributing to Team
                   </label>
-                  <div className="flex items-center gap-2 h-10 px-3 py-2 text-sm border rounded-md bg-muted bg-white">
+                  <div className="flex items-center gap-2 h-10 px-3 py-2 text-sm border rounded-md bg-white">
                     <Users className="h-4 w-4 opacity-70" />
                     {teamLoading ? (
                       <span className="text-muted-foreground">

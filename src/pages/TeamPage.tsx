@@ -207,7 +207,7 @@ export const TeamPage = () => {
               <Button
                 variant="destructive"
                 onClick={handleLeaveTeam}
-                className="w-full"
+                className="w-full cursor-pointer"
               >
                 Leave Team
               </Button>

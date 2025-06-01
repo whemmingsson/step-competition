@@ -29,6 +29,7 @@ export type Database = {
       }
       Steps: {
         Row: {
+          competition_id: number | null
           created_at: string
           date: string | null
           id: number
@@ -36,6 +37,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          competition_id?: number | null
           created_at?: string
           date?: string | null
           id?: number
@@ -43,6 +45,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          competition_id?: number | null
           created_at?: string
           date?: string | null
           id?: number

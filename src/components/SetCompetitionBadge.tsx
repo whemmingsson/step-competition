@@ -2,18 +2,12 @@ import { Badge } from "./ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 export const SetCompetitionBadge = () => {
-  // Get saved competition from localStorage on component mount
-  const savedCompetition =
-    typeof window !== "undefined"
-      ? localStorage.getItem("selectedCompetition")
-      : null;
-
-  if (savedCompetition) return null;
-
   return (
     <Tooltip>
       <TooltipTrigger>
-        <Badge variant="secondary">?</Badge>
+        <Badge variant="secondary" className="bg-black text-white rounded-full">
+          ?
+        </Badge>
       </TooltipTrigger>
       <TooltipContent>
         <p>Please select a competition before start participating.</p>
