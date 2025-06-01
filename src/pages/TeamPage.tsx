@@ -39,6 +39,28 @@ export const TeamPage = () => {
   const [selectedTeamId, setSelectedTeamId] = useState("");
 
   useEffect(() => {
+    const fetchUserTeam = async () => {
+      setLoading(true);
+
+      const result = await TeamService.getTeamByUserId();
+
+      if (result.success && result.data) {
+        const team = {
+          id: result.data.id,
+          name: result.data.name,
+          totalSteps: 0, // Placeholder, replace with actual logic
+          memberCount: 1, // Placeholder, replace with actual logic
+        };
+        setUserTeam(team);
+      } else {
+        console.error("Failed to load user team:", result.error);
+      }
+      setLoading(false);
+    };
+    fetchUserTeam();
+  }, []);
+
+  useEffect(() => {
     const fetchTeams = async () => {
       setLoading(true);
 
@@ -99,24 +121,20 @@ export const TeamPage = () => {
 
     setLoading(true);
     try {
-      // Mock API call
-      console.log(`Joining team with ID: ${selectedTeamId}`);
-
       // Find the selected team from available teams
       const teamToJoin = availableTeams.find(
         (team) => team.id === selectedTeamId
       );
 
       // Simulate successful team join
-      setTimeout(() => {
-        if (teamToJoin) {
-          setUserTeam({
-            ...teamToJoin,
-            memberCount: teamToJoin.memberCount + 1,
-          });
-        }
-        setLoading(false);
-      }, 1000);
+      if (teamToJoin && userContext.user && userContext.user.id) {
+        await TeamService.joinTeam(
+          userContext.user?.id,
+          parseInt(teamToJoin.id)
+        );
+      }
+      setLoading(false);
+      setUserTeam(teamToJoin || null);
     } catch (error) {
       console.error("Error joining team:", error);
       setLoading(false);
@@ -126,14 +144,20 @@ export const TeamPage = () => {
   const handleLeaveTeam = async () => {
     setLoading(true);
     try {
-      // Mock API call
-      console.log("Leaving current team");
+      if (!userContext.user || !userContext.user.id || !userTeam) return;
 
-      // Simulate successful team leave
-      setTimeout(() => {
+      const result = await TeamService.leaveTeam(
+        userContext.user.id,
+        parseInt(userTeam.id)
+      );
+
+      if (result.success) {
         setUserTeam(null);
-        setLoading(false);
-      }, 1000);
+      } else {
+        console.error("Failed to leave team:", result.error);
+      }
+
+      setLoading(false);
     } catch (error) {
       console.error("Error leaving team:", error);
       setLoading(false);

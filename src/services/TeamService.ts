@@ -136,6 +136,61 @@ export class TeamService {
     }
   }
 
+  public static async getTeamByUserId(): Promise<{
+    success: boolean;
+    error?: string;
+    data?: { id: string; name: string; user_id: string } | null;
+  }> {
+    try {
+      const user = await supabase().auth.getUser();
+      if (!user || !user.data.user?.id) {
+        return { success: false, error: "User not authenticated" };
+      }
+
+      // Check if the user is part of a team
+      const { data, error } = await supabase()
+        .from("Users_Teams")
+        .select("id, user_id, team_id")
+        .eq("user_id", user.data.user?.id)
+        .single();
+
+      if (error) {
+        console.error("Error fetching team by user ID:", error);
+        return { success: false, error: error.message };
+      }
+
+      if (!data || !data.team_id) {
+        return { success: true, data: null }; // No team found for user
+      }
+
+      // Get team details
+      const { data: teamData, error: teamError } = await this.getTeamById(
+        data.team_id
+      );
+
+      if (teamError) {
+        console.error("Error fetching team details:", teamError);
+        return { success: false, error: teamError };
+      }
+
+      const mappedData = teamData
+        ? {
+            id: String(teamData.id),
+            name: teamData.name ?? "",
+            user_id: teamData.user_id ?? "",
+          }
+        : undefined;
+
+      return { success: true, data: mappedData };
+    } catch (err) {
+      console.error("Unexpected error fetching team by user ID:", err);
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : "Unknown error occurred",
+      };
+    }
+  }
+
   /**
    * Join a team
    *
@@ -173,6 +228,52 @@ export class TeamService {
       return { success: true };
     } catch (err) {
       console.error("Unexpected error joining team:", err);
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : "Unknown error occurred",
+      };
+    }
+  }
+
+  /**
+   * Leave a team
+   *
+   * @param userId - The ID of the user leaving the team
+   * @param teamId - The ID of the team to leave
+   * @returns Promise with the result of the operation
+   */
+  static async leaveTeam(
+    userId: string,
+    teamId: number
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      if (!userId || !teamId) {
+        return {
+          success: false,
+          error: userId ? "Team ID is required" : "User ID is required",
+        };
+      }
+
+      // check if the team exists
+      const result = await this.getTeamById(teamId);
+      if (!result.success || !result.data) {
+        return { success: false, error: "Team not found" };
+      }
+
+      const { error } = await supabase()
+        .from("Users_Teams")
+        .delete()
+        .eq("user_id", userId)
+        .eq("team_id", teamId);
+
+      if (error) {
+        console.error("Error leaving team:", error);
+        return { success: false, error: error.message };
+      }
+
+      return { success: true };
+    } catch (err) {
+      console.error("Unexpected error leaving team:", err);
       return {
         success: false,
         error: err instanceof Error ? err.message : "Unknown error occurred",
