@@ -238,6 +238,13 @@ export class StepService {
     ids: string[]
   ): Promise<{ success: boolean; error?: string; data?: number }> {
     try {
+      const competitionId = LocalStorageService.getSelectedComptetionId();
+      if (!competitionId) {
+        return {
+          success: false,
+          error: "No competition selected",
+        };
+      }
       if (!ids) {
         return {
           success: false,
@@ -248,7 +255,8 @@ export class StepService {
       const { data, error } = await supabase()
         .from("Steps")
         .select("steps")
-        .in("user_id", ids);
+        .in("user_id", ids)
+        .eq("competition_id", competitionId);
 
       if (error) {
         console.error("Error fetching total steps for users:", error);

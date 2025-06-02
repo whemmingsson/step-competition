@@ -12,7 +12,7 @@ export class TeamService {
   ): Promise<number> {
     const cacheKey = `get-total-steps-for-team-${userIdsInTeam.join(",")}`;
     const cachedSteps = CacheService.get(cacheKey);
-    if (cachedSteps !== undefined) {
+    if (cachedSteps) {
       return cachedSteps as number; // Return cached value if available
     }
 

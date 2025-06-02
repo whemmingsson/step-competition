@@ -18,6 +18,8 @@ class CacheService {
       return null;
     }
 
+    console.info("Cache hit for key:", key, entry.data);
+
     return entry.data;
   }
 
@@ -30,6 +32,13 @@ class CacheService {
       timestamp,
       expiresAt,
     };
+
+    console.info(
+      `Cache set for key: ${key}, expires at: ${new Date(
+        expiresAt
+      ).toISOString()}`,
+      data
+    );
   }
 
   static invalidate(keyPrefix: string): void {
