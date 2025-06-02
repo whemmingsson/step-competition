@@ -13,7 +13,13 @@ function Login() {
   }
 
   if (!session) {
-    return <Auth supabaseClient={client} appearance={{ theme: ThemeSupa }} />;
+    return (
+      <Auth
+        supabaseClient={client}
+        appearance={{ theme: ThemeSupa }}
+        providers={[]}
+      />
+    );
   } else {
     return <Navigate to="/" />;
   }

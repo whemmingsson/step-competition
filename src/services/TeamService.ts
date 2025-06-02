@@ -1,6 +1,7 @@
 import supabase from "@/supabase";
 import type { Team } from "@/types/Team";
 import { StepService } from "./StepService";
+import CacheService from "./CacheService";
 
 /**
  * Service for user-related operations
@@ -9,13 +10,21 @@ export class TeamService {
   private static async getTotalStepsForTeam(
     userIdsInTeam: string[]
   ): Promise<number> {
-    // This method is a placeholder for future implementation
-    // It should return the total steps for the team
+    const cacheKey = `get-total-steps-for-team-${userIdsInTeam.join(",")}`;
+    const cachedSteps = CacheService.get(cacheKey);
+    if (cachedSteps !== undefined) {
+      return cachedSteps as number; // Return cached value if available
+    }
+
     const result = await StepService.getTotalStepsForListOfUsers(userIdsInTeam);
     if (!result.success) {
       console.error("Error fetching total steps for team:", result.error);
       return 0; // Return 0 if there's an error
     }
+
+    // Cache the result for future use
+    CacheService.set(cacheKey, result.data || 0, 10);
+
     return result.data || 0; // Return the total steps or 0 if data is undefined
   }
   /**
@@ -81,6 +90,12 @@ export class TeamService {
     error?: string;
     data?: Team[];
   }> {
+    const cacheKey = `get-teams`;
+    const cachedTeams = CacheService.get(cacheKey);
+    if (cachedTeams) {
+      return { success: true, data: cachedTeams as Team[] };
+    }
+
     try {
       const { data, error } = await supabase()
         .from("Teams")
@@ -97,6 +112,9 @@ export class TeamService {
           name: team.name ?? "",
           user_id: team.user_id ?? "",
         })) ?? [];
+
+      // Cache the result
+      CacheService.set(cacheKey, mappedData, 5);
 
       return { success: true, data: mappedData };
     } catch (err) {
@@ -116,6 +134,12 @@ export class TeamService {
     try {
       if (!teamId) {
         return { success: false, error: "Team ID is required" };
+      }
+
+      const cacheKey = `get-team-by-id-${teamId}`;
+      const cachedTeam = CacheService.get(cacheKey);
+      if (cachedTeam) {
+        return { success: true, data: cachedTeam as Team };
       }
 
       const { data, error } = await supabase()
@@ -158,6 +182,9 @@ export class TeamService {
           }
         : null;
 
+      // Cache the result
+      CacheService.set(cacheKey, mappedData, 15);
+
       return { success: true, data: mappedData };
     } catch (err) {
       console.error("Unexpected error fetching team by ID:", err);
@@ -173,6 +200,12 @@ export class TeamService {
     error?: string;
     data?: Team | null;
   }> {
+    const cacheKey = `get-team-by-user-id`;
+    const cachedTeam = CacheService.get(cacheKey);
+    if (cachedTeam) {
+      return { success: true, data: cachedTeam as Team };
+    }
+
     try {
       const user = await supabase().auth.getUser();
       if (!user || !user.data.user?.id) {
@@ -216,6 +249,9 @@ export class TeamService {
             ),
           }
         : null;
+
+      // Cache the result
+      CacheService.set(cacheKey, mappedData, 15);
 
       return { success: true, data: mappedData };
     } catch (err) {
@@ -310,6 +346,81 @@ export class TeamService {
       return { success: true };
     } catch (err) {
       console.error("Unexpected error leaving team:", err);
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : "Unknown error occurred",
+      };
+    }
+  }
+
+  static async getTopTeams(
+    take: number
+  ): Promise<{ success: boolean; error?: string; data?: Team[] }> {
+    try {
+      const cacheKey = `get-top-teams-${take}`;
+      const cachedTeams = CacheService.get(cacheKey);
+      if (cachedTeams) {
+        return { success: true, data: cachedTeams as Team[] };
+      }
+
+      if (!take || take <= 0) {
+        return { success: false, error: "Invalid number of teams to fetch" };
+      }
+
+      const { data, error } = await supabase()
+        .from("Teams")
+        .select("id, name, user_id");
+
+      if (error) {
+        console.error("Error fetching top teams:", error);
+        return { success: false, error: error.message };
+      }
+
+      const mappedData: Team[] =
+        data?.map((team) => ({
+          id: team.id,
+          name: team.name ?? "",
+          user_id: team.user_id ?? "",
+          members: [], // Initialize with an empty array, can be populated later
+          totalSteps: 0, // Placeholder for total steps
+        })) ?? [];
+
+      // Fetch total steps for each team
+      for (const team of mappedData) {
+        const usersInTeam = await supabase()
+          .from("Users_Teams")
+          .select("user_id")
+          .eq("team_id", team.id);
+
+        if (usersInTeam.error) {
+          console.error(
+            `Error fetching users in team ${team.id}:`,
+            usersInTeam.error
+          );
+          continue;
+        }
+
+        const userIds = usersInTeam.data
+          .map((user) => user.user_id)
+          .filter((id): id is string => id !== null);
+        team.totalSteps = await this.getTotalStepsForTeam(userIds);
+        team.members = userIds.map((id) => ({
+          id,
+          displayName: "UNSET", // Not relevant for this operation
+        }));
+        team.avgSteps = team.totalSteps / userIds.length || 0; // Calculate average steps
+      }
+
+      // Sort teams by total steps and limit to the requested number
+      mappedData.sort((a, b) => (b.totalSteps || 0) - (a.totalSteps || 0));
+      mappedData.splice(take);
+
+      // Cache the result
+      CacheService.set(cacheKey, mappedData, 20);
+
+      return { success: true, data: mappedData };
+    } catch (err) {
+      console.error("Unexpected error fetching top teams:", err);
       return {
         success: false,
         error: err instanceof Error ? err.message : "Unknown error occurred",

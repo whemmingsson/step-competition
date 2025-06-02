@@ -171,7 +171,7 @@ export default function RegisterStepsPage() {
 
   return (
     <PageContainer>
-      <Card className="w-full" style={{ background: "#ffffffed" }}>
+      <Card className="w-full" style={{ background: "#ffffffee" }}>
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-center">
             Register Your Daily Steps

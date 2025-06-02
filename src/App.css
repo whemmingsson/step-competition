@@ -3,19 +3,3 @@
   margin-left: auto;
   margin-right: auto;
 }
-
-/* Ensure the container takes full width */
-.flex-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  width: 100%;
-}
-
-/* Additional spacing for content */
-.card-wrapper {
-  width: 100%;
-  max-width: 28rem; /* equivalent to max-w-md */
-  padding: 1rem;
-}

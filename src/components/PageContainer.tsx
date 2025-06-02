@@ -9,7 +9,8 @@ export const PageContainer = ({
 }) => {
   return (
     <div
-      className={`container max-w-xl py-10 flex min-h-screen items-center justify-center gap-2 ${
+      style={{ minHeight: "calc(100vh - 12rem)" }}
+      className={`container max-w-2xl py-10 flex items-center justify-center gap-2 ${
         flexRows ? "flex-row" : "flex-col"
       }`}
     >

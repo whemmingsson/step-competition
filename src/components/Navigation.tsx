@@ -2,12 +2,12 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { LogOut, Menu, X } from "lucide-react";
+import { Footprints, LogOut, Menu, X } from "lucide-react";
 
 import { DisplayNameBadge } from "./DisplayNameBadge";
 import supabase from "@/supabase";
 
-export function Navigation() {
+export function Navigation({ className }: { className?: string }) {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -29,7 +29,11 @@ export function Navigation() {
   }
 
   return (
-    <nav className="bg-background border-b sticky top-0 z-10">
+    <nav
+      className={
+        `bg-background border-b sticky top-0 z-10 ` + (className || "")
+      }
+    >
       <div className="container mx-auto px-4 py-3 relative">
         {/* Mobile menu button */}
         <div className="flex justify-between items-center md:hidden">
@@ -59,8 +63,6 @@ export function Navigation() {
             </Button>
           </div>
         </div>
-
-        {/* Mobile menu - now absolutely positioned */}
         <div
           className={cn(
             "md:hidden absolute left-0 right-0 top-full bg-background border-b shadow-lg z-20",
@@ -92,32 +94,42 @@ export function Navigation() {
           </div>
         </div>
 
-        {/* Desktop menu */}
-        <div className="hidden md:flex justify-center space-x-4">
-          {navItems.map((item) => {
-            const isActive =
-              location.pathname === item.path ||
-              (item.path !== "/" && location.pathname.startsWith(item.path));
+        {/* Desktop navigation container */}
+        <div className="hidden md:flex items-center justify-between">
+          {/* Logo and brand name - left side */}
+          <div className="flex items-center space-x-2">
+            <Footprints className="h-7 w-7 text-primary" />
+            <span className="text-xl font-bold">Step Competition</span>
+          </div>
 
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={cn(
-                  "inline-flex items-center justify-center whitespace-nowrap rounded-md px-6 py-3 text-base font-medium transition-colors",
-                  "hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 gap-2",
-                  isActive
-                    ? "bg-primary text-primary-foreground"
-                    : "text-foreground/80"
-                )}
-              >
-                {item.name}
-                {item.name === "User" && <DisplayNameBadge />}
-              </Link>
-            );
-          })}
+          {/* Menu items - centered */}
+          <div className="flex justify-center space-x-4 absolute left-1/2 -translate-x-1/2">
+            {navItems.map((item) => {
+              const isActive =
+                location.pathname === item.path ||
+                (item.path !== "/" && location.pathname.startsWith(item.path));
 
-          <div className="hidden md:block absolute right-4 top-1/2 -translate-y-1/2">
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={cn(
+                    "inline-flex items-center justify-center whitespace-nowrap rounded-md px-6 py-3 text-base font-medium transition-colors",
+                    "hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 gap-2",
+                    isActive
+                      ? "bg-primary text-primary-foreground"
+                      : "text-foreground/80"
+                  )}
+                >
+                  {item.name}
+                  {item.name === "User" && <DisplayNameBadge />}
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* Logout button - right side */}
+          <div>
             <Button
               variant="outline"
               onClick={handleLogout}

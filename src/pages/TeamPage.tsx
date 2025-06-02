@@ -136,11 +136,17 @@ export const TeamPage = () => {
     }
   };
 
+  const totalSteps = userTeam?.totalSteps || 0;
+  const avgStepsPerMember =
+    userTeam?.members && userTeam.members.length > 0
+      ? totalSteps / userTeam.members.length
+      : 0;
+
   return (
     <PageContainer>
       <Card
         className="w-full max-w-2xl mx-auto shadow-md"
-        style={{ background: "#ffffffed" }}
+        style={{ background: "#ffffffee" }}
       >
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -161,16 +167,24 @@ export const TeamPage = () => {
             <div className="space-y-6">
               <div className="bg-muted p-6 rounded-lg text-center">
                 <h3 className="text-2xl font-bold mb-2">{userTeam.name}</h3>
-                <div className="grid grid-cols-2 gap-4 mt-4">
+                <div className="grid grid-cols-3 gap-4 mt-4">
                   <div className="bg-background rounded-md p-4">
                     <p className="text-sm text-muted-foreground">Total Steps</p>
                     <p className="text-2xl font-bold">
-                      {userTeam.totalSteps?.toLocaleString() || "0"}
+                      {totalSteps.toLocaleString()}
                     </p>
                   </div>
                   <div className="bg-background rounded-md p-4">
                     <p className="text-sm text-muted-foreground">
-                      Team Members
+                      Avg steps per member
+                    </p>
+                    <p className="text-2xl font-bold">
+                      {avgStepsPerMember.toLocaleString()}
+                    </p>
+                  </div>
+                  <div className="bg-background rounded-md p-4">
+                    <p className="text-sm text-muted-foreground">
+                      Team members
                     </p>
                     <p className="text-2xl font-bold">
                       {userTeam.members?.length ?? 0}

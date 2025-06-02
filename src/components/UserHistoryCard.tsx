@@ -77,7 +77,7 @@ export const UserHistoryCard = ({
                     <TableCell className="text-right font-medium">
                       {record.steps.toLocaleString()}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="text-right">
                       {" "}
                       <Button
                         variant="ghost"

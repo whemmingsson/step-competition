@@ -3,7 +3,7 @@ import { useAuth } from "../context/auth/useAuth";
 import RegisterStepsPage from "@/pages/RegisterStepsPage";
 import UserPage from "@/pages/UserPage";
 import { LoginPage } from "@/pages/LoginPage";
-import { AuthenticatedLayout } from "./AuthenticatedLayout";
+import { Layout } from "./Layout";
 import { RequireAuth } from "./RequireAuth";
 import { LoadingScreen } from "./LoadingScreen";
 import { LeaderboardPage } from "@/pages/LeaderboardPage.";
@@ -23,14 +23,14 @@ export const AppRouter = () => {
   }
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.VITE_BASE_PATH || "/"}>
       <Routes>
         {/* Login page - separate from other routes */}
         <Route path="/login" element={<LoginPage />} />
 
         {/* All authenticated routes use the same layout */}
         <Route element={<RequireAuth />}>
-          <Route element={<AuthenticatedLayout />}>
+          <Route element={<Layout />}>
             <Route path="/" element={<Home />} />
             <Route path="/user" element={<User />} />
             <Route path="/team" element={<Team />} />

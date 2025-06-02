@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Footer } from "./Footer";
 
 // Shared authenticated layout for ALL authenticated routes including home
-export const AuthenticatedLayout = () => {
+export const Layout = () => {
   // Track viewport width for responsive background switching
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
@@ -20,24 +20,27 @@ export const AuthenticatedLayout = () => {
 
   return (
     <div
-      className="h-screen flex flex-col bg-cover bg-center bg-fixed relative overflow-hidden"
+      className="h-screen flex flex-col bg-cover bg-center bg-fixed overflow-hidden"
       style={{
         backgroundImage: isMobile
-          ? "url('/resources/mobile.jpg')"
-          : "url('/resources/desktop.jpg')",
+          ? "url('./resources/mobile.jpg')"
+          : "url('./resources/desktop.jpg')",
       }}
     >
       {/* Semi-transparent overlay */}
-      <div className="absolute inset-0 bg-black/40 pointer-events-none" />
+      <div className="absolute inset-0 bg-black/30 pointer-events-none" />
 
       {/* Content layer (above overlay) */}
       <div className="relative z-10 flex flex-col h-full">
         <Navigation />
-        <div className="flex-1 px-4 pb-16 pt-6 overflow-hidden">
-          <div className="container mx-auto max-w-full md:max-w-4xl overflow-hidden">
+
+        {/* Use auto scrolling only on the content area */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="container mx-auto max-w-full md:max-w-4xl px-4 py-6">
             <Outlet />
           </div>
         </div>
+
         <Footer className="backdrop-blur-sm bg-background/30" />
       </div>
     </div>
