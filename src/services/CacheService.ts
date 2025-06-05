@@ -18,12 +18,12 @@ class CacheService {
       return null;
     }
 
-    console.info("Cache hit for key:", key, entry.data);
+    console.info("Cache hit for key:", key);
 
     return entry.data;
   }
 
-  static set<T>(key: string, data: T, ttlMinutes: number = 5): void {
+  static set<T>(key: string, data: T, ttlMinutes: number = 30): void {
     const timestamp = Date.now();
     const expiresAt = timestamp + ttlMinutes * 60 * 1000;
 
@@ -36,14 +36,14 @@ class CacheService {
     console.info(
       `Cache set for key: ${key}, expires at: ${new Date(
         expiresAt
-      ).toISOString()}`,
-      data
+      ).toISOString()}`
     );
   }
 
   static invalidate(keyPrefix: string): void {
     Object.keys(this.cache).forEach((key) => {
       if (key.startsWith(keyPrefix)) {
+        console.info(`Invalidating cache for key: ${key}`);
         delete this.cache[key];
       }
     });

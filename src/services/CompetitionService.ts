@@ -44,8 +44,7 @@ export class CompetitionService {
       });
 
       if (mappedData) {
-        // Cache the fetched data for 1 hour
-        CacheService.set(cacheKey, mappedData, 60);
+        CacheService.set(cacheKey, mappedData);
       }
 
       return { success: true, data: mappedData };

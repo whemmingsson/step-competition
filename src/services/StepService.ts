@@ -43,6 +43,10 @@ export class StepService {
         };
       }
 
+      // Clear the cache for user steps since we just added a new record
+      const cacheKey = `user_steps_${uid}_${LocalStorageService.getSelectedComptetionId()}`;
+      CacheService.invalidate(cacheKey);
+
       return {
         success: true,
         data,
@@ -85,7 +89,8 @@ export class StepService {
         .from("Steps")
         .select("*")
         .eq("user_id", uid)
-        .order("date", { ascending: false });
+        .order("date", { ascending: false })
+        .limit(7);
 
       if (competitionId) {
         query = query.eq("competition_id", competitionId);
@@ -98,7 +103,7 @@ export class StepService {
         throw error;
       }
 
-      CacheService.set(cacheKey, data, 1); // Cache for 1 minute
+      CacheService.set(cacheKey, data);
 
       return { success: true, data };
     } catch (err) {

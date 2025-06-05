@@ -23,7 +23,7 @@ export class TeamService {
     }
 
     // Cache the result for future use
-    CacheService.set(cacheKey, result.data || 0, 10);
+    CacheService.set(cacheKey, result.data || 0);
 
     return result.data || 0; // Return the total steps or 0 if data is undefined
   }
@@ -114,7 +114,7 @@ export class TeamService {
         })) ?? [];
 
       // Cache the result
-      CacheService.set(cacheKey, mappedData, 5);
+      CacheService.set(cacheKey, mappedData);
 
       return { success: true, data: mappedData };
     } catch (err) {
@@ -183,7 +183,7 @@ export class TeamService {
         : null;
 
       // Cache the result
-      CacheService.set(cacheKey, mappedData, 15);
+      CacheService.set(cacheKey, mappedData);
 
       return { success: true, data: mappedData };
     } catch (err) {
@@ -251,7 +251,7 @@ export class TeamService {
         : null;
 
       // Cache the result
-      CacheService.set(cacheKey, mappedData, 15);
+      CacheService.set(cacheKey, mappedData);
 
       return { success: true, data: mappedData };
     } catch (err) {
@@ -416,7 +416,7 @@ export class TeamService {
       mappedData.splice(take);
 
       // Cache the result
-      CacheService.set(cacheKey, mappedData, 20);
+      CacheService.set(cacheKey, mappedData);
 
       return { success: true, data: mappedData };
     } catch (err) {

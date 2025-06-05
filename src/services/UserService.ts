@@ -110,7 +110,7 @@ export class UserService {
           : undefined;
 
       if (displayName) {
-        CacheService.set(cacheKey, displayName, 60); // Cache null for 1 hour
+        CacheService.set(cacheKey, displayName, 60);
       }
 
       return {
