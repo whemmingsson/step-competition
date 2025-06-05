@@ -36,8 +36,6 @@ export const TeamPage = () => {
       setLoading(true);
 
       const result = await TeamService.getTeamByUserId();
-      console.log(result);
-
       if (result.success && result.data) {
         setUserTeam(result.data);
       } else {
