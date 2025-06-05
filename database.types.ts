@@ -12,18 +12,24 @@ export type Database = {
       Competitions: {
         Row: {
           created_at: string
+          end_date: string | null
           id: number
           name: string | null
+          start_date: string | null
         }
         Insert: {
           created_at?: string
+          end_date?: string | null
           id?: number
           name?: string | null
+          start_date?: string | null
         }
         Update: {
           created_at?: string
+          end_date?: string | null
           id?: number
           name?: string | null
+          start_date?: string | null
         }
         Relationships: []
       }
@@ -52,7 +58,15 @@ export type Database = {
           steps?: number | null
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "Steps_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "Competitions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       Teams: {
         Row: {
@@ -115,7 +129,15 @@ export type Database = {
           team_id?: number | null
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "Users_Teams_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "Teams"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

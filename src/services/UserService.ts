@@ -1,5 +1,6 @@
 import supabase from "@/supabase";
 import type { User } from "@/types/User";
+import CacheService from "./CacheService";
 
 /**
  * Service for user-related operations
@@ -79,6 +80,16 @@ export class UserService {
         };
       }
 
+      const cacheKey = `display_name_${userId}`;
+      const cachedData = CacheService.get(cacheKey);
+
+      if (cachedData) {
+        return {
+          success: true,
+          displayName: cachedData as string,
+        };
+      }
+
       const { data, error } = await supabase()
         .from("Users_Meta")
         .select("display_name")
@@ -93,12 +104,18 @@ export class UserService {
         };
       }
 
+      const displayName =
+        data && data["display_name"] !== null
+          ? data["display_name"]
+          : undefined;
+
+      if (displayName) {
+        CacheService.set(cacheKey, displayName, 60); // Cache null for 1 hour
+      }
+
       return {
         success: true,
-        displayName:
-          data && data["display_name"] !== null
-            ? data["display_name"]
-            : undefined,
+        displayName: displayName,
       };
     } catch (err) {
       return {
@@ -110,6 +127,16 @@ export class UserService {
 
   static async getUser(): Promise<{ success: boolean; user: User | null }> {
     try {
+      const cacheKey = "current_user";
+      const cachedUser = CacheService.get<User>(cacheKey);
+
+      if (cachedUser) {
+        return {
+          success: true,
+          user: cachedUser,
+        };
+      }
+
       const { data, error } = await supabase().auth.getUser();
 
       if (error) {
@@ -127,6 +154,8 @@ export class UserService {
         id: data.user.id,
         displayName: displayNameResult.displayName ?? null,
       };
+
+      CacheService.set(cacheKey, user, 60);
 
       return { success: true, user };
     } catch (err) {

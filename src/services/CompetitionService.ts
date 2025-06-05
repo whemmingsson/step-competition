@@ -1,4 +1,5 @@
 import supabase from "@/supabase";
+import CacheService from "./CacheService";
 
 /**
  * Service for user-related operations
@@ -15,6 +16,14 @@ export class CompetitionService {
     data?: { name: string | null; id: number }[];
   }> {
     try {
+      const cacheKey = "competitions";
+      const cachedData = CacheService.get(cacheKey);
+      if (cachedData) {
+        return {
+          success: true,
+          data: cachedData as { name: string | null; id: number }[],
+        };
+      }
       const { data, error } = await supabase()
         .from("Competitions")
         .select("name, id");
@@ -22,6 +31,11 @@ export class CompetitionService {
       if (error) {
         console.error("Error fetching competitions:", error);
         return { success: false, error: error.message };
+      }
+
+      if (data) {
+        // Cache the fetched data for 1 hour
+        CacheService.set(cacheKey, data, 60);
       }
 
       return { success: true, data: data || [] };

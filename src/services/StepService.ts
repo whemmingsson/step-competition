@@ -1,5 +1,6 @@
 import supabase from "@/supabase";
 import { LocalStorageService } from "./LocalStorageService";
+import CacheService from "./CacheService";
 
 /**
  * Service for handling step-related database operations
@@ -62,7 +63,23 @@ export class StepService {
    * @returns Promise with the user's step data
    */
   static async getUserSteps(uid: string) {
+    // Only apply the competition filter if we have a value
+    const competitionId = LocalStorageService.getSelectedComptetionId();
+
     try {
+      const cacheKey = `user_steps_${uid}_${competitionId}`;
+      const cachedData = CacheService.get(cacheKey);
+      if (cachedData) {
+        return {
+          success: true,
+          data: cachedData as {
+            user_id: string;
+            steps: number;
+            date: string;
+          }[],
+        };
+      }
+
       // Start with the base query
       let query = supabase()
         .from("Steps")
@@ -70,8 +87,6 @@ export class StepService {
         .eq("user_id", uid)
         .order("date", { ascending: false });
 
-      // Only apply the competition filter if we have a value
-      const competitionId = LocalStorageService.getSelectedComptetionId();
       if (competitionId) {
         query = query.eq("competition_id", competitionId);
       }
@@ -82,6 +97,8 @@ export class StepService {
       if (error) {
         throw error;
       }
+
+      CacheService.set(cacheKey, data, 1); // Cache for 1 minute
 
       return { success: true, data };
     } catch (err) {
@@ -99,13 +116,28 @@ export class StepService {
    * @param limit - Number of users to return (default 5)
    * @returns Promise with array of {username, totalSteps}
    */
-  static async getTopUsers(limit: number = 5) {
+  static async getTopUsers(limit: number = 5): Promise<{
+    success: boolean;
+    error?: string;
+    data?: { displayName: string; totalSteps: number }[];
+  }> {
     const competitionId = LocalStorageService.getSelectedComptetionId();
 
     if (!competitionId) {
       return {
         success: false,
         error: "No competition selected",
+      };
+    }
+
+    // Read from cache first
+    const cacheKey = `top_users_${competitionId}_${limit}`;
+    const cachedData = CacheService.get(cacheKey);
+
+    if (cachedData) {
+      return {
+        success: true,
+        data: cachedData as { displayName: string; totalSteps: number }[],
       };
     }
 
@@ -176,6 +208,8 @@ export class StepService {
         });
       }
 
+      CacheService.set(cacheKey, result, 10);
+
       return {
         success: true,
         data: result,
@@ -237,8 +271,18 @@ export class StepService {
   static async getTotalStepsForListOfUsers(
     ids: string[]
   ): Promise<{ success: boolean; error?: string; data?: number }> {
+    const competitionId = LocalStorageService.getSelectedComptetionId();
+
+    const cacheKey = `total_steps_${competitionId}_${ids.join(",")}`;
+    const cachedData = CacheService.get(cacheKey);
+    if (cachedData) {
+      return {
+        success: true,
+        data: cachedData as number,
+      };
+    }
+
     try {
-      const competitionId = LocalStorageService.getSelectedComptetionId();
       if (!competitionId) {
         return {
           success: false,
@@ -266,10 +310,14 @@ export class StepService {
         };
       }
 
+      const result =
+        data?.reduce((total, record) => total + (record.steps || 0), 0) || 0;
+
+      CacheService.set(cacheKey, result, 10);
+
       return {
         success: true,
-        data:
-          data?.reduce((total, record) => total + (record.steps || 0), 0) || 0,
+        data: result,
       };
     } catch (err) {
       console.error("Unexpected error fetching total step count for team", err);
