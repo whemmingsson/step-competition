@@ -38,6 +38,7 @@ import {
 import { CompetitionService } from "@/services/CompetitionService";
 import { TeamService } from "@/services/TeamService";
 import { SetCompetitionBadge } from "@/components/SetCompetitionBadge";
+import type { Competition } from "@/types/Competition";
 
 // Form validation schema with competition field
 const formSchema = z.object({
@@ -61,9 +62,7 @@ type FormValues = z.infer<typeof formSchema>;
 
 export default function RegisterStepsPage() {
   const [competitionLoading, setCompetitionLoading] = useState(false);
-  const [competitions, setCompetitions] = useState<
-    { id: string; name: string }[]
-  >([]);
+  const [competitions, setCompetitions] = useState<Competition[]>([]);
   const [userTeam, setUserTeam] = useState<{ id: string; name: string } | null>(
     null
   );
@@ -104,13 +103,8 @@ export default function RegisterStepsPage() {
       try {
         const result = await CompetitionService.getCompetitions();
 
-        if (result.success && result) {
-          setCompetitions(
-            (result.data ?? []).map((competition) => ({
-              id: String(competition.id),
-              name: competition.name ?? "Unnamed Competition",
-            }))
-          );
+        if (result.success && result.data) {
+          setCompetitions(result.data);
         }
       } catch (err) {
         console.error("Error loading display name:", err);
@@ -202,15 +196,27 @@ export default function RegisterStepsPage() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {competitions.map((competition) => (
-                          <SelectItem
-                            className="bg-white"
-                            key={competition.id}
-                            value={competition.id}
-                          >
-                            {competition.name}
-                          </SelectItem>
-                        ))}
+                        {competitions.map((competition) => {
+                          let isActive = false;
+                          if (!competition.startDate || !competition.endDate) {
+                            isActive = false; // If no dates, assume inactive
+                          } else {
+                            const now = new Date();
+                            const start = new Date(competition.startDate);
+                            const end = new Date(competition.endDate);
+                            isActive = now >= start && now <= end;
+                          }
+                          return (
+                            <SelectItem
+                              className="bg-white"
+                              key={competition.id}
+                              value={competition.id}
+                              disabled={!isActive}
+                            >
+                              {competition.name}
+                            </SelectItem>
+                          );
+                        })}
                       </SelectContent>
                     </Select>
                     <FormDescription>
