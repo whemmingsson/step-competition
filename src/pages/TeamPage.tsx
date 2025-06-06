@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { PageContainer } from "@/components/PageContainer";
 import {
   Card,
@@ -22,53 +22,32 @@ import { Loader2, Users } from "lucide-react";
 import { TeamService } from "@/services/TeamService";
 import { useUser } from "@/context/user/UserContext";
 import type { Team } from "@/types/Team";
+import { useTeams } from "@/hooks/useTeams";
+import { useUserTeam } from "@/hooks/useUserTeam";
+import { toast } from "sonner";
 
 export const TeamPage = () => {
   const userContext = useUser();
-  const [userTeam, setUserTeam] = useState<Team | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [availableTeams, setAvailableTeams] = useState<Team[]>([]);
+  const {
+    data: teams,
+    set: setTeams,
+    loading: teamsLoading,
+    refetch: refetchTeams,
+  } = useTeams();
+  const {
+    data: userTeam,
+    set: setUserTeam,
+    loading: userTeamLoading,
+  } = useUserTeam();
+
   const [newTeamName, setNewTeamName] = useState("");
   const [selectedTeamId, setSelectedTeamId] = useState("");
-
-  useEffect(() => {
-    const fetchUserTeam = async () => {
-      setLoading(true);
-
-      const result = await TeamService.getTeamByUserId();
-      if (result.success && result.data) {
-        setUserTeam(result.data);
-      } else {
-        console.error("Failed to load user team:", result.error);
-      }
-      setLoading(false);
-    };
-    fetchUserTeam();
-  }, []);
-
-  useEffect(() => {
-    const fetchTeams = async () => {
-      setLoading(true);
-
-      const result = await TeamService.getTeams();
-
-      if (result.success && result.data) {
-        setAvailableTeams(result.data);
-      } else {
-        console.error("Failed to load teams:", result.error);
-      }
-      setLoading(false);
-    };
-
-    fetchTeams();
-  }, []);
 
   const handleCreateTeam = async () => {
     if (!newTeamName.trim()) return;
 
     if (!userContext.user || !userContext.user.id) return;
 
-    setLoading(true);
     try {
       const result = await TeamService.createTeam(
         userContext.user.id,
@@ -77,26 +56,26 @@ export const TeamPage = () => {
 
       if (result.success && result.data) {
         const t = result.data as Team;
-        setAvailableTeams((prev) => [...prev, t]);
+        if (setTeams) {
+          setTeams([...(teams ?? []), t]);
+        }
         setNewTeamName("");
+        toast.success("Team created successfully!");
+        if (refetchTeams) refetchTeams();
       } else {
         console.error("Failed to create team:", result.error);
       }
-
-      setLoading(false);
     } catch (error) {
       console.error("Error creating team:", error);
-      setLoading(false);
     }
   };
 
   const handleJoinTeam = async () => {
     if (!selectedTeamId) return;
 
-    setLoading(true);
     try {
       // Find the selected team from available teams
-      const teamToJoin = availableTeams.find(
+      const teamToJoin = teams?.find(
         (team) => team.id.toString() === selectedTeamId
       );
 
@@ -104,16 +83,17 @@ export const TeamPage = () => {
       if (teamToJoin && userContext.user && userContext.user.id) {
         await TeamService.joinTeam(userContext.user?.id, teamToJoin.id);
       }
-      setLoading(false);
-      setUserTeam(teamToJoin || null);
+
+      if (setUserTeam) {
+        setUserTeam(teamToJoin || null);
+      }
+      toast.success("Successfully joined team!");
     } catch (error) {
       console.error("Error joining team:", error);
-      setLoading(false);
     }
   };
 
   const handleLeaveTeam = async () => {
-    setLoading(true);
     try {
       if (!userContext.user || !userContext.user.id || !userTeam) return;
 
@@ -123,17 +103,27 @@ export const TeamPage = () => {
       );
 
       if (result.success) {
-        setUserTeam(null);
+        if (setUserTeam) {
+          setUserTeam(null);
+        }
+        toast.success("Successfully left team!");
       } else {
         console.error("Failed to leave team:", result.error);
       }
-
-      setLoading(false);
     } catch (error) {
       console.error("Error leaving team:", error);
-      setLoading(false);
     }
   };
+
+  if (teamsLoading || userTeamLoading) {
+    return (
+      <PageContainer>
+        <div className="flex justify-center py-8">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </PageContainer>
+    );
+  }
 
   const totalSteps = userTeam?.totalSteps || 0;
   const avgStepsPerMember =
@@ -158,11 +148,7 @@ export const TeamPage = () => {
         </CardHeader>
 
         <CardContent>
-          {loading ? (
-            <div className="flex justify-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-          ) : userTeam ? (
+          {userTeam ? (
             <div className="space-y-6">
               <div className="bg-muted p-6 rounded-lg text-center">
                 <h3 className="text-2xl font-bold mb-2">{userTeam.name}</h3>
@@ -241,7 +227,7 @@ export const TeamPage = () => {
                       <SelectValue placeholder="Select a team to join" />
                     </SelectTrigger>
                     <SelectContent>
-                      {availableTeams.map((team) => (
+                      {teams?.map((team) => (
                         <SelectItem key={team.id} value={team.id.toString()}>
                           {team.name} ({team?.members?.length ?? 0} members)
                         </SelectItem>
