@@ -1,4 +1,3 @@
-import CacheService from "@/services/CacheService";
 import { TeamService } from "@/services/TeamService";
 import type { QueryResult } from "@/types/QueryResult";
 import type { Team } from "@/types/Team";
@@ -28,7 +27,6 @@ export const useTeams = (): QueryResult<Team[]> => {
 
   return {
     refetch: () => {
-      CacheService.invalidate(`get-teams`);
       setPing(new Date());
     },
     data: teams,

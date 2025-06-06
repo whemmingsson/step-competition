@@ -70,6 +70,9 @@ export class TeamService {
             totalSteps: 0,
           }
         : null;
+
+      CacheService.invalidate(`get-teams`);
+
       return { success: true, data: mappedData };
     } catch (err) {
       console.error("Unexpected error creating team:", err);
@@ -421,6 +424,61 @@ export class TeamService {
       return { success: true, data: mappedData };
     } catch (err) {
       console.error("Unexpected error fetching top teams:", err);
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : "Unknown error occurred",
+      };
+    }
+  }
+
+  static async deleteTeam(
+    teamId: number,
+    userId: string
+  ): Promise<{ success: boolean; error?: string }> {
+    try {
+      if (!teamId || !userId) {
+        return { success: false, error: "Team ID and User ID are required" };
+      }
+
+      // Check if the user is the owner of the team
+      const { data: teamData, error: teamError } = await supabase()
+        .from("Teams")
+        .select("user_id")
+        .eq("id", teamId)
+        .single();
+
+      if (teamError || !teamData) {
+        console.error("Error fetching team data:", teamError);
+        return { success: false, error: "Team not found" };
+      }
+
+      if (teamData.user_id !== userId) {
+        return {
+          success: false,
+          error: "Only the team owner can delete the team",
+        };
+      }
+
+      // Delete the team
+      const { error } = await supabase()
+        .from("Teams")
+        .delete()
+        .eq("id", teamId);
+
+      console.log("Error, if any, deleting team:", error);
+
+      if (error) {
+        console.error("Error deleting team:", error);
+        return { success: false, error: error.message };
+      }
+
+      // Clear cache for this team
+      CacheService.invalidate(`get-team-by-id-${teamId}`);
+      CacheService.invalidate(`get-teams`);
+
+      return { success: true };
+    } catch (err) {
+      console.error("Unexpected error deleting team:", err);
       return {
         success: false,
         error: err instanceof Error ? err.message : "Unknown error occurred",

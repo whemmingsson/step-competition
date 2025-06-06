@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Loader2, Users } from "lucide-react";
+import { Users } from "lucide-react";
 import { TeamService } from "@/services/TeamService";
 import { useUser } from "@/context/user/UserContext";
 import type { Team } from "@/types/Team";
@@ -28,12 +28,7 @@ import { toast } from "sonner";
 
 export const TeamPage = () => {
   const userContext = useUser();
-  const {
-    data: teams,
-    set: setTeams,
-    loading: teamsLoading,
-    refetch: refetchTeams,
-  } = useTeams();
+  const { data: teams, set: setTeams, refetch: refetchTeams } = useTeams();
   const {
     data: userTeam,
     set: setUserTeam,
@@ -41,7 +36,9 @@ export const TeamPage = () => {
   } = useUserTeam();
 
   const [newTeamName, setNewTeamName] = useState("");
-  const [selectedTeamId, setSelectedTeamId] = useState("");
+  const [selectedTeamId, setSelectedTeamId] = useState<string | undefined>(
+    undefined
+  );
 
   const handleCreateTeam = async () => {
     if (!newTeamName.trim()) return;
@@ -115,15 +112,36 @@ export const TeamPage = () => {
     }
   };
 
-  if (teamsLoading || userTeamLoading) {
-    return (
-      <PageContainer>
-        <div className="flex justify-center py-8">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      </PageContainer>
-    );
-  }
+  const handleDeleteTeam = async () => {
+    if (!userContext.user || !userContext.user.id) return;
+
+    try {
+      const result = await TeamService.deleteTeam(
+        parseInt(selectedTeamId ?? "-1"),
+        userContext.user.id
+      );
+
+      if (result.success) {
+        if (setTeams) {
+          setSelectedTeamId(undefined);
+          setTeams(
+            teams
+              ? teams.filter(
+                  (team) => team.id !== parseInt(selectedTeamId ?? "-1")
+                )
+              : []
+          );
+        }
+        if (refetchTeams) refetchTeams();
+        toast.success("Team deleted successfully!");
+      } else {
+        console.log(result);
+        console.error("Failed to delete team:", result.error);
+      }
+    } catch (error) {
+      console.error("Error deleting team:", error);
+    }
+  };
 
   const totalSteps = userTeam?.totalSteps || 0;
   const avgStepsPerMember =
@@ -148,7 +166,7 @@ export const TeamPage = () => {
         </CardHeader>
 
         <CardContent>
-          {userTeam ? (
+          {userTeam && !userTeamLoading ? (
             <div className="space-y-6">
               <div className="bg-muted p-6 rounded-lg text-center">
                 <h3 className="text-2xl font-bold mb-2">{userTeam.name}</h3>
@@ -242,6 +260,18 @@ export const TeamPage = () => {
                 >
                   Join Team
                 </Button>
+
+                {selectedTeamId &&
+                  teams?.find((t) => t.id === parseInt(selectedTeamId))
+                    ?.user_id === userContext.user?.id && (
+                    <Button
+                      onClick={handleDeleteTeam}
+                      variant="destructive"
+                      className="w-full"
+                    >
+                      Delete Team
+                    </Button>
+                  )}
               </div>
             </div>
           )}
