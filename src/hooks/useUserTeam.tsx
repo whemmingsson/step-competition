@@ -1,3 +1,4 @@
+import CacheService from "@/services/CacheService";
 import { TeamService } from "@/services/TeamService";
 import type { QueryResult } from "@/types/QueryResult";
 import type { Team } from "@/types/Team";
@@ -24,6 +25,7 @@ export const useUserTeam = (): QueryResult<Team | null> => {
 
   return {
     refetch: () => {
+      CacheService.invalidate(`get-team-by-user-id`);
       setLoading(true);
       TeamService.getTeamByUserId().then((result) => {
         if (result.success && result.data) {

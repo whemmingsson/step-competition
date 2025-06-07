@@ -101,6 +101,8 @@ export const TeamPage = () => {
       if (setUserTeam) {
         setUserTeam(teamToJoin || null);
       }
+
+      if (refetchTeams) refetchTeams();
       toast.success("Successfully joined team!");
     } catch (error) {
       console.error("Error joining team:", error);
@@ -121,6 +123,7 @@ export const TeamPage = () => {
         if (setUserTeam) {
           setUserTeam(null);
         }
+        if (refetchTeams) refetchTeams();
         toast.success("Successfully left team!");
       } else {
         console.error("Failed to leave team:", result.error);
@@ -264,7 +267,6 @@ export const TeamPage = () => {
                     </SelectTrigger>
                     <SelectContent>
                       {teams?.map((team) => {
-                        console.log("Rendering team:", team);
                         return (
                           <SelectItem key={team.id} value={team.id.toString()}>
                             {team.name} ({team?.numberOfMembers ?? 0} members)
