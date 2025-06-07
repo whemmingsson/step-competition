@@ -255,6 +255,15 @@ export class StepService {
         };
       }
 
+      // Invalidate the cache for the user steps since we just deleted a record
+      const user = await supabase().auth.getUser();
+      if (user.data.user) {
+        const cacheKey = `user_steps_${
+          user.data.user.id
+        }_${LocalStorageService.getSelectedComptetionId()}`;
+        CacheService.invalidate(cacheKey);
+      }
+
       return {
         success: true,
       };

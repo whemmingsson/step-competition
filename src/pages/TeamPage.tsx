@@ -25,6 +25,16 @@ import type { Team } from "@/types/Team";
 import { useTeams } from "@/hooks/useTeams";
 import { useUserTeam } from "@/hooks/useUserTeam";
 import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export const TeamPage = () => {
   const userContext = useUser();
@@ -40,6 +50,9 @@ export const TeamPage = () => {
   const [selectedTeamId, setSelectedTeamId] = useState<string | undefined>(
     undefined
   );
+
+  // Add state for deletion confirmation
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const handleCreateTeam = async () => {
     if (!newTeamName.trim()) return;
@@ -269,7 +282,7 @@ export const TeamPage = () => {
                   teams?.find((t) => t.id === parseInt(selectedTeamId))
                     ?.user_id === userContext.user?.id && (
                     <Button
-                      onClick={handleDeleteTeam}
+                      onClick={() => setIsDeleteDialogOpen(true)}
                       variant="destructive"
                       className="w-full"
                     >
@@ -287,6 +300,32 @@ export const TeamPage = () => {
           </p>
         </CardFooter>
       </Card>
+
+      {/* Confirmation Dialog */}
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete your team. Individual member progress
+              will not be affected, but the team will be removed from the
+              competition.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteTeam}
+              className="bg-red-500 hover:bg-red-700"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </PageContainer>
   );
 };
