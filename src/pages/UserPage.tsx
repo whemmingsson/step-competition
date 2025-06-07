@@ -19,6 +19,7 @@ import {
 import { useUser } from "@/context/user/UserContext";
 import { UserHistoryCard } from "@/components/UserHistoryCard";
 import { UserProfileCard } from "@/components/UserProfileCard";
+import { useUserDisplayName } from "@/hooks/useUserDisplayName";
 
 interface StepRecord {
   id: number;
@@ -36,10 +37,13 @@ export default function UserPage() {
   const [steps, setSteps] = useState<StepRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const {
+    data: displayName,
+    loading: displayNameLoading,
+    set,
+  } = useUserDisplayName();
 
   // Display name state
-  const [displayName, setDisplayName] = useState("");
-  const [displayNameLoading, setDisplayNameLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   // Add state for deletion confirmation
@@ -70,28 +74,6 @@ export default function UserPage() {
     fetchUserSteps();
   }, [userId, session]);
 
-  // Fetch current display name
-  useEffect(() => {
-    async function fetchDisplayName() {
-      if (!userId) return;
-
-      setDisplayNameLoading(true);
-      try {
-        const result = await UserService.getDisplayName(userId);
-
-        if (result.success && result.displayName) {
-          setDisplayName(result.displayName);
-        }
-      } catch (err) {
-        console.error("Error loading display name:", err);
-      } finally {
-        setDisplayNameLoading(false);
-      }
-    }
-
-    fetchDisplayName();
-  }, [userId]);
-
   // Handle display name update
   const handleUpdateDisplayName = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
@@ -101,7 +83,7 @@ export default function UserPage() {
       return;
     }
 
-    if (!displayName.trim()) {
+    if (displayName && !displayName.trim()) {
       toast.error("Display name cannot be empty");
       return;
     }
@@ -109,7 +91,10 @@ export default function UserPage() {
     setIsSaving(true);
 
     try {
-      const result = await UserService.setDisplayName(userId, displayName);
+      const result = await UserService.setDisplayName(
+        userId,
+        displayName ?? ""
+      );
 
       if (result.success) {
         toast.success("Display name updated successfully!");
@@ -155,11 +140,15 @@ export default function UserPage() {
   // Calculate total steps
   const totalSteps = steps.reduce((sum, record) => sum + record.steps, 0);
 
+  const setDisplayNameWrapper = (value: string | null) => {
+    if (set) set(value ? value.trim() : "");
+  };
+
   return (
     <PageContainer>
       <UserProfileCard
-        displayName={displayName}
-        setDisplayName={setDisplayName}
+        displayName={displayName || ""}
+        setDisplayName={setDisplayNameWrapper}
         displayNameLoading={displayNameLoading}
         handleUpdateDisplayName={handleUpdateDisplayName}
         isSaving={isSaving}

@@ -23,6 +23,17 @@ export const useUserTeam = (): QueryResult<Team | null> => {
   }, []);
 
   return {
+    refetch: () => {
+      setLoading(true);
+      TeamService.getTeamByUserId().then((result) => {
+        if (result.success && result.data) {
+          setUserTeam(result.data);
+        } else {
+          console.error("Failed to refetch user team:", result.error);
+        }
+        setLoading(false);
+      });
+    },
     set: setUserTeam,
     data: userTeam,
     loading,

@@ -300,6 +300,10 @@ export class TeamService {
         return { success: false, error: error.message };
       }
 
+      // Clear cache for this team
+      CacheService.invalidate(`get-team-by-id-${teamId}`);
+      CacheService.invalidate(`get-teams-by-user-id`);
+
       return { success: true };
     } catch (err) {
       console.error("Unexpected error joining team:", err);
@@ -345,6 +349,10 @@ export class TeamService {
         console.error("Error leaving team:", error);
         return { success: false, error: error.message };
       }
+
+      // Clear cache for this team
+      CacheService.invalidate(`get-team-by-id-${teamId}`);
+      CacheService.invalidate(`get-teams-by-user-id`);
 
       return { success: true };
     } catch (err) {

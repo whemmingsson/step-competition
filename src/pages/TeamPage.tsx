@@ -33,6 +33,7 @@ export const TeamPage = () => {
     data: userTeam,
     set: setUserTeam,
     loading: userTeamLoading,
+    refetch: refetchUserTeam,
   } = useUserTeam();
 
   const [newTeamName, setNewTeamName] = useState("");
@@ -79,6 +80,9 @@ export const TeamPage = () => {
       // Simulate successful team join
       if (teamToJoin && userContext.user && userContext.user.id) {
         await TeamService.joinTeam(userContext.user?.id, teamToJoin.id);
+        if (refetchUserTeam) {
+          refetchUserTeam();
+        }
       }
 
       if (setUserTeam) {

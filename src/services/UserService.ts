@@ -40,6 +40,10 @@ export class UserService {
           return { success: false, error: error.message };
         }
 
+        // Cache the new display name
+        const cacheKey = `display_name_${userId}`;
+        CacheService.set(cacheKey, displayName, 60);
+
         return { success: true, data };
       } else {
         const { data: insertData, error: insertError } = await supabase()
@@ -51,6 +55,10 @@ export class UserService {
           console.error("Error inserting display name:", insertError);
           return { success: false, error: insertError.message };
         }
+
+        // Cache the new display name
+        const cacheKey = `display_name_${userId}`;
+        CacheService.set(cacheKey, displayName, 60);
 
         return { success: true, data: insertData };
       }
