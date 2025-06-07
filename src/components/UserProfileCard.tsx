@@ -14,6 +14,7 @@ import { Upload, Image as ImageIcon } from "lucide-react";
 import supabase from "@/supabase";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { UserService } from "@/services/UserService";
 
 interface UserProfileCardProps {
   displayName: string;
@@ -95,7 +96,7 @@ export const UserProfileCard = ({
       const filePath = `${fileName}`;
 
       // Upload file to Supabase Storage
-      const { data, error } = await supabase()
+      const { error } = await supabase()
         .storage.from("profile-images")
         .upload(filePath, file, {
           cacheControl: "3600",
@@ -112,10 +113,12 @@ export const UserProfileCard = ({
         .getPublicUrl(filePath);
 
       setUploadedImageUrl(urlData.publicUrl);
-      toast.success("Profile image uploaded successfully");
 
-      // Here you would typically update the user profile with the new image URL
-      // This depends on your app's structure and user profile management
+      if (userId) {
+        await UserService.setProfileImageUrl(userId, urlData.publicUrl);
+      }
+
+      toast.success("Profile image uploaded successfully");
     } catch (error) {
       console.error("Error uploading image:", error);
       toast.error("Failed to upload image");

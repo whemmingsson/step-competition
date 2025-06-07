@@ -174,4 +174,95 @@ export class UserService {
       };
     }
   }
+
+  /**
+   * Update a user's profile image URL
+   *
+   * @param userId - The user's ID
+   * @param imageUrl - The URL of the uploaded profile image
+   * @returns Promise with the result of the operation
+   */
+  static async setProfileImageUrl(
+    userId: string,
+    imageUrl: string
+  ): Promise<{ success: boolean; error?: string; data?: unknown }> {
+    try {
+      if (!userId || !imageUrl.trim()) {
+        return {
+          success: false,
+          error: userId ? "Image URL cannot be empty" : "User ID is required",
+        };
+      }
+
+      // Check if user exists in Users_Meta table
+      const { data: existingUser, error: fetchError } = await supabase()
+        .from("Users_Meta")
+        .select("user_id, profile_image_url")
+        .eq("user_id", userId)
+        .single();
+
+      if (fetchError && fetchError.code !== "PGRST116") {
+        // PGRST116 is "no rows returned" error
+        console.error("Error checking for existing user:", fetchError);
+        return { success: false, error: fetchError.message };
+      }
+
+      let result;
+
+      if (existingUser) {
+        // Update existing record
+        const { data, error } = await supabase()
+          .from("Users_Meta")
+          .update({ profile_image_url: imageUrl })
+          .eq("user_id", userId);
+
+        if (error) {
+          console.error("Error updating profile image URL:", error);
+          return { success: false, error: error.message };
+        }
+
+        result = { success: true, data };
+      } else {
+        // Insert new record
+        const { data, error } = await supabase()
+          .from("Users_Meta")
+          .insert([
+            {
+              user_id: userId,
+              profile_image_url: imageUrl,
+              display_name: null, // Set to null or provide a default display name
+            },
+          ])
+          .select();
+
+        if (error) {
+          console.error("Error inserting profile image URL:", error);
+          return { success: false, error: error.message };
+        }
+
+        result = { success: true, data };
+      }
+
+      // Update user cache
+      const userCacheKey = "current_user";
+      const cachedUser = CacheService.get<User>(userCacheKey);
+
+      if (cachedUser) {
+        cachedUser.profileImageUrl = imageUrl;
+        CacheService.set(userCacheKey, cachedUser, 60);
+      }
+
+      // Cache the image URL separately
+      const imageCacheKey = `profile_image_${userId}`;
+      CacheService.set(imageCacheKey, imageUrl, 60);
+
+      return result;
+    } catch (err) {
+      console.error("Unexpected error setting profile image URL:", err);
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : "Unknown error occurred",
+      };
+    }
+  }
 }
