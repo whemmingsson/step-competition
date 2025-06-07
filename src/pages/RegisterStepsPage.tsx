@@ -47,7 +47,7 @@ const formSchema = z.object({
   }),
   steps: z
     .number({ required_error: "Number of steps is required" })
-    .positive("Steps must be a positive number")
+    .positive("Steps must be a positive number greater than zero")
     .int("Steps must be a whole number"),
   date: z
     .date({
