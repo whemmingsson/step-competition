@@ -2,14 +2,24 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Footprints, LogOut, Menu, X } from "lucide-react";
+import { Footprints, LogOut, Menu, Trash, X } from "lucide-react";
 
 import { DisplayNameBadge } from "./DisplayNameBadge";
 import supabase from "@/supabase";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "./ui/alert-dialog";
 
 export function Navigation({ className }: { className?: string }) {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const navItems = [
     { name: "Home", path: "/" },
@@ -129,7 +139,7 @@ export function Navigation({ className }: { className?: string }) {
           </div>
 
           {/* Logout button - right side */}
-          <div>
+          <div className="flex items-center space-x-2">
             <Button
               variant="outline"
               onClick={handleLogout}
@@ -138,9 +148,45 @@ export function Navigation({ className }: { className?: string }) {
               <LogOut className="h-4 w-4" />
               Logout
             </Button>
+            <Button
+              variant="outline"
+              onClick={() => setIsDeleteDialogOpen(true)}
+              className="flex items-center gap-2 bg-destructive text-white"
+            >
+              <Trash className="h-4 w-4" />
+              Delete account?
+            </Button>
           </div>
         </div>
       </div>
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>How to delete your account</AlertDialogTitle>
+            <AlertDialogDescription>
+              Don't want to use the app anymore? No worry! Just send us an email
+              to{" "}
+              <a
+                href={`mailto:${import.meta.env.VITE_CONTACT_EMAIL}`}
+                className="underline"
+              >
+                {import.meta.env.VITE_CONTACT_EMAIL}
+              </a>{" "}
+              with your display name and we will delete your account for you.{" "}
+              <span className="font-bold">
+                Please note that this action is irreversible and will remove all
+                your data from our system.
+              </span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>OK</AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </nav>
   );
 }
