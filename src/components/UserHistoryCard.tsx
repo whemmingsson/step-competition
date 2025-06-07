@@ -54,19 +54,17 @@ export const UserHistoryCard = ({
       </CardHeader>
 
       <CardContent>
-        {/* View mode selector menu */}
-
         {!loading && (
           <div className="grid grid-cols-2 gap-4 mt-2 mb-6 text-center">
             <div className="bg-background rounded-md p-4">
-              <p className="text-sm text-muted-foreground">Total Steps</p>
+              <p className="text-sm text-muted-foreground">Total steps</p>
               <p className="text-2xl font-bold">
                 {totalSteps.toLocaleString()}
               </p>
             </div>
             <div className="bg-background rounded-md p-4">
               <p className="text-sm text-muted-foreground">
-                Avg steps per day (last 7 entries)
+                Avg. steps per day
               </p>
               <p className="text-2xl font-bold">{avgStepsPerDay}</p>
             </div>

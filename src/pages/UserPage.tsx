@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
 import { useAuth } from "@/context/auth/useAuth";
 import { StepService } from "@/services/StepService";
@@ -134,6 +134,15 @@ export default function UserPage() {
   // Calculate total steps
   const totalSteps = steps.reduce((sum, record) => sum + record.steps, 0);
 
+  // Calculate avg steps per day
+  // Calculate avg steps per day using useMemo
+  const avgStepsPerDay = useMemo(() => {
+    if (steps.length === 0) return 0;
+    const totalDays = new Set(steps.map((s) => s.date)).size;
+    const totalSteps = steps.reduce((sum, record) => sum + record.steps, 0);
+    return totalDays > 0 ? Math.round(totalSteps / totalDays) : 0;
+  }, [steps]);
+
   const setDisplayNameWrapper = (value: string | null) => {
     if (set) set(value ? value.trim() : "");
   };
@@ -151,6 +160,7 @@ export default function UserPage() {
       <UserHistoryCard
         steps={steps}
         totalSteps={totalSteps}
+        avgStepsPerDay={avgStepsPerDay}
         loading={loading}
         handleDeleteClick={handleDeleteClick}
         error={error}
