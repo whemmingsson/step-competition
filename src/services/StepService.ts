@@ -84,28 +84,42 @@ export class StepService {
         };
       }
 
-      // Start with the base query
-      let query = supabase()
-        .from("Steps")
-        .select("*")
-        .eq("user_id", uid)
-        .order("date", { ascending: false })
-        .limit(7);
+      // Fetch all step data for the user
+      let query = supabase().from("Steps").select("*").eq("user_id", uid);
 
       if (competitionId) {
         query = query.eq("competition_id", competitionId);
       }
 
-      // Execute the query
+      // Execute the query to get all raw data
       const { data, error } = await query;
 
       if (error) {
         throw error;
       }
 
-      CacheService.set(cacheKey, data);
+      // Group by date and sum steps
+      const stepsByDay: Record<string, number> = {};
 
-      return { success: true, data };
+      data?.forEach((record) => {
+        const date: string | null = record.date;
+        if (typeof date === "string") {
+          if (!stepsByDay[date]) {
+            stepsByDay[date] = 0;
+          }
+          stepsByDay[date] += record.steps || 0;
+        }
+      });
+
+      // Convert to array and sort by date descending
+      const groupedData = Object.entries(stepsByDay)
+        .map(([date, steps], i) => ({ date, steps, id: i }))
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        .slice(0, 7); // Get only the last 7 days
+
+      CacheService.set(cacheKey, groupedData);
+
+      return { success: true, data: groupedData };
     } catch (err) {
       console.error("Error fetching user steps:", err);
       return {
@@ -234,29 +248,43 @@ export class StepService {
    * @param id - ID of the step record to delete
    * @returns Promise with the result of the delete operation
    */
-  static async deleteStepRecord(
-    id: number
+  static async deleteStepRecordsOnDate(
+    date: string
   ): Promise<{ success: boolean; error?: string }> {
     try {
-      if (!id) {
+      if (!date) {
         return {
           success: false,
-          error: "Record ID is required",
+          error: "Record date is required",
         };
       }
 
-      const { error } = await supabase().from("Steps").delete().eq("id", id);
+      const user = await supabase().auth.getUser();
+      if (!user.data.user) {
+        return {
+          success: false,
+          error: "User not authenticated",
+        };
+      }
+
+      const { error } = await supabase()
+        .from("Steps")
+        .delete()
+        .eq("date", date)
+        .eq("user_id", user.data.user.id)
+        .eq(
+          "competition_id",
+          LocalStorageService.getSelectedComptetionId() ?? -1 // Use a default invalid ID if null
+        );
 
       if (error) {
-        console.error("Error deleting step record:", error);
+        console.error("Error deleting step record(s):", error);
         return {
           success: false,
           error: error.message,
         };
       }
 
-      // Invalidate the cache for the user steps since we just deleted a record
-      const user = await supabase().auth.getUser();
       if (user.data.user) {
         const cacheKey = `user_steps_${
           user.data.user.id
@@ -268,7 +296,7 @@ export class StepService {
         success: true,
       };
     } catch (err) {
-      console.error("Unexpected error deleting step record:", err);
+      console.error("Unexpected error deleting step record(s):", err);
       return {
         success: false,
         error: err instanceof Error ? err.message : "Unknown error occurred",

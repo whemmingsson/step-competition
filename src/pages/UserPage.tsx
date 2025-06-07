@@ -20,21 +20,14 @@ import { useUser } from "@/context/user/UserContext";
 import { UserHistoryCard } from "@/components/UserHistoryCard";
 import { UserProfileCard } from "@/components/UserProfileCard";
 import { useUserDisplayName } from "@/hooks/useUserDisplayName";
-
-interface StepRecord {
-  id: number;
-  user_id: string;
-  steps: number;
-  date: string;
-  created_at: string;
-}
+import type { StepsRecord } from "@/types/StepsRecord";
 
 export default function UserPage() {
   // Add this near your other hooks
   const { refreshUser } = useUser();
   const { session } = useAuth();
   const userId = session?.user?.id;
-  const [steps, setSteps] = useState<StepRecord[]>([]);
+  const [steps, setSteps] = useState<StepsRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const {
@@ -47,7 +40,9 @@ export default function UserPage() {
   const [isSaving, setIsSaving] = useState(false);
 
   // Add state for deletion confirmation
-  const [recordToDelete, setRecordToDelete] = useState<StepRecord | null>(null);
+  const [recordToDelete, setRecordToDelete] = useState<StepsRecord | null>(
+    null
+  );
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   useEffect(() => {
@@ -59,7 +54,7 @@ export default function UserPage() {
         const result = await StepService.getUserSteps(userId);
 
         if (result.success && result.data) {
-          setSteps(result.data as StepRecord[]);
+          setSteps(result.data as StepsRecord[]);
         } else {
           setError(result.error || "Failed to load step data");
         }
@@ -111,9 +106,8 @@ export default function UserPage() {
   };
 
   // Handle delete confirmation
-  const handleDeleteClick = (record: { id: number }) => {
-    const fullRecord = steps.find((step) => step.id === record.id) || null;
-    setRecordToDelete(fullRecord);
+  const handleDeleteClick = (record: StepsRecord) => {
+    setRecordToDelete(record);
     setIsDeleteDialogOpen(true);
   };
 
@@ -122,7 +116,7 @@ export default function UserPage() {
     if (!recordToDelete) return;
 
     try {
-      await StepService.deleteStepRecord(recordToDelete.id);
+      await StepService.deleteStepRecordsOnDate(recordToDelete.date);
       toast.success("Record deleted successfully");
 
       // Update the UI by removing the deleted record

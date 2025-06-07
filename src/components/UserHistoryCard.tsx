@@ -17,18 +17,21 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
+import type { StepsRecord } from "@/types/StepsRecord";
 
 interface UserHistoryCardProps {
   steps: { id: number; date: string; steps: number }[];
   totalSteps: number;
+  avgStepsPerDay?: number; // Optional, can be calculated if needed
   loading: boolean;
   error: string | null;
-  handleDeleteClick: (record: { id: number }) => void;
+  handleDeleteClick: (record: StepsRecord) => void;
 }
 
 export const UserHistoryCard = ({
   steps,
   totalSteps,
+  avgStepsPerDay = 0, // Default to 0 if not provided
   loading,
   error,
   handleDeleteClick,
@@ -56,9 +59,21 @@ export const UserHistoryCard = ({
           </div>
         ) : (
           <>
-            <div className="text-lg font-medium mb-4 text-center">
-              Total Steps: {totalSteps.toLocaleString()}
+            <div className="grid grid-cols-2 gap-4 mt-2 mb-2 text-center">
+              <div className="bg-background rounded-md p-4">
+                <p className="text-sm text-muted-foreground">Total Steps</p>
+                <p className="text-2xl font-bold">
+                  {totalSteps.toLocaleString()}
+                </p>
+              </div>
+              <div className="bg-background rounded-md p-4">
+                <p className="text-sm text-muted-foreground">
+                  Avg steps per day (last 7 entries)
+                </p>
+                <p className="text-2xl font-bold">{avgStepsPerDay}</p>
+              </div>
             </div>
+
             <Table>
               <TableCaption>A history of your recorded steps</TableCaption>
               <TableHeader>
@@ -70,7 +85,7 @@ export const UserHistoryCard = ({
               </TableHeader>
               <TableBody>
                 {steps.map((record) => (
-                  <TableRow key={record.id}>
+                  <TableRow key={record.date}>
                     <TableCell>
                       {format(new Date(record.date), "PPP")}
                     </TableCell>
@@ -82,7 +97,10 @@ export const UserHistoryCard = ({
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => handleDeleteClick(record)}
+                        onClick={() => {
+                          console.log(record);
+                          handleDeleteClick({ ...record } as StepsRecord);
+                        }}
                         className="text-red-500 hover:text-red-700 hover:bg-red-100"
                       >
                         <Trash2 className="h-4 w-4" />
