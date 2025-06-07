@@ -23,9 +23,10 @@ export function Navigation({ className }: { className?: string }) {
 
   const navItems = [
     { name: "Home", path: "/" },
-    { name: "User", path: "/user" },
+    { name: "My Progress", path: "/user" },
     { name: "Team", path: "/team" },
     { name: "Leaderboard", path: "/leaderboard" },
+    { name: "Profile", path: "/profile" },
   ];
 
   async function handleLogout(): Promise<void> {
@@ -97,7 +98,7 @@ export function Navigation({ className }: { className?: string }) {
                       : "hover:bg-accent"
                   )}
                 >
-                  {item.name} {item.name === "User" && <DisplayNameBadge />}
+                  {item.name} {item.name === "Profile" && <DisplayNameBadge />}
                 </Link>
               );
             })}
@@ -124,15 +125,15 @@ export function Navigation({ className }: { className?: string }) {
                   key={item.path}
                   to={item.path}
                   className={cn(
-                    "inline-flex items-center justify-center whitespace-nowrap rounded-md px-6 py-3 text-base font-medium transition-colors",
-                    "hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 gap-2",
+                    "inline-flex items-center justify-center whitespace-nowrap rounded-md px-4 py-2 text-base font-medium transition-colors",
+                    "hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-1 gap-2",
                     isActive
                       ? "bg-primary text-primary-foreground"
                       : "text-foreground/80"
                   )}
                 >
                   {item.name}
-                  {item.name === "User" && <DisplayNameBadge />}
+                  {item.name === "Profile" && <DisplayNameBadge />}
                 </Link>
               );
             })}

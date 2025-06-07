@@ -116,6 +116,38 @@ export class TeamService {
           user_id: team.user_id ?? "",
         })) ?? [];
 
+      const teamIds = mappedData.map((team) => team.id);
+      // Fetch number of users in each team
+      const usersInTeams = await supabase()
+        .from("Users_Teams")
+        .select("team_id, user_id")
+        .in("team_id", teamIds);
+
+      /* if (usersInTeams.error) {
+        console.error("Error fetching users in teams:", usersInTeams.error);
+        return { success: false, error: usersInTeams.error.message };
+      } */
+
+      // Map users to teams
+      const usersMap: Record<number, string[]> = {};
+      if (usersInTeams.data) {
+        usersInTeams.data.forEach((user) => {
+          if (user.team_id !== null && user.team_id !== undefined) {
+            if (!usersMap[user.team_id]) {
+              usersMap[user.team_id] = [];
+            }
+            if (user.user_id !== null) {
+              usersMap[user.team_id].push(user.user_id);
+            }
+          }
+        });
+      }
+
+      mappedData.forEach((team) => {
+        const userIds = usersMap[team.id] || [];
+        team.numberOfMembers = userIds.length;
+      });
+
       // Cache the result
       CacheService.set(cacheKey, mappedData);
 

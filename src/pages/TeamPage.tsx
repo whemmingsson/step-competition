@@ -262,11 +262,14 @@ export const TeamPage = () => {
                       <SelectValue placeholder="Select a team to join" />
                     </SelectTrigger>
                     <SelectContent>
-                      {teams?.map((team) => (
-                        <SelectItem key={team.id} value={team.id.toString()}>
-                          {team.name} ({team?.members?.length ?? 0} members)
-                        </SelectItem>
-                      ))}
+                      {teams?.map((team) => {
+                        console.log("Rendering team:", team);
+                        return (
+                          <SelectItem key={team.id} value={team.id.toString()}>
+                            {team.name} ({team?.numberOfMembers ?? 0} members)
+                          </SelectItem>
+                        );
+                      })}
                     </SelectContent>
                   </Select>
                 </div>

@@ -1,5 +1,5 @@
 import "./App.css";
-import { AppRouter } from "./components/AppRouter";
+import { Router } from "./components/Router";
 import { AuthProvider } from "./context/auth/AuthContextProvider";
 import { UserProvider } from "./context/user/UserContext";
 
@@ -7,7 +7,7 @@ function App() {
   return (
     <AuthProvider>
       <UserProvider>
-        <AppRouter />
+        <Router />
       </UserProvider>
     </AuthProvider>
   );

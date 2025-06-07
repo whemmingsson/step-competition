@@ -20,6 +20,7 @@ import {
 } from "./ui/table";
 import { cn } from "@/lib/utils";
 import type { StepsRecord } from "@/types/StepsRecord";
+import { UserStepsChart } from "./charts/UserStepsChart";
 
 interface UserHistoryCardProps {
   steps: { id: number; date: string; steps: number }[];
@@ -46,10 +47,11 @@ export const UserHistoryCard = ({
     <Card className="w-full" style={{ background: "#ffffffed" }}>
       <CardHeader>
         <CardTitle className="text-2xl font-bold text-center">
-          Your Step History
+          My progress
         </CardTitle>
         <CardDescription className="text-center">
-          Track your progress over time
+          Track your progress over time. View your step history in a table or
+          chart format.
         </CardDescription>
       </CardHeader>
 
@@ -146,14 +148,8 @@ export const UserHistoryCard = ({
                 </TableBody>
               </Table>
             ) : (
-              <div className="border-2 border-dashed border-muted-foreground/20 rounded-lg p-12 text-center">
-                <BarChart3 className="h-16 w-16 mx-auto text-muted-foreground/70 mb-2" />
-                <h3 className="font-semibold text-lg mb-2">
-                  Chart View Coming Soon
-                </h3>
-                <p className="text-muted-foreground">
-                  A visualization of your step history will be implemented here.
-                </p>
+              <div className="border-2 border-dashed border-muted-foreground/20 rounded-lg p-4 text-center">
+                <UserStepsChart stepsData={steps} />
               </div>
             )}
           </>

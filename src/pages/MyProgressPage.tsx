@@ -4,7 +4,6 @@ import { useAuth } from "@/context/auth/useAuth";
 import { StepService } from "@/services/StepService";
 
 import { PageContainer } from "@/components/PageContainer";
-import { UserService } from "@/services/UserService";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -16,28 +15,16 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useUser } from "@/context/user/UserContext";
 import { UserHistoryCard } from "@/components/UserHistoryCard";
-import { UserProfileCard } from "@/components/UserProfileCard";
-import { useUserDisplayName } from "@/hooks/useUserDisplayName";
 import type { StepsRecord } from "@/types/StepsRecord";
 
-export default function UserPage() {
+export default function MyProgressPage() {
   // Add this near your other hooks
-  const { refreshUser } = useUser();
   const { session } = useAuth();
   const userId = session?.user?.id;
   const [steps, setSteps] = useState<StepsRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const {
-    data: displayName,
-    loading: displayNameLoading,
-    set,
-  } = useUserDisplayName();
-
-  // Display name state
-  const [isSaving, setIsSaving] = useState(false);
 
   // Add state for deletion confirmation
   const [recordToDelete, setRecordToDelete] = useState<StepsRecord | null>(
@@ -68,42 +55,6 @@ export default function UserPage() {
 
     fetchUserSteps();
   }, [userId, session]);
-
-  // Handle display name update
-  const handleUpdateDisplayName = async (e: { preventDefault: () => void }) => {
-    e.preventDefault();
-
-    if (!userId) {
-      toast.error("You must be logged in to update your display name");
-      return;
-    }
-
-    if (displayName && !displayName.trim()) {
-      toast.error("Display name cannot be empty");
-      return;
-    }
-
-    setIsSaving(true);
-
-    try {
-      const result = await UserService.setDisplayName(
-        userId,
-        displayName ?? ""
-      );
-
-      if (result.success) {
-        toast.success("Display name updated successfully!");
-        refreshUser(); // Refresh user data to reflect changes
-      } else {
-        toast.error(`Failed to update display name: ${result.error}`);
-      }
-    } catch (error) {
-      toast.error("An error occurred while updating your display name");
-      console.error(error);
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
   // Handle delete confirmation
   const handleDeleteClick = (record: StepsRecord) => {
@@ -143,20 +94,8 @@ export default function UserPage() {
     return totalDays > 0 ? Math.round(totalSteps / totalDays) : 0;
   }, [steps]);
 
-  const setDisplayNameWrapper = (value: string | null) => {
-    if (set) set(value ? value.trim() : "");
-  };
-
   return (
     <PageContainer>
-      <UserProfileCard
-        displayName={displayName || ""}
-        setDisplayName={setDisplayNameWrapper}
-        displayNameLoading={displayNameLoading}
-        handleUpdateDisplayName={handleUpdateDisplayName}
-        isSaving={isSaving}
-      />
-
       <UserHistoryCard
         steps={steps}
         totalSteps={totalSteps}

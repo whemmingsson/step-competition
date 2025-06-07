@@ -28,7 +28,7 @@ export const UserProfileCard = ({
   return (
     <Card className="w-full" style={{ background: "#ffffffed" }}>
       <CardHeader>
-        <CardTitle className="text-xl font-bold">
+        <CardTitle className="text-xl font-bold flex gap-x-2">
           Your Profile <DisplayNameBadge />
         </CardTitle>
         <CardDescription>

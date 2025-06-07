@@ -1,21 +1,24 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "../context/auth/useAuth";
 import RegisterStepsPage from "@/pages/RegisterStepsPage";
-import UserPage from "@/pages/UserPage";
+import MyProgressPage from "@/pages/MyProgressPage";
 import { LoginPage } from "@/pages/LoginPage";
 import { Layout } from "./Layout";
 import { RequireAuth } from "./RequireAuth";
 import { LoadingScreen } from "./LoadingScreen";
 import { LeaderboardPage } from "@/pages/LeaderboardPage.";
 import { TeamPage } from "@/pages/TeamPage";
+import { ProfilePage } from "@/pages/ProfilePage";
 
-// Page components
-const Home = () => <RegisterStepsPage />;
-const User = () => <UserPage />;
-const Team = () => <TeamPage />;
-const Leaderboard = () => <LeaderboardPage />;
+const pages = [
+  { p: "/", c: <RegisterStepsPage /> },
+  { p: "/user", c: <MyProgressPage /> },
+  { p: "/team", c: <TeamPage /> },
+  { p: "/leaderboard", c: <LeaderboardPage /> },
+  { p: "/profile", c: <ProfilePage /> },
+];
 
-export const AppRouter = () => {
+export const Router = () => {
   const { isLoading } = useAuth();
 
   if (isLoading) {
@@ -31,10 +34,9 @@ export const AppRouter = () => {
         {/* All authenticated routes use the same layout */}
         <Route element={<RequireAuth />}>
           <Route element={<Layout />}>
-            <Route path="/" element={<Home />} />
-            <Route path="/user" element={<User />} />
-            <Route path="/team" element={<Team />} />
-            <Route path="/leaderboard" element={<Leaderboard />} />
+            {pages.map((page) => (
+              <Route key={page.p} path={page.p} element={page.c} />
+            ))}
           </Route>
         </Route>
 

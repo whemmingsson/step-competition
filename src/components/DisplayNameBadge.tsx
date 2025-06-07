@@ -1,6 +1,6 @@
 import { useUser } from "@/context/user/UserContext";
-import { Badge } from "./ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+import { TriangleAlert } from "lucide-react";
 
 export const DisplayNameBadge = () => {
   const { user, isLoading } = useUser();
@@ -13,9 +13,10 @@ export const DisplayNameBadge = () => {
   return (
     <Tooltip>
       <TooltipTrigger>
-        <Badge variant="outline" className="bg-yellow-500 rounded-full">
-          !
-        </Badge>
+        <TriangleAlert
+          color="#000"
+          fill="oklch(79.5% 0.184 86.047)"
+        ></TriangleAlert>
       </TooltipTrigger>
       <TooltipContent>
         <p>Please set a display name</p>
