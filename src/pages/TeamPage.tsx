@@ -117,6 +117,7 @@ export const TeamPage = () => {
       );
 
       if (result.success) {
+        console.log("Left team successfully:", result);
         if (setUserTeam) {
           setUserTeam(null);
         }

@@ -317,12 +317,6 @@ export class TeamService {
         };
       }
 
-      // check if the team exists
-      const result = await this.getTeamById(teamId);
-      if (!result.success || !result.data) {
-        return { success: false, error: "Team not found" };
-      }
-
       const { error } = await supabase()
         .from("Users_Teams")
         .insert([{ user_id: userId, team_id: teamId }]);
@@ -335,6 +329,7 @@ export class TeamService {
       // Clear cache for this team
       CacheService.invalidate(`get-team-by-id-${teamId}`);
       CacheService.invalidate(`get-teams-by-user-id`);
+      CacheService.invalidate(`get-teams`);
 
       return { success: true };
     } catch (err) {
@@ -365,12 +360,6 @@ export class TeamService {
         };
       }
 
-      // check if the team exists
-      const result = await this.getTeamById(teamId);
-      if (!result.success || !result.data) {
-        return { success: false, error: "Team not found" };
-      }
-
       const { error } = await supabase()
         .from("Users_Teams")
         .delete()
@@ -385,6 +374,7 @@ export class TeamService {
       // Clear cache for this team
       CacheService.invalidate(`get-team-by-id-${teamId}`);
       CacheService.invalidate(`get-teams-by-user-id`);
+      CacheService.invalidate(`get-teams`);
 
       return { success: true };
     } catch (err) {

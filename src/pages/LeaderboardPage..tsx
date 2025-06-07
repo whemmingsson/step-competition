@@ -88,7 +88,7 @@ export const LeaderboardPage = () => {
       <Card className="w-full" style={{ background: "#ffffffee" }}>
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-center">
-            Leaderboard
+            User leaderboard
           </CardTitle>
         </CardHeader>
         <CardContent>

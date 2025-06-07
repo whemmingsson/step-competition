@@ -25,7 +25,7 @@ export function Navigation({ className }: { className?: string }) {
     { name: "Home", path: "/" },
     { name: "My Progress", path: "/user" },
     { name: "Team", path: "/team" },
-    { name: "Leaderboard", path: "/leaderboard" },
+    { name: "Leaderboards", path: "/leaderboard" },
     { name: "Profile", path: "/profile" },
   ];
 
