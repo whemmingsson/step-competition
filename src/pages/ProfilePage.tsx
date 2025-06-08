@@ -12,15 +12,11 @@ export const ProfilePage = () => {
   const { session } = useAuth();
   const userId = session?.user?.id;
 
-  console.log(user);
-
   const {
     data: displayName,
     loading: displayNameLoading,
     set,
   } = useUserDisplayName();
-
-  console.log("Display Name:", displayName);
 
   // Display name state
   const [isSaving, setIsSaving] = useState(false);

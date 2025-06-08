@@ -10,11 +10,8 @@ import {
 } from "./ui/card";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { Upload, Image as ImageIcon } from "lucide-react";
-import supabase from "@/supabase";
-import { toast } from "sonner";
-import { cn } from "@/lib/utils";
-import { UserService } from "@/services/UserService";
+import { Image as ImageIcon } from "lucide-react";
+import { FileUpload } from "./FileUpload";
 
 interface UserProfileCardProps {
   displayName: string;
@@ -35,96 +32,9 @@ export const UserProfileCard = ({
   userId,
   profileImageUrl,
 }: UserProfileCardProps) => {
-  const [isDragging, setIsDragging] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | undefined>(
     profileImageUrl
   );
-
-  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-  };
-
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
-
-  const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      await handleImageUpload(e.dataTransfer.files[0]);
-    }
-  };
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      await handleImageUpload(e.target.files[0]);
-    }
-  };
-
-  const handleImageUpload = async (file: File) => {
-    // Check if file is an image
-    if (!file.type.startsWith("image/")) {
-      toast.error("Please upload an image file");
-      return;
-    }
-
-    // Check file size (max 2MB)
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error("Image size should be less than 2MB");
-      return;
-    }
-
-    setIsUploading(true);
-
-    try {
-      // Generate a unique file name
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${userId || "profile"}-${Date.now()}.${fileExt}`;
-      const filePath = `${fileName}`;
-
-      // Upload file to Supabase Storage
-      const { error } = await supabase()
-        .storage.from("profile-images")
-        .upload(filePath, file, {
-          cacheControl: "3600",
-          upsert: true,
-        });
-
-      if (error) {
-        throw error;
-      }
-
-      // Get public URL for the uploaded image
-      const { data: urlData } = supabase()
-        .storage.from("profile-images")
-        .getPublicUrl(filePath);
-
-      setUploadedImageUrl(urlData.publicUrl);
-      if (userId) {
-        await UserService.setProfileImageUrl(userId, urlData.publicUrl);
-      }
-
-      toast.success("Profile image uploaded successfully");
-    } catch (error) {
-      console.error("Error uploading image:", error);
-      toast.error("Failed to upload image");
-    } finally {
-      setIsUploading(false);
-    }
-  };
 
   const displayUrl = uploadedImageUrl || profileImageUrl || undefined;
 
@@ -161,43 +71,10 @@ export const UserProfileCard = ({
               )}
             </div>
 
-            <div
-              className={cn(
-                "w-full max-w-[200px] h-24 border-2 border-dashed rounded-lg flex flex-col items-center justify-center cursor-pointer transition-colors",
-                isDragging
-                  ? "border-primary bg-primary/10"
-                  : "border-muted-foreground/25 hover:border-primary/50",
-                isUploading && "opacity-70 cursor-not-allowed"
-              )}
-              onDragEnter={handleDragEnter}
-              onDragLeave={handleDragLeave}
-              onDragOver={handleDragOver}
-              onDrop={handleDrop}
-              onClick={() =>
-                !isUploading && document.getElementById("fileInput")?.click()
-              }
-            >
-              <input
-                id="fileInput"
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleFileChange}
-                disabled={isUploading}
-              />
-
-              {isUploading ? (
-                <div className="flex flex-col items-center gap-1 text-sm">
-                  <div className="animate-spin h-5 w-5 border-2 border-primary rounded-full border-t-transparent"></div>
-                  <span className="text-xs">Uploading...</span>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center gap-1 text-sm">
-                  <Upload className="h-5 w-5 text-muted-foreground" />
-                  <span className="text-xs">Drag image or click to upload</span>
-                </div>
-              )}
-            </div>
+            <FileUpload
+              userId={userId}
+              onUploadSuccess={(url) => setUploadedImageUrl(url)}
+            />
           </div>
 
           {/* Display Name Form */}
