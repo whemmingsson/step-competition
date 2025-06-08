@@ -8,15 +8,19 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 export const ProfilePage = () => {
-  const { refreshUser } = useUser();
+  const { refreshUser, user } = useUser();
   const { session } = useAuth();
   const userId = session?.user?.id;
+
+  console.log(user);
 
   const {
     data: displayName,
     loading: displayNameLoading,
     set,
   } = useUserDisplayName();
+
+  console.log("Display Name:", displayName);
 
   // Display name state
   const [isSaving, setIsSaving] = useState(false);
@@ -69,6 +73,8 @@ export const ProfilePage = () => {
         displayNameLoading={displayNameLoading}
         handleUpdateDisplayName={handleUpdateDisplayName}
         isSaving={isSaving}
+        userId={userId}
+        profileImageUrl={user?.profileImageUrl || undefined}
       />
     </PageContainer>
   );

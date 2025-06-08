@@ -2,6 +2,11 @@ import supabase from "@/supabase";
 import type { User } from "@/types/User";
 import CacheService from "./CacheService";
 
+interface ProfileMeta {
+  display_name?: string | null;
+  profile_image_url?: string | null;
+}
+
 /**
  * Service for user-related operations
  */
@@ -27,9 +32,12 @@ export class UserService {
         };
       }
 
-      const existingDisplayName = await this.getDisplayName(userId);
+      const existingDisplayName = await this.getProfileMeta(userId);
 
-      if (existingDisplayName.success && existingDisplayName.displayName) {
+      if (
+        existingDisplayName.success &&
+        existingDisplayName?.data?.display_name
+      ) {
         const { data, error } = await supabase()
           .from("Users_Meta")
           .update({ display_name: displayName })
@@ -77,9 +85,9 @@ export class UserService {
    * @param userId - The user's ID
    * @returns Promise with the user's display name
    */
-  static async getDisplayName(
+  static async getProfileMeta(
     userId: string
-  ): Promise<{ success: boolean; error?: string; displayName?: string }> {
+  ): Promise<{ success: boolean; error?: string; data?: ProfileMeta }> {
     try {
       if (!userId) {
         return {
@@ -88,42 +96,37 @@ export class UserService {
         };
       }
 
-      const cacheKey = `display_name_${userId}`;
+      const cacheKey = `profile_meta_${userId}`;
       const cachedData = CacheService.get(cacheKey);
 
       if (cachedData) {
         return {
           success: true,
-          displayName: cachedData as string,
+          data: cachedData as ProfileMeta,
         };
       }
 
       const { data, error } = await supabase()
         .from("Users_Meta")
-        .select("display_name")
+        .select("display_name, profile_image_url")
         .eq("user_id", userId)
         .single();
 
       if (error) {
-        console.error("Error getting display name:", error);
+        console.error("Error getting profile meta:", error);
         return {
           success: false,
           error: error.message,
         };
       }
 
-      const displayName =
-        data && data["display_name"] !== null
-          ? data["display_name"]
-          : undefined;
-
-      if (displayName) {
-        CacheService.set(cacheKey, displayName, 60);
+      if (data) {
+        CacheService.set(cacheKey, data as ProfileMeta, 60);
       }
 
       return {
         success: true,
-        displayName: displayName,
+        data: data as ProfileMeta,
       };
     } catch (err) {
       return {
@@ -156,11 +159,12 @@ export class UserService {
         return { success: false, user: null };
       }
 
-      const displayNameResult = await this.getDisplayName(data.user.id);
+      const meta = await this.getProfileMeta(data.user.id);
 
       const user: User = {
         id: data.user.id,
-        displayName: displayNameResult.displayName ?? null,
+        displayName: meta.data?.display_name ?? null,
+        profileImageUrl: meta.data?.profile_image_url ?? null,
       };
 
       CacheService.set(cacheKey, user, 60);
@@ -187,6 +191,7 @@ export class UserService {
     imageUrl: string
   ): Promise<{ success: boolean; error?: string; data?: unknown }> {
     try {
+      console.log("Setting profile image URL for user:", userId, imageUrl);
       if (!userId || !imageUrl.trim()) {
         return {
           success: false,
@@ -200,6 +205,8 @@ export class UserService {
         .select("user_id, profile_image_url")
         .eq("user_id", userId)
         .single();
+
+      console.log("Existing user data:", existingUser, fetchError);
 
       if (fetchError && fetchError.code !== "PGRST116") {
         // PGRST116 is "no rows returned" error
@@ -215,6 +222,8 @@ export class UserService {
           .from("Users_Meta")
           .update({ profile_image_url: imageUrl })
           .eq("user_id", userId);
+
+        console.log("Update result:", data, error);
 
         if (error) {
           console.error("Error updating profile image URL:", error);

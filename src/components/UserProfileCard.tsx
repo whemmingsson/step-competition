@@ -113,7 +113,6 @@ export const UserProfileCard = ({
         .getPublicUrl(filePath);
 
       setUploadedImageUrl(urlData.publicUrl);
-
       if (userId) {
         await UserService.setProfileImageUrl(userId, urlData.publicUrl);
       }
@@ -126,6 +125,8 @@ export const UserProfileCard = ({
       setIsUploading(false);
     }
   };
+
+  const displayUrl = uploadedImageUrl || profileImageUrl || undefined;
 
   return (
     <Card className="w-full" style={{ background: "#ffffffed" }}>
@@ -145,10 +146,10 @@ export const UserProfileCard = ({
               <p className="text-sm text-muted-foreground mb-1">
                 Profile Image
               </p>
-              {uploadedImageUrl ? (
+              {displayUrl ? (
                 <div className="relative w-32 h-32 rounded-full overflow-hidden border-2 border-muted mb-2">
                   <img
-                    src={uploadedImageUrl}
+                    src={displayUrl}
                     alt="Profile"
                     className="w-full h-full object-cover"
                   />

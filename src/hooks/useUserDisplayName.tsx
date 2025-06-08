@@ -15,10 +15,10 @@ export const useUserDisplayName = (): QueryResult<string | null> => {
 
       setLoading(true);
       try {
-        const result = await UserService.getDisplayName(user.id);
+        const result = await UserService.getProfileMeta(user.id);
 
-        if (result.success && result.displayName) {
-          setDisplayName(result.displayName);
+        if (result.success && result.data?.display_name) {
+          setDisplayName(result.data?.display_name);
         }
       } catch (err) {
         console.error("Error loading display name:", err);
