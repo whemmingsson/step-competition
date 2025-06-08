@@ -12,10 +12,12 @@ import {
 import { PageContainer } from "@/components/PageContainer";
 import { TeamService } from "@/services/TeamService";
 import type { Team } from "@/types/Team";
+import { ProfileImage } from "@/components/ProfileImage";
 
 interface LeaderboardUser {
   displayName: string;
   totalSteps: number;
+  profileImageUrl?: string;
 }
 
 export const LeaderboardPage = () => {
@@ -118,8 +120,16 @@ export const LeaderboardPage = () => {
                       )}
                     </TableCell>
                     <TableCell
-                      className={index === 0 ? "font-bold text-lg" : ""}
+                      className={
+                        index === 0
+                          ? "font-bold text-lg flex items-center gap-x-2"
+                          : "flex items-center gap-x-2"
+                      }
                     >
+                      <ProfileImage
+                        name={user.displayName}
+                        url={user.profileImageUrl}
+                      />{" "}
                       {user.displayName}
                     </TableCell>
                     <TableCell

@@ -1,11 +1,7 @@
 import supabase from "@/supabase";
 import type { User } from "@/types/User";
 import CacheService from "./CacheService";
-
-interface ProfileMeta {
-  display_name?: string | null;
-  profile_image_url?: string | null;
-}
+import type { ProfileMeta } from "@/types/ProfileMeta";
 
 /**
  * Service for user-related operations

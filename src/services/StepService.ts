@@ -1,6 +1,7 @@
 import supabase from "@/supabase";
 import { LocalStorageService } from "./LocalStorageService";
 import CacheService from "./CacheService";
+import type { ProfileMeta } from "@/types/ProfileMeta";
 
 /**
  * Service for handling step-related database operations
@@ -138,7 +139,11 @@ export class StepService {
   static async getTopUsers(limit: number = 5): Promise<{
     success: boolean;
     error?: string;
-    data?: { displayName: string; totalSteps: number }[];
+    data?: {
+      displayName: string;
+      totalSteps: number;
+      profileImageUrl: string;
+    }[];
   }> {
     const competitionId = LocalStorageService.getSelectedComptetionId();
 
@@ -156,7 +161,11 @@ export class StepService {
     if (cachedData) {
       return {
         success: true,
-        data: cachedData as { displayName: string; totalSteps: number }[],
+        data: cachedData as {
+          displayName: string;
+          totalSteps: number;
+          profileImageUrl: string;
+        }[],
       };
     }
 
@@ -196,18 +205,23 @@ export class StepService {
       const userIds = sortedUsers.map((user) => user.userId);
       const { data: usersData, error: usersError } = await supabase()
         .from("Users_Meta")
-        .select("user_id, display_name")
+        .select("user_id, display_name, profile_image_url")
         .in("user_id", userIds);
 
       // Convert the usersData to a map for easy access
-      let userMetaMap: Record<string, string> = {};
+      let userMetaMap: Record<string, ProfileMeta> = {};
+
       if (usersData) {
         userMetaMap = usersData.reduce((acc, user) => {
           if (user.user_id) {
-            acc[user.user_id] = user.display_name || "Unknown User";
+            const meta: ProfileMeta = {
+              display_name: user.display_name,
+              profile_image_url: user.profile_image_url,
+            };
+            acc[user.user_id] = meta;
           }
           return acc;
-        }, {} as Record<string, string>);
+        }, {} as Record<string, ProfileMeta>);
       }
 
       if (usersError) {
@@ -220,9 +234,10 @@ export class StepService {
           console.warn("Skipping user with missing user_id:", user);
           continue; // Skip users without user_id
         }
-        const username = userMetaMap[user.userId] || "Unknown User";
+        const meta = userMetaMap[user.userId];
         result.push({
-          displayName: username,
+          displayName: meta.display_name || "Unknown User",
+          profileImageUrl: meta.profile_image_url || "",
           totalSteps: user.totalSteps,
         });
       }
