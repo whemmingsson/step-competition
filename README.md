@@ -165,5 +165,3 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ---
 
 For questions or support, please open an issue on the GitHub repository or contact us at the email address in your environment configuration.
-
-Similar code found with 1 license type
