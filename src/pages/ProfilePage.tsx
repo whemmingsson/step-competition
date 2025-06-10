@@ -40,7 +40,7 @@ export const ProfilePage = () => {
     try {
       const result = await UserService.setDisplayName(
         userId,
-        displayName ?? ""
+        displayName ? displayName.trim() : ""
       );
 
       if (result.success) {
@@ -58,7 +58,7 @@ export const ProfilePage = () => {
   };
 
   const setDisplayNameWrapper = (value: string | null) => {
-    if (set) set(value ? value.trim() : "");
+    if (set) set(value ?? "");
   };
 
   return (
