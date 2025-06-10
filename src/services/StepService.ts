@@ -236,8 +236,8 @@ export class StepService {
         }
         const meta = userMetaMap[user.userId];
         result.push({
-          displayName: meta.display_name || "Unknown User",
-          profileImageUrl: meta.profile_image_url || "",
+          displayName: meta?.display_name || "Unknown User",
+          profileImageUrl: meta?.profile_image_url || "",
           totalSteps: user.totalSteps,
         });
       }
