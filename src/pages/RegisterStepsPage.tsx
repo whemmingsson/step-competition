@@ -81,7 +81,7 @@ export default function RegisterStepsPage() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       competition: savedCompetition,
-      steps: 0,
+      steps: undefined,
       date: new Date(),
     },
   });

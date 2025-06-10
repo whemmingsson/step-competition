@@ -21,8 +21,9 @@ export class StepService {
     date: Date
   ): Promise<{ success: boolean; error?: string; data?: unknown }> {
     try {
-      // Format the date to ISO string (YYYY-MM-DD) to ensure proper storage in Supabase
-      const formattedDate = date.toISOString().split("T")[0];
+      const formattedDate = `${date.getFullYear()}-${String(
+        date.getMonth() + 1
+      ).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 
       const { data, error } = await supabase()
         .from("Steps")
