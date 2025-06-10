@@ -20,7 +20,7 @@ export const Layout = () => {
 
   return (
     <div
-      className="h-screen flex flex-col bg-cover bg-center bg-fixed overflow-hidden"
+      className="min-h-screen flex flex-col bg-cover bg-center bg-fixed"
       style={{
         backgroundImage: isMobile
           ? "url('./resources/mobile.jpg')"
@@ -28,19 +28,20 @@ export const Layout = () => {
       }}
     >
       {/* Semi-transparent overlay */}
-      <div className="absolute inset-0 bg-black/30 pointer-events-none" />
+      <div className="absolute inset-0 bg-black/40 pointer-events-none" />
 
       {/* Content layer (above overlay) */}
-      <div className="relative z-10 flex flex-col h-full">
+      <div className="relative z-10 flex flex-col min-h-screen">
         <Navigation />
 
-        {/* Use auto scrolling only on the content area */}
+        {/* Main content area with auto scrolling */}
         <div className="flex-1 overflow-y-auto">
           <div className="container mx-auto max-w-full md:max-w-4xl px-4 py-6">
             <Outlet />
           </div>
         </div>
 
+        {/* Footer will automatically be pushed to the bottom */}
         <Footer className="backdrop-blur-sm bg-background/30" />
       </div>
     </div>
