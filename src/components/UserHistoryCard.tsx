@@ -1,7 +1,5 @@
 import { useState } from "react";
-import { Trash2, BarChart3, Table as TableIcon, Pen, Save } from "lucide-react";
-import { Button } from "./ui/button";
-import { format } from "date-fns";
+import { BarChart3, Table as TableIcon } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -9,29 +7,19 @@ import {
   CardHeader,
   CardTitle,
 } from "./ui/card";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "./ui/table";
 import { cn } from "@/lib/utils";
 import type { StepsRecord } from "@/types/StepsRecord";
 import { UserStepsChart } from "./charts/UserStepsChart";
-import { Input } from "./ui/input";
-import { StepService } from "@/services/StepService";
-import { toast } from "sonner";
+import { UserStepsTable } from "./UserStepsTable";
 
 interface UserHistoryCardProps {
-  steps: { id: number; date: string; steps: number }[];
+  steps: StepsRecord[];
   totalSteps: number;
   avgStepsPerDay?: number; // Optional, can be calculated if needed
   loading: boolean;
   error: string | null;
   handleDeleteClick: (record: StepsRecord) => void;
+  refetch?: () => Promise<void>; // Optional refetch function
 }
 
 type ViewMode = "table" | "chart";
@@ -43,34 +31,17 @@ export const UserHistoryCard = ({
   loading,
   error,
   handleDeleteClick,
+  refetch,
 }: UserHistoryCardProps) => {
   const [viewMode, setViewMode] = useState<ViewMode>("table");
-  const [editRecordId, setEditRecordId] = useState<number | null>(null);
-  const [updatedSteps, setUpdatedSteps] = useState<number | null>(null);
 
-  const handleEnableEditRecord = (id: number) => {
-    if (editRecordId === id) {
-      setEditRecordId(null); // Disable edit mode
-    } else {
-      setEditRecordId(id); // Enable edit mode for the selected record
-    }
-  };
-
-  const handleUpdateRecord = async () => {
-    console.log("Updating record with ID:", editRecordId, updatedSteps);
-    if (!editRecordId || updatedSteps === null) return;
-
-    const result = await StepService.updateStepRecord(
-      editRecordId,
-      updatedSteps
-    );
-
-    if (result.success) {
-      setEditRecordId(null); // Exit edit mode
-      setUpdatedSteps(null); // Clear updated steps
-      toast.success("Step record updated successfully");
-    } else {
-      toast.error(result.error || "Failed to update step record");
+  const select = (value: number) => {
+    if (loading || (!value && value !== 0)) return "Loading...";
+    try {
+      return value.toLocaleString();
+    } catch (error) {
+      console.error("Error accessing statistics data:", error);
+      return "N/A";
     }
   };
 
@@ -87,22 +58,16 @@ export const UserHistoryCard = ({
       </CardHeader>
 
       <CardContent>
-        {!loading && (
-          <div className="grid grid-cols-2 gap-4 mt-2 mb-6 text-center">
-            <div className="bg-background rounded-md p-4">
-              <p className="text-sm text-muted-foreground">Total steps</p>
-              <p className="text-2xl font-bold">
-                {totalSteps.toLocaleString()}
-              </p>
-            </div>
-            <div className="bg-background rounded-md p-4">
-              <p className="text-sm text-muted-foreground">
-                Avg. steps per day
-              </p>
-              <p className="text-2xl font-bold">{avgStepsPerDay}</p>
-            </div>
+        <div className="grid grid-cols-2 gap-4 mt-2 mb-6 text-center">
+          <div className="bg-background rounded-md p-4">
+            <p className="text-sm text-muted-foreground">Total steps</p>
+            <p className="text-2xl font-bold">{select(totalSteps)}</p>
           </div>
-        )}
+          <div className="bg-background rounded-md p-4">
+            <p className="text-sm text-muted-foreground">Avg. steps per day</p>
+            <p className="text-2xl font-bold">{select(avgStepsPerDay)}</p>
+          </div>
+        </div>
 
         <div className="flex border-b mb-4">
           <button
@@ -131,11 +96,7 @@ export const UserHistoryCard = ({
           </button>
         </div>
 
-        {loading ? (
-          <div className="flex justify-center py-8">
-            <div className="animate-spin h-8 w-8 border-4 border-blue-600 rounded-full border-t-transparent"></div>
-          </div>
-        ) : error ? (
+        {error ? (
           <div className="text-center text-red-500 py-4">{error}</div>
         ) : steps.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
@@ -144,79 +105,11 @@ export const UserHistoryCard = ({
         ) : (
           <>
             {viewMode === "table" ? (
-              <Table>
-                <TableCaption>A history of your recorded steps</TableCaption>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-70">Date</TableHead>
-                    <TableHead>Steps</TableHead>
-                    <TableHead></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {steps.map((record) => (
-                    <TableRow key={record.date}>
-                      <TableCell className="w-70">
-                        {format(new Date(record.date), "PPP")}
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        {editRecordId && editRecordId === record.id ? (
-                          <Input
-                            type="number"
-                            name="steps-edit"
-                            defaultValue={record.steps}
-                            className=" border-gray-400 edit-steps-input w-20 "
-                            style={{ marginLeft: "-12px" }}
-                            onChange={(e) => {
-                              setUpdatedSteps(
-                                Number((e.target as HTMLInputElement).value)
-                              );
-                            }}
-                          />
-                        ) : (
-                          record.steps.toLocaleString()
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {editRecordId && editRecordId === record.id ? (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="text-blue-950 hover:bg-blue-100"
-                            onClick={() => {
-                              handleUpdateRecord();
-                            }}
-                          >
-                            <Save className="h-4 w-4" />
-                          </Button>
-                        ) : (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => {
-                              handleEnableEditRecord(record.id);
-                            }}
-                            className="text-blue-950 hover:bg-blue-100"
-                          >
-                            <Pen className="h-4 w-4" />
-                          </Button>
-                        )}
-
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            handleDeleteClick({ ...record } as StepsRecord);
-                          }}
-                          className="text-red-500 hover:text-red-700 hover:bg-red-100"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+              <UserStepsTable
+                steps={steps}
+                handleDeleteClick={handleDeleteClick}
+                refetch={refetch}
+              />
             ) : (
               <div className="border-2 border-dashed border-muted-foreground/20 rounded-lg p-4 text-center">
                 <UserStepsChart stepsData={steps} />

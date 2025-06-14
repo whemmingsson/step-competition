@@ -9,6 +9,12 @@ import type { StepsRecord } from "@/types/StepsRecord";
  */
 export class StepService {
   /**
+   * Clear the cache for all step-related data
+   */
+  private static clearServiceCache() {
+    CacheService.invalidate("step_service_");
+  }
+  /**
    * Insert a new step entry into the database
    *
    * @param steps - Number of steps recorded
@@ -46,9 +52,7 @@ export class StepService {
         };
       }
 
-      // Clear the cache for user steps since we just added a new record
-      const cacheKey = `user_steps_${uid}_${LocalStorageService.getSelectedComptetionId()}`;
-      CacheService.invalidate(cacheKey);
+      this.clearServiceCache();
 
       return {
         success: true,
@@ -67,14 +71,15 @@ export class StepService {
    * Get steps for a specific user
    *
    * @param uid - User ID to fetch steps for
+   * @param groupByDate - Whether to group steps by date (default true)
    * @returns Promise with the user's step data
    */
-  static async getUserSteps(uid: string) {
+  static async getUserSteps(uid: string, groupByDate: boolean = true) {
     // Only apply the competition filter if we have a value
     const competitionId = LocalStorageService.getSelectedComptetionId();
 
     try {
-      const cacheKey = `user_steps_${uid}_${competitionId}`;
+      const cacheKey = `step_service_user_steps_${uid}_${competitionId}`;
       const cachedData = CacheService.get(cacheKey);
       if (cachedData) {
         return {
@@ -101,28 +106,49 @@ export class StepService {
         throw error;
       }
 
-      // Group by date and sum steps
-      const stepsByDay: Record<string, number> = {};
+      if (groupByDate) {
+        // Group by date and sum steps
+        const stepsByDay: Record<string, number> = {};
 
-      data?.forEach((record) => {
-        const date: string | null = record.date;
-        if (typeof date === "string") {
-          if (!stepsByDay[date]) {
-            stepsByDay[date] = 0;
+        data?.forEach((record) => {
+          const date: string | null = record.date;
+          if (typeof date === "string") {
+            if (!stepsByDay[date]) {
+              stepsByDay[date] = 0;
+            }
+            stepsByDay[date] += record.steps || 0;
           }
-          stepsByDay[date] += record.steps || 0;
-        }
-      });
+        });
 
-      // Convert to array and sort by date descending
-      const groupedData = Object.entries(stepsByDay)
-        .map(([date, steps], i) => ({ date, steps, id: i }))
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-        .slice(0, 7); // Get only the last 7 days
+        // Convert to array and sort by date descending
+        const groupedData = Object.entries(stepsByDay)
+          .map(([date, steps], i) => ({ date, steps, id: i }))
+          .sort(
+            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+          )
+          .slice(0, 7); // Get only the last 7 days
 
-      CacheService.set(cacheKey, groupedData);
+        CacheService.set(cacheKey, groupedData);
 
-      return { success: true, data: groupedData };
+        return { success: true, data: groupedData };
+      }
+
+      // If not grouping by date, return raw data
+      const rawData =
+        data
+          ?.map((record) => ({
+            user_id: record.user_id,
+            steps: record.steps,
+            date: record.date ?? "",
+            id: record.id,
+          }))
+          .sort(
+            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+          )
+          .slice(0, 7) || [];
+
+      CacheService.set(cacheKey, rawData);
+      return { success: true, data: rawData };
     } catch (err) {
       console.error("Error fetching user steps:", err);
       return {
@@ -157,7 +183,7 @@ export class StepService {
     }
 
     // Read from cache first
-    const cacheKey = `top_users_${competitionId}_${limit}`;
+    const cacheKey = `step_service_top_users_${competitionId}_${limit}`;
     const cachedData = CacheService.get(cacheKey);
 
     if (cachedData) {
@@ -302,12 +328,7 @@ export class StepService {
         };
       }
 
-      if (user.data.user) {
-        const cacheKey = `user_steps_${
-          user.data.user.id
-        }_${LocalStorageService.getSelectedComptetionId()}`;
-        CacheService.invalidate(cacheKey);
-      }
+      this.clearServiceCache();
 
       return {
         success: true,
@@ -332,7 +353,9 @@ export class StepService {
   ): Promise<{ success: boolean; error?: string; data?: number }> {
     const competitionId = LocalStorageService.getSelectedComptetionId();
 
-    const cacheKey = `total_steps_${competitionId}_${ids.join(",")}`;
+    const cacheKey = `step_service_total_steps_${competitionId}_${ids.join(
+      ","
+    )}`;
     const cachedData = CacheService.get(cacheKey);
     if (cachedData) {
       return {
@@ -388,7 +411,7 @@ export class StepService {
   }
 
   static async getTotalSteps(competetionId: number) {
-    const cacheKey = `total_steps_${competetionId}`;
+    const cacheKey = `step_service_total_steps_${competetionId}`;
     const cachedData = CacheService.get(cacheKey);
     if (cachedData) {
       return {
@@ -430,7 +453,7 @@ export class StepService {
   }
 
   static async getAllStepRecordsForCompetition(competetionId: number) {
-    const cacheKey = `all_steps_${competetionId}`;
+    const cacheKey = `step_service_all_steps_${competetionId}`;
     const cachedData = CacheService.get(cacheKey);
     if (cachedData) {
       return {
@@ -469,7 +492,6 @@ export class StepService {
   }
 
   static async updateStepRecord(recordId: number, steps: number) {
-    console.log("Updating step record:", recordId, steps);
     const user = await supabase().auth.getUser();
     if (!user.data.user) {
       return {
@@ -493,13 +515,7 @@ export class StepService {
         };
       }
 
-      // Clear the cache for user steps since we just updated a record
-      if (user.data.user.id) {
-        const cacheKey = `user_steps_${
-          user.data.user.id
-        }_${LocalStorageService.getSelectedComptetionId()}`;
-        CacheService.invalidate(cacheKey);
-      }
+      this.clearServiceCache();
 
       return {
         success: true,

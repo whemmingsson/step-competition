@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 import { format } from "date-fns";
 import { useAuth } from "@/context/auth/useAuth";
 import { StepService } from "@/services/StepService";
@@ -17,44 +17,26 @@ import {
 } from "@/components/ui/alert-dialog";
 import { UserHistoryCard } from "@/components/UserHistoryCard";
 import type { StepsRecord } from "@/types/StepsRecord";
+import { useUserSteps } from "@/hooks/useUserSteps";
 
 export const MyProgressPage = () => {
-  // Add this near your other hooks
   const { session } = useAuth();
   const userId = session?.user?.id;
-  const [steps, setSteps] = useState<StepsRecord[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    steps,
+    loading,
+    error,
+    totalSteps,
+    avgStepsPerDay,
+    refetch,
+    setSteps,
+  } = useUserSteps(userId, false);
 
   // Add state for deletion confirmation
   const [recordToDelete, setRecordToDelete] = useState<StepsRecord | null>(
     null
   );
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-
-  useEffect(() => {
-    async function fetchUserSteps() {
-      if (!userId) return;
-
-      setLoading(true);
-      try {
-        const result = await StepService.getUserSteps(userId);
-
-        if (result.success && result.data) {
-          setSteps(result.data as StepsRecord[]);
-        } else {
-          setError(result.error || "Failed to load step data");
-        }
-      } catch (err) {
-        setError("An unexpected error occurred");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchUserSteps();
-  }, [userId, session]);
 
   // Handle delete confirmation
   const handleDeleteClick = (record: StepsRecord) => {
@@ -72,6 +54,7 @@ export const MyProgressPage = () => {
 
       // Update the UI by removing the deleted record
       setSteps(steps.filter((record) => record.id !== recordToDelete.id));
+      refetch?.(); // Call refetch if provided to refresh data
     } catch (error) {
       toast.error("Failed to delete record");
       console.error(error);
@@ -82,18 +65,6 @@ export const MyProgressPage = () => {
     }
   };
 
-  // Calculate total steps
-  const totalSteps = steps.reduce((sum, record) => sum + record.steps, 0);
-
-  // Calculate avg steps per day
-  // Calculate avg steps per day using useMemo
-  const avgStepsPerDay = useMemo(() => {
-    if (steps.length === 0) return 0;
-    const totalDays = new Set(steps.map((s) => s.date)).size;
-    const totalSteps = steps.reduce((sum, record) => sum + record.steps, 0);
-    return totalDays > 0 ? Math.round(totalSteps / totalDays) : 0;
-  }, [steps]);
-
   return (
     <PageContainer>
       <UserHistoryCard
@@ -103,6 +74,7 @@ export const MyProgressPage = () => {
         loading={loading}
         handleDeleteClick={handleDeleteClick}
         error={error}
+        refetch={refetch}
       />
 
       {/* Confirmation Dialog */}
