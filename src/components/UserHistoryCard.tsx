@@ -22,6 +22,8 @@ import { cn } from "@/lib/utils";
 import type { StepsRecord } from "@/types/StepsRecord";
 import { UserStepsChart } from "./charts/UserStepsChart";
 import { Input } from "./ui/input";
+import { StepService } from "@/services/StepService";
+import { toast } from "sonner";
 
 interface UserHistoryCardProps {
   steps: { id: number; date: string; steps: number }[];
@@ -44,12 +46,31 @@ export const UserHistoryCard = ({
 }: UserHistoryCardProps) => {
   const [viewMode, setViewMode] = useState<ViewMode>("table");
   const [editRecordId, setEditRecordId] = useState<number | null>(null);
+  const [updatedSteps, setUpdatedSteps] = useState<number | null>(null);
 
   const handleEnableEditRecord = (id: number) => {
     if (editRecordId === id) {
       setEditRecordId(null); // Disable edit mode
     } else {
       setEditRecordId(id); // Enable edit mode for the selected record
+    }
+  };
+
+  const handleUpdateRecord = async () => {
+    console.log("Updating record with ID:", editRecordId, updatedSteps);
+    if (!editRecordId || updatedSteps === null) return;
+
+    const result = await StepService.updateStepRecord(
+      editRecordId,
+      updatedSteps
+    );
+
+    if (result.success) {
+      setEditRecordId(null); // Exit edit mode
+      setUpdatedSteps(null); // Clear updated steps
+      toast.success("Step record updated successfully");
+    } else {
+      toast.error(result.error || "Failed to update step record");
     }
   };
 
@@ -146,6 +167,11 @@ export const UserHistoryCard = ({
                             defaultValue={record.steps}
                             className=" border-gray-400 edit-steps-input w-20 "
                             style={{ marginLeft: "-12px" }}
+                            onChange={(e) => {
+                              setUpdatedSteps(
+                                Number((e.target as HTMLInputElement).value)
+                              );
+                            }}
                           />
                         ) : (
                           record.steps.toLocaleString()
@@ -157,6 +183,9 @@ export const UserHistoryCard = ({
                             variant="ghost"
                             size="icon"
                             className="text-blue-950 hover:bg-blue-100"
+                            onClick={() => {
+                              handleUpdateRecord();
+                            }}
                           >
                             <Save className="h-4 w-4" />
                           </Button>

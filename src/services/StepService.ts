@@ -467,4 +467,49 @@ export class StepService {
       };
     }
   }
+
+  static async updateStepRecord(recordId: number, steps: number) {
+    console.log("Updating step record:", recordId, steps);
+    const user = await supabase().auth.getUser();
+    if (!user.data.user) {
+      return {
+        success: false,
+        error: "User not authenticated",
+      };
+    }
+
+    try {
+      const { error } = await supabase()
+        .from("Steps")
+        .update({ steps: steps })
+        .eq("id", recordId)
+        .eq("user_id", user.data.user.id);
+
+      if (error) {
+        console.error("Error updating step record:", error);
+        return {
+          success: false,
+          error: error.message,
+        };
+      }
+
+      // Clear the cache for user steps since we just updated a record
+      if (user.data.user.id) {
+        const cacheKey = `user_steps_${
+          user.data.user.id
+        }_${LocalStorageService.getSelectedComptetionId()}`;
+        CacheService.invalidate(cacheKey);
+      }
+
+      return {
+        success: true,
+      };
+    } catch (err) {
+      console.error("Unexpected error updating step record:", err);
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : "Unknown error occurred",
+      };
+    }
+  }
 }
