@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Footprints, LogOut, Menu, Trash, X } from "lucide-react";
+import { LogOut, Menu, Trash, X } from "lucide-react";
 
 import { DisplayNameBadge } from "./DisplayNameBadge";
 import supabase from "@/supabase";
@@ -38,7 +38,7 @@ export function Navigation({ className }: { className?: string }) {
         `bg-background border-b sticky top-0 z-10 ` + (className || "")
       }
     >
-      <div className="container mx-auto px-4 py-3 relative">
+      <div className="">
         {/* Mobile menu button */}
         <div className="flex justify-between items-center md:hidden">
           <span className="text-lg font-bold">Step Competition</span>
@@ -52,6 +52,16 @@ export function Navigation({ className }: { className?: string }) {
               title="Logout"
             >
               <LogOut className="h-5 w-5" />
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsDeleteDialogOpen(true)}
+              className="text-foreground/80 hover:text-foreground"
+              title="Logout"
+            >
+              <Trash className="h-5 w-5" />
             </Button>
 
             <Button
@@ -99,15 +109,13 @@ export function Navigation({ className }: { className?: string }) {
         </div>
 
         {/* Desktop navigation container */}
-        <div className="hidden md:flex items-center justify-between">
-          {/* Logo and brand name - left side */}
-          <div className="flex items-center space-x-2">
-            <Footprints className="h-7 w-7 text-primary" />
-            <span className="text-xl font-bold">Step Competition</span>
-          </div>
+        {/* Desktop navigation container */}
+        <div className="hidden md:flex w-full items-center justify-between h-12">
+          {/* Left section with logo */}
+          <div className="w-[150px] lg:w-[200px] flex items-center"></div>
 
-          {/* Menu items - centered */}
-          <div className="flex justify-center space-x-4 absolute left-1/2 -translate-x-1/2">
+          {/* Center section - menu items */}
+          <div className="flex items-center justify-center gap-1 md:gap-2 lg:gap-4">
             {SitePages.map((item) => {
               const isActive =
                 location.pathname === item.path ||
@@ -118,8 +126,8 @@ export function Navigation({ className }: { className?: string }) {
                   key={item.path}
                   to={item.path}
                   className={cn(
-                    "inline-flex items-center justify-center whitespace-nowrap rounded-md px-4 py-2 text-base font-medium transition-colors",
-                    "hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-1 gap-2",
+                    "inline-flex items-center justify-center whitespace-nowrap rounded-md px-2 md:px-3 lg:px-4 py-2 text-sm md:text-base font-medium transition-colors",
+                    "hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-1 gap-1 lg:gap-2",
                     isActive
                       ? "bg-primary text-primary-foreground"
                       : "text-foreground/80"
@@ -132,23 +140,25 @@ export function Navigation({ className }: { className?: string }) {
             })}
           </div>
 
-          {/* Logout button - right side */}
-          <div className="flex items-center space-x-2">
+          {/* Right section - login/delete buttons */}
+          <div className="flex items-center space-x-1 md:space-x-2 w-[150px] lg:w-[200px] justify-end mr-4">
             <Button
               variant="outline"
               onClick={handleLogout}
-              className="flex items-center gap-2"
+              size="sm"
+              className="flex items-center gap-1 md:gap-2"
             >
-              <LogOut className="h-4 w-4" />
-              Logout
+              <LogOut className="h-3 w-3 md:h-4 md:w-4" />
+              <span className="hidden lg:inline">Logout</span>
             </Button>
             <Button
               variant="outline"
               onClick={() => setIsDeleteDialogOpen(true)}
-              className="flex items-center gap-2 bg-destructive text-white"
+              size="sm"
+              className="flex items-center gap-1 md:gap-2"
             >
-              <Trash className="h-4 w-4" />
-              Delete account?
+              <Trash className="h-3 w-3 md:h-4 md:w-4" />
+              <span className="hidden lg:inline">Delete</span>
             </Button>
           </div>
         </div>

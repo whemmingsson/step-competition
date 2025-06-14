@@ -52,6 +52,7 @@ export const CumulativeStepsChart = ({ data }: { data: CumulativeSteps[] }) => {
                 radius={3}
                 type="linear"
                 strokeWidth={2}
+                animationDuration={500}
               />
             </LineChart>
           </ChartContainer>
