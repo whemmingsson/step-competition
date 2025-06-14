@@ -18,7 +18,7 @@ import {
 import { UserHistoryCard } from "@/components/UserHistoryCard";
 import type { StepsRecord } from "@/types/StepsRecord";
 
-export default function MyProgressPage() {
+export const MyProgressPage = () => {
   // Add this near your other hooks
   const { session } = useAuth();
   const userId = session?.user?.id;
@@ -134,4 +134,4 @@ export default function MyProgressPage() {
       </AlertDialog>
     </PageContainer>
   );
-}
+};

@@ -15,19 +15,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "./ui/alert-dialog";
+import { SitePages } from "@/navigation/NavigationConfig";
 
 export function Navigation({ className }: { className?: string }) {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-
-  const navItems = [
-    { name: "Home", path: "/" },
-    { name: "My Progress", path: "/user" },
-    { name: "Team", path: "/team" },
-    { name: "Leaderboards", path: "/leaderboard" },
-    { name: "Profile", path: "/profile" },
-  ];
 
   async function handleLogout(): Promise<void> {
     const { error } = await supabase().auth.signOut();
@@ -81,7 +74,7 @@ export function Navigation({ className }: { className?: string }) {
           )}
         >
           <div className="container mx-auto px-4 py-2 space-y-2">
-            {navItems.map((item) => {
+            {SitePages.map((item) => {
               const isActive =
                 location.pathname === item.path ||
                 (item.path !== "/" && location.pathname.startsWith(item.path));
@@ -115,7 +108,7 @@ export function Navigation({ className }: { className?: string }) {
 
           {/* Menu items - centered */}
           <div className="flex justify-center space-x-4 absolute left-1/2 -translate-x-1/2">
-            {navItems.map((item) => {
+            {SitePages.map((item) => {
               const isActive =
                 location.pathname === item.path ||
                 (item.path !== "/" && location.pathname.startsWith(item.path));

@@ -60,7 +60,7 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export default function RegisterStepsPage() {
+export const RegisterStepsPage = () => {
   const [competitionLoading, setCompetitionLoading] = useState(false);
   const [competitions, setCompetitions] = useState<Competition[]>([]);
   const [userTeam, setUserTeam] = useState<{ id: string; name: string } | null>(
@@ -336,4 +336,4 @@ export default function RegisterStepsPage() {
       </Card>
     </PageContainer>
   );
-}
+};

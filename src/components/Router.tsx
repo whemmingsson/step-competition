@@ -1,22 +1,11 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "../context/auth/useAuth";
-import RegisterStepsPage from "@/pages/RegisterStepsPage";
-import MyProgressPage from "@/pages/MyProgressPage";
+
 import { LoginPage } from "@/pages/LoginPage";
 import { Layout } from "./Layout";
 import { RequireAuth } from "./RequireAuth";
 import { LoadingScreen } from "./LoadingScreen";
-import { LeaderboardPage } from "@/pages/LeaderboardPage.";
-import { TeamPage } from "@/pages/TeamPage";
-import { ProfilePage } from "@/pages/ProfilePage";
-
-const pages = [
-  { p: "/", c: <RegisterStepsPage /> },
-  { p: "/user", c: <MyProgressPage /> },
-  { p: "/team", c: <TeamPage /> },
-  { p: "/leaderboard", c: <LeaderboardPage /> },
-  { p: "/profile", c: <ProfilePage /> },
-];
+import { SitePages } from "@/navigation/NavigationConfig";
 
 export const Router = () => {
   const { isLoading } = useAuth();
@@ -34,8 +23,12 @@ export const Router = () => {
         {/* All authenticated routes use the same layout */}
         <Route element={<RequireAuth />}>
           <Route element={<Layout />}>
-            {pages.map((page) => (
-              <Route key={page.p} path={page.p} element={page.c} />
+            {SitePages.map((page) => (
+              <Route
+                key={page.name}
+                path={page.path}
+                element={page.component}
+              />
             ))}
           </Route>
         </Route>
