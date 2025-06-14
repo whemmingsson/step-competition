@@ -2,6 +2,7 @@ import supabase from "@/supabase";
 import { LocalStorageService } from "./LocalStorageService";
 import CacheService from "./CacheService";
 import type { ProfileMeta } from "@/types/ProfileMeta";
+import type { StepsRecord } from "@/types/StepsRecord";
 
 /**
  * Service for handling step-related database operations
@@ -379,6 +380,87 @@ export class StepService {
       };
     } catch (err) {
       console.error("Unexpected error fetching total step count for team", err);
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : "Unknown error occurred",
+      };
+    }
+  }
+
+  static async getTotalSteps(competetionId: number) {
+    const cacheKey = `total_steps_${competetionId}`;
+    const cachedData = CacheService.get(cacheKey);
+    if (cachedData) {
+      return {
+        success: true,
+        data: cachedData as number,
+      };
+    }
+
+    try {
+      const { data, error } = await supabase()
+        .from("Steps")
+        .select("steps")
+        .eq("competition_id", competetionId);
+
+      if (error) {
+        console.error("Error fetching total steps:", error);
+        return {
+          success: false,
+          error: error.message,
+        };
+      }
+
+      const result =
+        data?.reduce((total, record) => total + (record.steps || 0), 0) || 0;
+
+      CacheService.set(cacheKey, result, 10);
+
+      return {
+        success: true,
+        data: result,
+      };
+    } catch (err) {
+      console.error("Unexpected error fetching total steps", err);
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : "Unknown error occurred",
+      };
+    }
+  }
+
+  static async getAllStepRecordsForCompetition(competetionId: number) {
+    const cacheKey = `all_steps_${competetionId}`;
+    const cachedData = CacheService.get(cacheKey);
+    if (cachedData) {
+      return {
+        success: true,
+        data: cachedData as { user_id: string; steps: number; date: string }[],
+      };
+    }
+
+    try {
+      const { data, error } = await supabase()
+        .from("Steps")
+        .select("*")
+        .eq("competition_id", competetionId);
+
+      if (error) {
+        console.error("Error fetching all step records:", error);
+        return {
+          success: false,
+          error: error.message,
+        };
+      }
+
+      CacheService.set(cacheKey, data, 10);
+
+      return {
+        success: true,
+        data: (data as StepsRecord[]) || [],
+      };
+    } catch (err) {
+      console.error("Unexpected error fetching all step records", err);
       return {
         success: false,
         error: err instanceof Error ? err.message : "Unknown error occurred",

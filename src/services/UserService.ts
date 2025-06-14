@@ -270,4 +270,42 @@ export class UserService {
       };
     }
   }
+
+  static async getNumberOfUsersInCompetition(
+    competitionId: number
+  ): Promise<number> {
+    try {
+      // Get all user_id entries for the competition
+      const { data, error } = await supabase()
+        .from("Steps")
+        .select("user_id")
+        .eq("competition_id", competitionId)
+        .gt("steps", 0);
+
+      if (error) {
+        console.error("Error fetching number of users in competition:", error);
+        return 0;
+      }
+
+      // Count distinct users with Set
+      if (!data || data.length === 0) return 0;
+
+      const uniqueUserIds = new Set<string>();
+
+      // Add each user_id to the Set (Sets only store unique values)
+      data.forEach((record) => {
+        if (record.user_id) {
+          uniqueUserIds.add(record.user_id);
+        }
+      });
+
+      return uniqueUserIds.size;
+    } catch (err) {
+      console.error(
+        "Unexpected error fetching number of users in competition:",
+        err
+      );
+      return 0;
+    }
+  }
 }
