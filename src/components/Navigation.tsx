@@ -126,12 +126,13 @@ export function Navigation({ className }: { className?: string }) {
                   to={item.path}
                   className={cn(
                     "inline-flex items-center justify-center whitespace-nowrap rounded-md px-2 md:px-3 lg:px-4 py-2 text-sm md:text-base font-medium transition-colors",
-                    "hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-1 gap-1 lg:gap-2",
+                    "hover:bg-blue-900 hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-1 gap-1 lg:gap-2",
                     isActive
-                      ? "bg-primary text-primary-foreground"
+                      ? "bg-blue-900 text-primary-foreground"
                       : "text-foreground/80"
                   )}
                 >
+                  {item.icon}
                   {item.name}
                   {item.name === "Profile" && <DisplayNameBadge />}
                 </Link>

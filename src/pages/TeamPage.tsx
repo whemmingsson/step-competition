@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Users } from "lucide-react";
+import { UserMinus, Users } from "lucide-react";
 import { TeamService } from "@/services/TeamService";
 import { useUser } from "@/context/user/UserContext";
 import type { Team } from "@/types/Team";
@@ -217,10 +217,11 @@ export const TeamPage = () => {
                 </div>
               </div>
               <Button
-                variant="destructive"
+                variant="outline"
                 onClick={handleLeaveTeam}
-                className="w-full cursor-pointer"
+                className="w-full cursor-pointer border-red-500 text-red-500 hover:bg-red-50 hover:text-red-600 flex items-center justify-center gap-2"
               >
+                <UserMinus className="h-4 w-4" />
                 Leave Team
               </Button>
             </div>
