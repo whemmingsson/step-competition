@@ -23,8 +23,9 @@ export const CumulativeStepsChart = ({ data }: { data: CumulativeSteps[] }) => {
           Cumulative steps
         </CardTitle>
         <p className="text-muted-foreground text-center mt-2">
-          This chart shows the cumulative steps taken over time, providing a
-          visual representation of the overall progress in this competition.
+          This chart shows the cumulative (running total) steps taken over time,
+          providing a visual representation of the overall progress in this
+          competition.
         </p>
       </CardHeader>
 
