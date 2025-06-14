@@ -109,7 +109,6 @@ export function Navigation({ className }: { className?: string }) {
         </div>
 
         {/* Desktop navigation container */}
-        {/* Desktop navigation container */}
         <div className="hidden md:flex w-full items-center justify-between h-12">
           {/* Left section with logo */}
           <div className="w-[150px] lg:w-[200px] flex items-center"></div>

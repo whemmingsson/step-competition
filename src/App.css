@@ -3,3 +3,9 @@
   margin-left: auto;
   margin-right: auto;
 }
+
+.edit-steps-input::-webkit-outer-spin-button,
+.edit-steps-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}

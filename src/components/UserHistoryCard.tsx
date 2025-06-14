@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Trash2, BarChart3, Table as TableIcon } from "lucide-react";
+import { Trash2, BarChart3, Table as TableIcon, Pen, Save } from "lucide-react";
 import { Button } from "./ui/button";
 import { format } from "date-fns";
 import {
@@ -21,6 +21,7 @@ import {
 import { cn } from "@/lib/utils";
 import type { StepsRecord } from "@/types/StepsRecord";
 import { UserStepsChart } from "./charts/UserStepsChart";
+import { Input } from "./ui/input";
 
 interface UserHistoryCardProps {
   steps: { id: number; date: string; steps: number }[];
@@ -42,6 +43,15 @@ export const UserHistoryCard = ({
   handleDeleteClick,
 }: UserHistoryCardProps) => {
   const [viewMode, setViewMode] = useState<ViewMode>("table");
+  const [editRecordId, setEditRecordId] = useState<number | null>(null);
+
+  const handleEnableEditRecord = (id: number) => {
+    if (editRecordId === id) {
+      setEditRecordId(null); // Disable edit mode
+    } else {
+      setEditRecordId(id); // Enable edit mode for the selected record
+    }
+  };
 
   return (
     <Card className="w-full" style={{ background: "#ffffffed" }}>
@@ -117,21 +127,52 @@ export const UserHistoryCard = ({
                 <TableCaption>A history of your recorded steps</TableCaption>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead className="text-right">Steps</TableHead>
+                    <TableHead className="w-70">Date</TableHead>
+                    <TableHead>Steps</TableHead>
                     <TableHead></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {steps.map((record) => (
                     <TableRow key={record.date}>
-                      <TableCell>
+                      <TableCell className="w-70">
                         {format(new Date(record.date), "PPP")}
                       </TableCell>
-                      <TableCell className="text-right font-medium">
-                        {record.steps.toLocaleString()}
+                      <TableCell className="font-medium">
+                        {editRecordId && editRecordId === record.id ? (
+                          <Input
+                            type="number"
+                            name="steps-edit"
+                            defaultValue={record.steps}
+                            className=" border-gray-400 edit-steps-input w-20 "
+                            style={{ marginLeft: "-12px" }}
+                          />
+                        ) : (
+                          record.steps.toLocaleString()
+                        )}
                       </TableCell>
                       <TableCell className="text-right">
+                        {editRecordId && editRecordId === record.id ? (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-blue-950 hover:bg-blue-100"
+                          >
+                            <Save className="h-4 w-4" />
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              handleEnableEditRecord(record.id);
+                            }}
+                            className="text-blue-950 hover:bg-blue-100"
+                          >
+                            <Pen className="h-4 w-4" />
+                          </Button>
+                        )}
+
                         <Button
                           variant="ghost"
                           size="icon"
