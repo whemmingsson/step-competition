@@ -4,7 +4,6 @@ import { format } from "date-fns";
 import * as z from "zod";
 
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import {
   Form,
   FormControl,
@@ -15,18 +14,12 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
-import { CalendarIcon, Users } from "lucide-react";
+import { Users } from "lucide-react";
 import { StepService } from "@/services/StepService";
 import { PageContainer } from "@/components/PageContainer";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import {
   Select,
   SelectContent,
@@ -41,6 +34,8 @@ import { useUser } from "@/context/user/UserContext";
 import { useUserTeam } from "@/hooks/useUserTeam";
 import { useCompetition } from "@/hooks/useComptetition";
 import { Link } from "react-router";
+import { useUserSteps } from "@/hooks/useUserSteps";
+import { CalendarField } from "@/components/forms/CalendarField";
 
 // Form validation schema with competition field
 const formSchema = z.object({
@@ -65,6 +60,7 @@ type FormValues = z.infer<typeof formSchema>;
 export const RegisterStepsPage = () => {
   const { competitions, loading: competitionLoading } = useCompetitions();
   const { user } = useUser();
+  const { steps } = useUserSteps(user?.id, false); // Fetch user steps to ensure user is loaded
   const { id: userId } = user || {};
   const { data: userTeam, loading: teamLoading } = useUserTeam();
   const { competitionId } = useCompetition();
@@ -108,6 +104,18 @@ export const RegisterStepsPage = () => {
       competition: competitionId, // Reset to saved competition
     });
   }
+
+  // TODO: Ask J.T about how to fix this.
+  const modifiers = useMemo(() => {
+    const map: Record<string, number> = {};
+    steps.forEach((step) => {
+      const dateKey = format(step.date, "yyyy-MM-dd");
+      map[dateKey] = step.steps;
+    });
+    return {
+      highlighted: (date: Date) => format(date, "yyyy-MM-dd") in map,
+    };
+  }, [steps]);
 
   return (
     <PageContainer>
@@ -202,49 +210,11 @@ export const RegisterStepsPage = () => {
                 )}
               />
 
-              <FormField
+              <CalendarField
                 control={form.control}
-                name="date"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
-                    <FormLabel>Date</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, "PPP")
-                            ) : (
-                              <span>Pick a date</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          disabled={(date) =>
-                            date > new Date() || date < new Date("1900-01-01")
-                          }
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <FormDescription>
-                      Select the date for your step count
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                modifiers={modifiers}
+                label="Date"
+                description="Select the date for your step count"
               />
 
               {/* Team display section - outside of form validation */}

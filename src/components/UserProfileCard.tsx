@@ -11,7 +11,7 @@ import {
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Image as ImageIcon } from "lucide-react";
-import { FileUpload } from "./FileUpload";
+import { FileUpload } from "./forms/FileUpload";
 
 interface UserProfileCardProps {
   displayName: string;

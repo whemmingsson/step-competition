@@ -4,8 +4,27 @@
   margin-right: auto;
 }
 
+/* Style to remove the up and down arrows from number inputs */
 .edit-steps-input::-webkit-outer-spin-button,
 .edit-steps-input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
+}
+
+/* Style for the calendar */
+.calendar-day-highlighted {
+  background-color: rgba(34, 197, 94, 0.1);
+  color: #166534;
+  font-weight: 500;
+  position: relative;
+}
+
+.calendar-day-highlighted::after {
+  content: "✓";
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-size: 10px;
+  color: #22c55e;
+  font-weight: bold;
 }
