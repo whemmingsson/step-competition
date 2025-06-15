@@ -20,41 +20,43 @@ interface SitePage {
   icon: React.JSX.Element;
 }
 
+const commonClassName = "h5 w5";
+
 export const SitePages: SitePage[] = [
   {
     name: "Home",
     path: "/",
     component: <RegisterStepsPage />,
-    icon: <Footprints className="h-5 w-5" />,
+    icon: <Footprints className={commonClassName} />,
   },
   {
     name: "Progress",
     path: "/user",
     component: <MyProgressPage />,
-    icon: <LineChart className="h-5 w-5" />,
+    icon: <LineChart className={commonClassName} />,
   },
   {
     name: "Team",
     path: "/team",
     component: <TeamPage />,
-    icon: <Users className="h-5 w-5" />,
+    icon: <Users className={commonClassName} />,
   },
   {
     name: "Leaderboards",
     path: "/leaderboard",
     component: <LeaderboardPage />,
-    icon: <Trophy className="h-5 w-5" />,
+    icon: <Trophy className={commonClassName} />,
   },
   {
     name: "Profile",
     path: "/profile",
     component: <ProfilePage />,
-    icon: <UserCircle className="h-5 w-5" />,
+    icon: <UserCircle className={commonClassName} />,
   },
   {
     name: "Stats",
     path: "/stats",
     component: <StatisticsPage />,
-    icon: <BarChart3 className="h-5 w-5" />,
+    icon: <BarChart3 className={commonClassName} />,
   },
 ];

@@ -8,6 +8,8 @@ export const useCompetition = () => {
   const [competition, setCompetition] = useState<Competition>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
+  const selectedCompetitionId = LocalStorageService.getSelectedComptetionId();
+
   useEffect(() => {
     async function fetchCompetitions() {
       setIsLoading(true);
@@ -26,7 +28,6 @@ export const useCompetition = () => {
   }, []);
 
   useEffect(() => {
-    const selectedCompetitionId = LocalStorageService.getSelectedComptetionId();
     if (selectedCompetitionId) {
       const selectedCompetition = competitions.find(
         (comp) => comp.id === selectedCompetitionId.toString()
@@ -35,7 +36,11 @@ export const useCompetition = () => {
     } else {
       setCompetition(undefined);
     }
-  }, [competitions]);
+  }, [competitions, selectedCompetitionId]);
 
-  return { competition, isLoading };
+  return {
+    competition,
+    isLoading,
+    competitionId: selectedCompetitionId?.toString() || "",
+  };
 };

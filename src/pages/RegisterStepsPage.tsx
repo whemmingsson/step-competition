@@ -25,9 +25,8 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { CalendarIcon, Users } from "lucide-react";
 import { StepService } from "@/services/StepService";
-import { useAuth } from "@/context/auth/useAuth";
 import { PageContainer } from "@/components/PageContainer";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import {
   Select,
   SelectContent,
@@ -35,10 +34,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CompetitionService } from "@/services/CompetitionService";
-import { TeamService } from "@/services/TeamService";
 import { SetCompetitionBadge } from "@/components/SetCompetitionBadge";
-import type { Competition } from "@/types/Competition";
+
+import { useCompetitions } from "@/hooks/useCompetitions";
+import { useUser } from "@/context/user/UserContext";
+import { useUserTeam } from "@/hooks/useUserTeam";
+import { useCompetition } from "@/hooks/useComptetition";
+import { Link } from "react-router";
 
 // Form validation schema with competition field
 const formSchema = z.object({
@@ -61,26 +63,16 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export const RegisterStepsPage = () => {
-  const [competitionLoading, setCompetitionLoading] = useState(false);
-  const [competitions, setCompetitions] = useState<Competition[]>([]);
-  const [userTeam, setUserTeam] = useState<{ id: string; name: string } | null>(
-    null
-  );
-  const [teamLoading, setTeamLoading] = useState(false);
-
-  const { session } = useAuth();
-  const { id: userId } = session?.user || {};
-  // Get saved competition from localStorage on component mount
-  const savedCompetition =
-    typeof window !== "undefined"
-      ? localStorage.getItem("selectedCompetition") ||
-        (competitions[0] && competitions[0].id)
-      : competitions[0].id;
+  const { competitions, loading: competitionLoading } = useCompetitions();
+  const { user } = useUser();
+  const { id: userId } = user || {};
+  const { data: userTeam, loading: teamLoading } = useUserTeam();
+  const { competitionId } = useCompetition();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      competition: savedCompetition,
+      competition: competitionId,
       steps: undefined,
       date: new Date(),
     },
@@ -94,52 +86,6 @@ export const RegisterStepsPage = () => {
       localStorage.setItem("selectedCompetition", selectedCompetition);
     }
   }, [selectedCompetition]);
-
-  useEffect(() => {
-    async function fetchCompetitions() {
-      if (!userId) return;
-
-      setCompetitionLoading(true);
-      try {
-        const result = await CompetitionService.getCompetitions();
-
-        if (result.success && result.data) {
-          setCompetitions(result.data);
-        }
-      } catch (err) {
-        console.error("Error loading display name:", err);
-      } finally {
-        setCompetitionLoading(false);
-      }
-    }
-
-    fetchCompetitions();
-  }, [userId]);
-
-  // Fetch user's team information
-  useEffect(() => {
-    async function fetchUserTeam() {
-      if (!userId) return;
-
-      setTeamLoading(true);
-      try {
-        const result = await TeamService.getTeamByUserId();
-
-        if (result.success && result.data) {
-          setUserTeam({
-            id: String(result.data.id),
-            name: result.data.name || "Unnamed Team",
-          });
-        }
-      } catch (err) {
-        console.error("Error loading user team:", err);
-      } finally {
-        setTeamLoading(false);
-      }
-    }
-
-    fetchUserTeam();
-  }, [userId]);
 
   async function onSubmit(data: FormValues) {
     if (!userId) {
@@ -159,7 +105,7 @@ export const RegisterStepsPage = () => {
     form.reset({
       steps: 0,
       date: new Date(),
-      competition: savedCompetition, // Reset to saved competition
+      competition: competitionId, // Reset to saved competition
     });
   }
 
@@ -317,7 +263,10 @@ export const RegisterStepsPage = () => {
                       <span>{userTeam.name}</span>
                     ) : (
                       <span className="text-muted-foreground">
-                        Not part of a team
+                        Not part of a team -{" "}
+                        <Link to="/team" className="font-bold hover:underline">
+                          Click here to create or join one
+                        </Link>
                       </span>
                     )}
                   </div>
