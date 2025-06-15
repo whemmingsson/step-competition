@@ -1,5 +1,5 @@
 import { Outlet } from "react-router";
-import { Navigation } from "./Navigation";
+import { MainMenu } from "./MainMenu";
 import { useEffect, useState } from "react";
 import { Footer } from "./Footer";
 
@@ -32,7 +32,7 @@ export const Layout = () => {
 
       {/* Content layer (above overlay) */}
       <div className="relative z-10 flex flex-col min-h-screen">
-        <Navigation />
+        <MainMenu />
 
         {/* Main content area with auto scrolling */}
         <div className="flex-1 overflow-y-auto">

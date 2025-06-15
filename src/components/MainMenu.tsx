@@ -17,7 +17,7 @@ import {
 } from "./ui/alert-dialog";
 import { SitePages } from "@/navigation/NavigationConfig";
 
-export function Navigation({ className }: { className?: string }) {
+export const MainMenu = ({ className }: { className?: string }) => {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -38,10 +38,10 @@ export function Navigation({ className }: { className?: string }) {
         `bg-background border-b sticky top-0 z-10 ` + (className || "")
       }
     >
-      <div className="">
+      <div>
         {/* Mobile menu button */}
         <div className="flex justify-between items-center md:hidden">
-          <span className="text-lg font-bold">Step Competition</span>
+          <span className="text-lg font-bold ml-4">Step Competition</span>
           <div className="flex items-center gap-2">
             {/* Logout button for mobile */}
             <Button
@@ -95,10 +95,10 @@ export function Navigation({ className }: { className?: string }) {
                   to={item.path}
                   onClick={() => setMobileMenuOpen(false)}
                   className={cn(
-                    "block w-full text-center py-3 px-4 rounded-md",
+                    "block w-full text-center py-2 px-2 rounded-md",
                     isActive
-                      ? "bg-primary text-primary-foreground"
-                      : "hover:bg-accent"
+                      ? "bg-blue-900 text-primary-foreground"
+                      : "text-foreground/80"
                   )}
                 >
                   {item.name} {item.name === "Profile" && <DisplayNameBadge />}
@@ -125,7 +125,7 @@ export function Navigation({ className }: { className?: string }) {
                   key={item.path}
                   to={item.path}
                   className={cn(
-                    "inline-flex items-center justify-center whitespace-nowrap rounded-md px-2 md:px-3 lg:px-4 py-2 text-sm md:text-base font-medium transition-colors",
+                    "inline-flex items-center justify-center whitespace-nowrap rounded-md px-2 md:px-2 lg:px-3 py-1 text-sm md:text-sm font-medium transition-colors",
                     "hover:bg-blue-900 hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-1 gap-1 lg:gap-2",
                     isActive
                       ? "bg-blue-900 text-primary-foreground"
@@ -171,8 +171,8 @@ export function Navigation({ className }: { className?: string }) {
           <AlertDialogHeader>
             <AlertDialogTitle>How to delete your account</AlertDialogTitle>
             <AlertDialogDescription>
-              Don't want to use the app anymore? No worry! Just send us an email
-              to{" "}
+              Don't want to use the app anymore? No worries! Just send us an
+              email to{" "}
               <a
                 href={`mailto:${import.meta.env.VITE_CONTACT_EMAIL}`}
                 className="underline"
@@ -193,4 +193,4 @@ export function Navigation({ className }: { className?: string }) {
       </AlertDialog>
     </nav>
   );
-}
+};

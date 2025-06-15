@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { UserMinus, Users } from "lucide-react";
+import { Trash2, UserMinus, Users } from "lucide-react";
 import { TeamService } from "@/services/TeamService";
 import { useUser } from "@/context/user/UserContext";
 import type { Team } from "@/types/Team";
@@ -290,10 +290,10 @@ export const TeamPage = () => {
                     ?.user_id === userContext.user?.id && (
                     <Button
                       onClick={() => setIsDeleteDialogOpen(true)}
-                      variant="destructive"
-                      className="w-full"
+                      variant="outline"
+                      className="w-full cursor-pointer border-red-500 text-red-500 hover:bg-red-50 hover:text-red-600 flex items-center justify-center gap-2"
                     >
-                      Delete Team
+                      <Trash2 /> Delete team
                     </Button>
                   )}
               </div>

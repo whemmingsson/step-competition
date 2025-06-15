@@ -20,7 +20,7 @@ interface SitePage {
   icon: React.JSX.Element;
 }
 
-const commonClassName = "h5 w5";
+const commonClassName = "h-5 w-5";
 
 export const SitePages: SitePage[] = [
   {

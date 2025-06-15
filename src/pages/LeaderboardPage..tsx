@@ -94,7 +94,7 @@ export const LeaderboardPage = () => {
       <Card className="w-full" style={{ background: "#ffffffee" }}>
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-center">
-            Team Leaderboard
+            Team leaderboard
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -116,34 +116,29 @@ export const LeaderboardPage = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {teamLeaderboard
-                  .sort((a, b) => (b?.avgSteps ?? 0) - (a?.avgSteps ?? 0))
-                  .map((team, index) => (
-                    <TableRow key={index}>
-                      <TableCell className="font-medium">
-                        {getMedal(index) ? (
-                          <span className="text-xl mr-2">
-                            {getMedal(index)}
-                          </span>
-                        ) : (
-                          `#${index + 1}`
-                        )}
-                      </TableCell>
-                      <TableCell
-                        className={index === 0 ? "font-bold text-lg" : ""}
-                      >
-                        {team.name}
-                      </TableCell>
-                      <TableCell
-                        className={`text-right ${
-                          index === 0 ? "font-bold text-lg" : ""
-                        }`}
-                      >
-                        {Math.round(team.avgSteps ?? 0).toLocaleString() ||
-                          "N/A"}
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                {teamLeaderboard.map((team, index) => (
+                  <TableRow key={index}>
+                    <TableCell className="font-medium">
+                      {getMedal(index) ? (
+                        <span className="text-xl mr-2">{getMedal(index)}</span>
+                      ) : (
+                        `#${index + 1}`
+                      )}
+                    </TableCell>
+                    <TableCell
+                      className={index === 0 ? "font-bold text-lg" : ""}
+                    >
+                      {team.name}
+                    </TableCell>
+                    <TableCell
+                      className={`text-right ${
+                        index === 0 ? "font-bold text-lg" : ""
+                      }`}
+                    >
+                      {Math.round(team.avgSteps ?? 0).toLocaleString() || "N/A"}
+                    </TableCell>
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
           )}
