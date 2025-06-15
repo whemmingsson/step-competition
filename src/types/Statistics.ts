@@ -4,6 +4,8 @@ export interface CumulativeSteps {
 }
 
 export interface Statistics {
+  averageStepsPerTeam: number | null; // Average steps per team, can be null if no teams
+  numberOfTeams: number;
   totalSteps: number; // Total number of steps
   averagePerDay: number; // Average steps per day
   averagePerMember: number; // Average steps per member

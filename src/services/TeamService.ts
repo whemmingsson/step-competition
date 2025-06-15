@@ -123,11 +123,6 @@ export class TeamService {
         .select("team_id, user_id")
         .in("team_id", teamIds);
 
-      /* if (usersInTeams.error) {
-        console.error("Error fetching users in teams:", usersInTeams.error);
-        return { success: false, error: usersInTeams.error.message };
-      } */
-
       // Map users to teams
       const usersMap: Record<number, string[]> = {};
       if (usersInTeams.data) {
@@ -146,6 +141,7 @@ export class TeamService {
       mappedData.forEach((team) => {
         const userIds = usersMap[team.id] || [];
         team.numberOfMembers = userIds.length;
+        team.memberIds = userIds;
       });
 
       // Cache the result

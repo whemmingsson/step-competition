@@ -1,4 +1,5 @@
 import { StepService } from "@/services/StepService";
+import { TeamService } from "@/services/TeamService";
 import type { Statistics } from "@/types/Statistics";
 import { useEffect, useState } from "react";
 
@@ -12,6 +13,10 @@ export const useStatistics = (competitionId: number) => {
       const stepsData = await StepService.getAllStepRecordsForCompetition(
         competitionId
       );
+
+      // Get all Teams regardless of competition
+      const teamData = await TeamService.getTeams();
+
       if (stepsData.data && stepsData.data.length > 0) {
         const totalSteps = stepsData.data
           .map((r) => r.steps)
@@ -43,6 +48,7 @@ export const useStatistics = (competitionId: number) => {
             cumulativeSteps[date] = cumulativeTotal;
           });
 
+        // Convert cumulative steps to array format
         const cumulativeStepsArray = Object.entries(cumulativeSteps).map(
           ([date, steps]) => ({
             date: date,
@@ -50,6 +56,21 @@ export const useStatistics = (competitionId: number) => {
           })
         );
 
+        let numberOfTeams = 0;
+        let averageStepsPerTeam = null;
+        if (teamData.success && teamData.data && teamData.data.length > 0) {
+          // Filter teams that have members in the competition
+          const filteredTeams = teamData.data.filter((team) =>
+            team.memberIds?.some((memberId) =>
+              stepsData.data.some((record) => record.user_id === memberId)
+            )
+          );
+          numberOfTeams = filteredTeams.length;
+          averageStepsPerTeam =
+            numberOfTeams > 0 ? Math.round(totalSteps / numberOfTeams) : null;
+        }
+
+        // Prepare statistics object
         const statistics: Statistics = {
           totalSteps: totalSteps,
           averagePerMember: Math.round(totalSteps / uniqueUsersCount),
@@ -58,7 +79,10 @@ export const useStatistics = (competitionId: number) => {
             totalSteps / (uniqueDatesCount * uniqueUsersCount)
           ),
           cumilativeSteps: cumulativeStepsArray,
+          numberOfTeams: numberOfTeams,
+          averageStepsPerTeam: averageStepsPerTeam,
         };
+
         setData(statistics);
       } else {
         console.error(

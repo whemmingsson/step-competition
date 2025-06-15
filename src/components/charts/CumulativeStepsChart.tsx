@@ -31,7 +31,7 @@ export const CumulativeStepsChart = ({ data }: { data: CumulativeSteps[] }) => {
 
       <CardContent className="pt-8">
         {/* Your chart component goes here */}
-        <div className="h-[300px] w-full bg-muted/20 rounded-md flex items-center justify-center">
+        <div className="h-[200px] w-full bg-muted/20 rounded-md flex items-center justify-center">
           <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
             <LineChart
               accessibilityLayer

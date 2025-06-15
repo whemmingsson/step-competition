@@ -81,7 +81,7 @@ export const UserProfileCard = ({
           <div className="flex-1">
             <form onSubmit={handleUpdateDisplayName} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="displayName">Display Name</Label>
+                <Label htmlFor="displayName">Display name</Label>
                 <Input
                   className="bg-white"
                   id="displayName"
