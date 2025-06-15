@@ -1,5 +1,3 @@
-import { useEffect, useState } from "react";
-import { StepService } from "@/services/StepService";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -10,66 +8,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { PageContainer } from "@/components/PageContainer";
-import { TeamService } from "@/services/TeamService";
-import type { Team } from "@/types/Team";
 import { ProfileImage } from "@/components/ProfileImage";
-
-interface LeaderboardUser {
-  displayName: string;
-  totalSteps: number;
-  profileImageUrl?: string;
-}
+import { useLeaderboards } from "@/hooks/useLeaderboards";
 
 export const LeaderboardPage = () => {
-  const [leaderboard, setLeaderboard] = useState<LeaderboardUser[]>([]);
-  const [teamLeaderboard, setTeamLeaderboard] = useState<Team[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [teamError, setTeamError] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function fetchLeaderboard() {
-      setLoading(true);
-      try {
-        const result = await StepService.getTopUsers(5);
-
-        if (result.success && result.data) {
-          setLeaderboard(result.data as LeaderboardUser[]);
-        } else {
-          setError(result.error || "Failed to load leaderboard data");
-        }
-      } catch (err) {
-        setError("An unexpected error occurred");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchLeaderboard();
-  }, []);
-
-  useEffect(() => {
-    async function fetchTeamLeaderboard() {
-      setLoading(true);
-      try {
-        const result = await TeamService.getTopTeams(5);
-
-        if (result.success && result.data) {
-          setTeamLeaderboard(result.data);
-        } else {
-          setTeamError("Failed to load team leaderboard data");
-        }
-      } catch (err) {
-        setTeamError("An unexpected error occurred");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchTeamLeaderboard();
-  }, []);
+  const { userLeaderboard, teamLeaderboard, isLoading, userError, teamError } =
+    useLeaderboards(5);
 
   // Medal emoji based on position
   const getMedal = (position: number) => {
@@ -94,12 +38,12 @@ export const LeaderboardPage = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {loading ? (
+          {isLoading ? (
             <div className="flex justify-center py-8">
               <div className="animate-spin h-8 w-8 border-4 border-blue-600 rounded-full border-t-transparent"></div>
             </div>
-          ) : error ? (
-            <div className="text-center text-red-500 py-4">{error}</div>
+          ) : userError ? (
+            <div className="text-center text-red-500 py-4">{userError}</div>
           ) : (
             <Table>
               <TableHeader>
@@ -110,7 +54,7 @@ export const LeaderboardPage = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {leaderboard.map((user, index) => (
+                {userLeaderboard.map((user, index) => (
                   <TableRow key={index}>
                     <TableCell className="font-medium">
                       {getMedal(index) ? (
@@ -154,12 +98,12 @@ export const LeaderboardPage = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {loading ? (
+          {isLoading ? (
             <div className="flex justify-center py-8">
               <div className="animate-spin h-8 w-8 border-4 border-blue-600 rounded-full border-t-transparent"></div>
             </div>
           ) : teamError ? (
-            <div className="text-center text-red-500 py-4">{error}</div>
+            <div className="text-center text-red-500 py-4">{teamError}</div>
           ) : (
             <Table>
               <TableHeader>
