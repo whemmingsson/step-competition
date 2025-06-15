@@ -125,7 +125,7 @@ export const MainMenu = ({ className }: { className?: string }) => {
                   key={item.path}
                   to={item.path}
                   className={cn(
-                    "inline-flex items-center justify-center whitespace-nowrap rounded-md px-2 md:px-2 lg:px-3 py-1 text-sm md:text-sm font-medium transition-colors",
+                    "inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 md:px-3 lg:px-3 py-2 text-sm md:text-sm font-medium transition-colors",
                     "hover:bg-blue-900 hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-1 gap-1 lg:gap-2",
                     isActive
                       ? "bg-blue-900 text-primary-foreground"
