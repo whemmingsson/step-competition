@@ -23,7 +23,7 @@ export const BetaNotification = () => {
       <AlertTriangle />
       <AlertTitle>Beta Features</AlertTitle>
       <AlertDescription className="text-white">
-        This section contains experimental features and statistical calculations
+        This page contains experimental features and statistical calculations
         that are still under active development. Data presented here may not be
         fully accurate or complete.
       </AlertDescription>
