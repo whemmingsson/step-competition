@@ -27,7 +27,8 @@ export class CompetitionService {
       }
       const { data, error } = await supabase()
         .from("Competitions")
-        .select("name, id, start_date, end_date");
+        .select("name, id, start_date, end_date")
+        .eq("is_private", false);
 
       if (error) {
         console.error("Error fetching competitions:", error);

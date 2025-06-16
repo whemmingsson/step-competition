@@ -58,6 +58,7 @@ export const CalendarField = ({
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
               <Calendar
+                weekStartsOn={1} // Monday as the first day of the week
                 mode="single"
                 selected={field.value}
                 onSelect={field.onChange}

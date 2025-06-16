@@ -105,7 +105,7 @@ export const RegisterStepsPage = () => {
     });
   }
 
-  // TODO: Ask J.T about how to fix this.
+  // TODO: Ask J.T about how to fix this
   const modifiers = useMemo(() => {
     const map: Record<string, number> = {};
     steps.forEach((step) => {

@@ -9,11 +9,38 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      Competition_Codes: {
+        Row: {
+          code: string | null
+          competition_id: number
+          id: number
+        }
+        Insert: {
+          code?: string | null
+          competition_id: number
+          id?: number
+        }
+        Update: {
+          code?: string | null
+          competition_id?: number
+          id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "Competition_Codes_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "Competitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       Competitions: {
         Row: {
           created_at: string
           end_date: string | null
           id: number
+          is_private: boolean | null
           name: string | null
           start_date: string | null
         }
@@ -21,6 +48,7 @@ export type Database = {
           created_at?: string
           end_date?: string | null
           id?: number
+          is_private?: boolean | null
           name?: string | null
           start_date?: string | null
         }
@@ -28,6 +56,7 @@ export type Database = {
           created_at?: string
           end_date?: string | null
           id?: number
+          is_private?: boolean | null
           name?: string | null
           start_date?: string | null
         }
