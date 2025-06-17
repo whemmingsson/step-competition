@@ -36,6 +36,7 @@ import { useCompetition } from "@/hooks/useComptetition";
 import { Link } from "react-router";
 import { useUserSteps } from "@/hooks/useUserSteps";
 import { CalendarField } from "@/components/forms/CalendarField";
+import { useAuth } from "@/context/auth/useAuth";
 
 // Form validation schema with competition field
 const formSchema = z.object({
@@ -58,12 +59,21 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export const RegisterStepsPage = () => {
+  const { session } = useAuth();
   const { competitions, loading: competitionLoading } = useCompetitions();
   const { user } = useUser();
-  const { steps } = useUserSteps(user?.id, false); // Fetch user steps to ensure user is loaded
+  const { steps } = useUserSteps(session?.user.id, false); // Fetch user steps to ensure user is loaded
   const { id: userId } = user || {};
   const { data: userTeam, loading: teamLoading } = useUserTeam();
   const { competitionId } = useCompetition();
+
+  console.log(
+    "Register steps page loading",
+    steps,
+    user,
+    userTeam,
+    competitionId
+  );
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -105,7 +115,6 @@ export const RegisterStepsPage = () => {
     });
   }
 
-  // TODO: Ask J.T about how to fix this
   const modifiers = useMemo(() => {
     const map: Record<string, number> = {};
     steps.forEach((step) => {
