@@ -1,3 +1,5 @@
+import type { Competition } from "@/types/Competition";
+import type { CompetitionDTO } from "@/types/DTO/CompetitionDTO";
 import type { ProfileMetaDTO } from "@/types/DTO/ProfileMetaDTO";
 import type { TeamDTO } from "@/types/DTO/TeamDTO";
 import type { ProfileMeta } from "@/types/ProfileMeta";
@@ -43,4 +45,19 @@ export const teamsTransformer = (data: TeamDTO[]): Team[] => {
   return data
     .map((team) => teamTransformer(team))
     .filter((team) => team !== null) as Team[];
+};
+
+export const competitionTransformer = (data: CompetitionDTO): Competition => {
+  return {
+    id: data.id.toString(),
+    name: data.name || "",
+    startDate: data.start_date || undefined,
+    endDate: data.end_date || undefined,
+  };
+};
+
+export const competitionsTransformer = (
+  data: CompetitionDTO[]
+): Competition[] => {
+  return data.map((competition) => competitionTransformer(competition));
 };

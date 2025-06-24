@@ -205,15 +205,14 @@ export class StepService {
       // Get all steps records
       const { data: stepsData, error: stepsError } = await supabase()
         .from("Steps")
-        .select("user_id, steps")
+        .select("user_id, steps, Users_Meta(display_name, profile_image_url)")
         .eq("competition_id", competitionId);
 
       if (stepsError) {
         throw stepsError;
       }
 
-      // Group steps by user and calculate totals
-      const userTotals: Record<string, number> = {};
+      const userTotals: Record<string, ProfileMeta> = {};
       for (const record of stepsData) {
         const userId = record.user_id;
 
@@ -222,59 +221,37 @@ export class StepService {
           continue; // Skip records without user_id
         }
         if (!userTotals[userId]) {
-          userTotals[userId] = 0;
+          const profileMeta: ProfileMeta = {
+            profileName: record.Users_Meta?.display_name || "Unknown User",
+            profileImageUrl: record.Users_Meta?.profile_image_url || "",
+            totalSteps: 0,
+          };
+          userTotals[userId] = profileMeta;
         }
-        userTotals[userId] += record.steps ?? 0;
+        if (!userTotals[userId].totalSteps) {
+          userTotals[userId].totalSteps = 0;
+        }
+        userTotals[userId].totalSteps += record.steps ?? 0;
       }
 
       // Sort users by total steps and take top ones
       const sortedUsers = Object.entries(userTotals)
-        .map(([userId, totalSteps]) => ({ userId, totalSteps }))
-        .sort((a, b) => (b.totalSteps as number) - (a.totalSteps as number))
+        .map(([userId, profileMeta]) => ({ userId, profileMeta }))
+        .sort(
+          (a, b) =>
+            (b.profileMeta.totalSteps as number) -
+            (a.profileMeta.totalSteps as number)
+        )
         .slice(0, limit);
 
-      // Fetch usernames for the top users
-      const userIds = sortedUsers.map((user) => user.userId);
-      const { data: usersData, error: usersError } = await supabase()
-        .from("Users_Meta")
-        .select("user_id, display_name, profile_image_url")
-        .in("user_id", userIds);
+      // Map to final result format
+      const result = sortedUsers.map(({ profileMeta }) => ({
+        displayName: profileMeta.profileName || "Unknown User",
+        totalSteps: profileMeta.totalSteps || 0,
+        profileImageUrl: profileMeta.profileImageUrl || "",
+      }));
 
-      // Convert the usersData to a map for easy access
-      let userMetaMap: Record<string, ProfileMeta> = {};
-
-      if (usersData) {
-        userMetaMap = usersData.reduce((acc, user) => {
-          if (user.user_id) {
-            const meta: ProfileMeta = {
-              profileName: user.display_name,
-              profileImageUrl: user.profile_image_url,
-            };
-            acc[user.user_id] = meta;
-          }
-          return acc;
-        }, {} as Record<string, ProfileMeta>);
-      }
-
-      if (usersError) {
-        throw usersError;
-      }
-      // Map usernames to the sorted users
-      const result = [];
-      for (const user of sortedUsers) {
-        if (!user.userId) {
-          console.warn("Skipping user with missing user_id:", user);
-          continue; // Skip users without user_id
-        }
-        const meta = userMetaMap[user.userId];
-        result.push({
-          displayName: meta?.profileName || "Unknown User",
-          profileImageUrl: meta?.profileImageUrl || "",
-          totalSteps: user.totalSteps,
-        });
-      }
-
-      CacheService.set(cacheKey, result, 10);
+      CacheService.set(cacheKey, result, 5);
 
       return {
         success: true,

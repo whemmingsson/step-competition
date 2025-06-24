@@ -7,7 +7,7 @@ import { wrapWithCache } from "@/utils/CacheWrapper";
 import { executeQuery } from "./SupabaseApiService";
 import type { ServiceCallResult } from "@/types/ServiceCallResult";
 import type { TeamDTO } from "@/types/DTO/TeamDTO";
-import { teamsTransformer, teamTransformer } from "@/utils/Transformers";
+import { teamsTransformer, teamTransformer } from "@/services/Transformers";
 
 /**
  * Service for user-related operations

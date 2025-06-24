@@ -95,6 +95,13 @@ export type Database = {
             referencedRelation: "Competitions"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "Steps_user_id_fkey1"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "Users_Meta"
+            referencedColumns: ["user_id"]
+          },
         ]
       }
       Teams: {
@@ -122,21 +129,18 @@ export type Database = {
         Row: {
           created_at: string
           display_name: string | null
-          id: number
           profile_image_url: string | null
           user_id: string
         }
         Insert: {
           created_at?: string
           display_name?: string | null
-          id?: number
           profile_image_url?: string | null
           user_id: string
         }
         Update: {
           created_at?: string
           display_name?: string | null
-          id?: number
           profile_image_url?: string | null
           user_id?: string
         }

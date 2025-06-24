@@ -4,7 +4,7 @@ import CacheService from "./CacheService";
 import type { ProfileMeta } from "@/types/ProfileMeta";
 import { executeQuery } from "./SupabaseApiService";
 import type { ProfileMetaDTO } from "@/types/DTO/ProfileMetaDTO";
-import { profileMetaTransformer } from "@/utils/Transformers";
+import { profileMetaTransformer } from "@/services/Transformers";
 import { getAuthenticatedUser } from "@/utils/AuthUtils";
 
 /**
