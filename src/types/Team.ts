@@ -1,10 +1,10 @@
-import type { User } from "./User";
+import type { AppUser } from "./User";
 
 export interface Team {
   id: number;
   name: string;
   user_id: string; // ID of the user who created the team
-  members?: User[]; // Optional array of team members
+  members?: AppUser[]; // Optional array of team members
   memberIds?: string[]; // Optional array of member IDs
   numberOfMembers?: number; // Optional count of team members
   totalSteps?: number; // Optional total steps for the team

@@ -1,11 +1,12 @@
 import supabase from "@/supabase";
-import type { User } from "@/types/User";
+import type { AppUser } from "@/types/User";
 import CacheService from "./CacheService";
 import type { ProfileMeta } from "@/types/ProfileMeta";
 import { executeQuery } from "./SupabaseApiService";
 import { profileMetaTransformer } from "@/services/Transformers";
 import { getAuthenticatedUser } from "@/utils/AuthUtils";
 import type { ServiceCallResult } from "@/types/ServiceCallResult";
+import { wrapWithCacheSimple } from "@/utils/CacheWrapper";
 
 /**
  * Service for user-related operations
@@ -106,43 +107,24 @@ export class UserService {
     );
   }
 
-  static async getUser(): Promise<{ success: boolean; user: User | null }> {
-    try {
-      const cacheKey = "user_service_current-user";
-      const cachedUser = CacheService.get<User>(cacheKey);
+  static async getUser(): Promise<{ success: boolean; user: AppUser | null }> {
+    const result = await wrapWithCacheSimple<AppUser>(
+      "user_service_current-user",
+      10,
+      async () => {
+        const authenticatedUser = await getAuthenticatedUser();
+        const meta = await this.getProfileMeta(authenticatedUser.id);
+        // TODO: What if meta is not found?
 
-      if (cachedUser) {
         return {
-          success: true,
-          user: cachedUser,
+          id: authenticatedUser.id,
+          displayName: meta.data?.profileName ?? null,
+          profileImageUrl: meta.data?.profileImageUrl ?? null,
         };
       }
+    );
 
-      const { data, error } = await getAuthenticatedUser();
-
-      if (error || !data.user) {
-        console.error("Error fetching user:", error);
-        return { success: false, user: null };
-      }
-
-      const meta = await this.getProfileMeta(data.user.id);
-
-      const user: User = {
-        id: data.user.id,
-        displayName: meta.data?.profileName ?? null,
-        profileImageUrl: meta.data?.profileImageUrl ?? null,
-      };
-
-      CacheService.set(cacheKey, user, 60);
-
-      return { success: true, user };
-    } catch (err) {
-      console.error("Unexpected error fetching user:", err);
-      return {
-        success: false,
-        user: null,
-      };
-    }
+    return { success: true, user: result };
   }
 
   /**
@@ -215,7 +197,7 @@ export class UserService {
 
       // Update user cache
       const userCacheKey = "user_service_current_user";
-      const cachedUser = CacheService.get<User>(userCacheKey);
+      const cachedUser = CacheService.get<AppUser>(userCacheKey);
 
       if (cachedUser) {
         cachedUser.profileImageUrl = imageUrl;

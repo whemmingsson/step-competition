@@ -7,8 +7,13 @@ import type { StepsRecord } from "@/types/StepsRecord";
 import { wrapWithCache } from "@/utils/CacheWrapper";
 import type { ExecutorResult } from "@/types/apiExecutorTypes";
 import type { ServiceCallResult } from "@/types/ServiceCallResult";
-import { stepsRecordsTransformer } from "./Transformers";
+import {
+  stepsRecordsTransformer,
+  stepsRecordTransformer,
+} from "./Transformers";
 import { executeQuery } from "./SupabaseApiService";
+import { formatDate } from "@/utils/DateUtils";
+import { getAuthenticatedUser } from "@/utils/AuthUtils";
 
 /**
  * Service for handling step-related database operations
@@ -32,45 +37,27 @@ export class StepService {
     steps: number,
     uid: string,
     date: Date
-  ): Promise<{ success: boolean; error?: string; data?: unknown }> {
-    try {
-      const formattedDate = `${date.getFullYear()}-${String(
-        date.getMonth() + 1
-      ).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-
-      const { data, error } = await supabase()
-        .from("Steps")
-        .insert([
-          {
-            user_id: uid,
-            steps: steps,
-            date: formattedDate,
-            competition_id: LocalStorageService.getSelectedComptetionId(),
-          },
-        ])
-        .select();
-
-      if (error) {
-        console.error("Error recording steps:", error);
-        return {
-          success: false,
-          error: error.message,
-        };
-      }
-
-      this.clearServiceCache();
-
-      return {
-        success: true,
-        data,
-      };
-    } catch (err) {
-      console.error("Unexpected error recording steps:", err);
-      return {
-        success: false,
-        error: err instanceof Error ? err.message : "Unknown error occurred",
-      };
-    }
+  ): Promise<{ success: boolean; error?: string; data?: StepsRecord }> {
+    return await executeQuery(
+      async () => {
+        return await supabase()
+          .from("Steps")
+          .insert([
+            {
+              user_id: uid,
+              steps: steps,
+              date: formatDate(date),
+              competition_id: LocalStorageService.getSelectedComptetionId(),
+            },
+          ])
+          .select() // TODO: Fix the query executor to handle inserts without select
+          .single();
+      },
+      stepsRecordTransformer,
+      null,
+      null,
+      this.clearServiceCache
+    );
   }
 
   /**
@@ -285,8 +272,8 @@ export class StepService {
         };
       }
 
-      const user = await supabase().auth.getUser();
-      if (!user.data.user) {
+      const user = await getAuthenticatedUser();
+      if (!user) {
         return {
           success: false,
           error: "User not authenticated",
@@ -297,7 +284,7 @@ export class StepService {
         .from("Steps")
         .delete()
         .eq("date", date)
-        .eq("user_id", user.data.user.id)
+        .eq("user_id", user.id)
         .eq(
           "competition_id",
           LocalStorageService.getSelectedComptetionId() ?? -1 // Use a default invalid ID if null
@@ -441,8 +428,8 @@ export class StepService {
   }
 
   static async updateStepRecord(recordId: number, steps: number) {
-    const user = await supabase().auth.getUser();
-    if (!user.data.user) {
+    const user = await getAuthenticatedUser();
+    if (!user) {
       return {
         success: false,
         error: "User not authenticated",
@@ -454,7 +441,7 @@ export class StepService {
         .from("Steps")
         .update({ steps: steps })
         .eq("id", recordId)
-        .eq("user_id", user.data.user.id);
+        .eq("user_id", user.id);
 
       if (error) {
         console.error("Error updating step record:", error);

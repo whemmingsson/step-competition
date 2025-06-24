@@ -6,7 +6,7 @@ import type { TeamDTO } from "@/types/DTO/TeamDTO";
 import type { ProfileMeta } from "@/types/ProfileMeta";
 import type { StepsRecord } from "@/types/StepsRecord";
 import type { Team } from "@/types/Team";
-import type { User } from "@/types/User";
+import type { AppUser } from "@/types/User";
 
 export const profileMetaTransformer = (data: ProfileMetaDTO): ProfileMeta => {
   return {
@@ -38,8 +38,9 @@ export const teamTransformer = (data: TeamDTO | null): Team => {
 
   result.numberOfMembers = result.memberIds?.length || 0;
   result.members =
-    result.memberIds?.map((id) => ({ displayName: "UNSET", id: id } as User)) ||
-    [];
+    result.memberIds?.map(
+      (id) => ({ displayName: "UNSET", id: id } as AppUser)
+    ) || [];
   return result;
 };
 

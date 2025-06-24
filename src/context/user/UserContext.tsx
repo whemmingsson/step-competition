@@ -7,10 +7,10 @@ import {
   type ReactNode,
 } from "react";
 import { UserService } from "@/services/UserService";
-import type { User } from "@/types/User";
+import type { AppUser } from "@/types/User";
 
 interface UserContextType {
-  user: User | null;
+  user: AppUser | null;
   isLoading: boolean;
   error: string | null;
   refreshUser: () => void;
@@ -19,7 +19,7 @@ interface UserContextType {
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AppUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);

@@ -37,3 +37,18 @@ export const wrapWithCache = async <TReturnType, ExecutorReturnType>(
 
   return data;
 };
+
+export const wrapWithCacheSimple = async <TReturnType>(
+  cacheKey: string,
+  cacheTtlMinutes: number,
+  action: () => Promise<TReturnType>
+) => {
+  const cachedResult = CacheService.get(cacheKey);
+  if (cachedResult) {
+    return cachedResult as TReturnType;
+  }
+
+  const result = await action();
+  CacheService.set(cacheKey, result, cacheTtlMinutes);
+  return result;
+};

@@ -19,8 +19,8 @@ import type {
 export const executeQuery = async <TViewModel, TDto>(
   executorFunc: ExecutorFunc<TDto>,
   transformerFunc: TransformerFunc<TDto, TViewModel> | null,
-  cacheKey: string | null,
-  cacheDurationMinutes: number = 5,
+  cacheKey?: string | null,
+  cacheDurationMinutes?: number | null,
   cacheClearFunc?: () => void
 ): Promise<ServiceCallResult<TViewModel>> => {
   try {
@@ -54,9 +54,9 @@ export const executeQuery = async <TViewModel, TDto>(
         data = result.data as unknown as TViewModel; // Fallback if no transformer is provided
       }
 
-      if (cacheKey) {
+      if (cacheKey && data) {
         // Cache the result for future use
-        CacheService.set(cacheKey, data, cacheDurationMinutes);
+        CacheService.set(cacheKey, data, cacheDurationMinutes || 5);
       }
 
       if (cacheClearFunc) {
