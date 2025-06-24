@@ -6,12 +6,17 @@ import { Layout } from "./Layout";
 import { RequireAuth } from "./RequireAuth";
 import { LoadingScreen } from "./LoadingScreen";
 import { SitePages } from "@/navigation/NavigationConfig";
+import { PromoPage } from "@/pages/PromoPage";
 
 export const Router = () => {
   const { isLoading } = useAuth();
 
   if (isLoading) {
     return <LoadingScreen />;
+  }
+
+  if (import.meta.env.VITE_SITE_ENABLED === "false") {
+    return <PromoPage />;
   }
 
   return (
