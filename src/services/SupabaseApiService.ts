@@ -6,6 +6,16 @@ import type {
   TransformerFunc,
 } from "@/types/apiExecutorTypes";
 
+/**
+ * Executes a query with optional caching and transformation.
+ *
+ * @param executorFunc - The function that executes the API call.
+ * @param transformerFunc - Optional function to transform the API response data.
+ * @param cacheKey - Optional key for caching the result.
+ * @param cacheDurationMinutes - Duration in minutes to cache the result (default is 5 minutes).
+ * @param cacheClearFunc - Optional function to clear related cache entries.
+ * @returns A promise that resolves to a ServiceCallResult containing the transformed data or an error message.
+ */
 export const executeQuery = async <TViewModel, TDto>(
   executorFunc: ExecutorFunc<TDto>,
   transformerFunc: TransformerFunc<TDto, TViewModel> | null,

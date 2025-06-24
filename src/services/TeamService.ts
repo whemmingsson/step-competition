@@ -7,7 +7,7 @@ import { wrapWithCache } from "@/utils/CacheWrapper";
 import { executeQuery } from "./SupabaseApiService";
 import type { ServiceCallResult } from "@/types/ServiceCallResult";
 import type { TeamDTO } from "@/types/DTO/TeamDTO";
-import { teamsTransformer } from "@/utils/Transformers";
+import { teamsTransformer, teamTransformer } from "@/utils/Transformers";
 
 /**
  * Service for user-related operations
@@ -108,68 +108,34 @@ export class TeamService {
     error?: string;
     data?: Team | null;
   }> {
-    try {
-      if (!teamId) {
-        return { success: false, error: "Team ID is required" };
-      }
+    const cacheKey = `team_service_get-team-by-id-${teamId}`;
 
-      const cacheKey = `teams_service_get-team-by-id-${teamId}`;
-      const cachedTeam = CacheService.get(cacheKey);
-      if (cachedTeam) {
-        return { success: true, data: cachedTeam as Team };
-      }
+    const { data: mappedTeam } = await executeQuery<Team, TeamDTO>(
+      async () => {
+        return await supabase()
+          .from("Teams")
+          .select("id, name, user_id, Users_Teams(user_id)")
+          .eq("id", teamId)
+          .single();
+      },
+      teamTransformer,
+      cacheKey,
+      5
+    );
 
-      const { data, error } = await supabase()
-        .from("Teams")
-        .select("id, name, user_id")
-        .eq("id", teamId)
-        .single();
-
-      if (error) {
-        console.error("Error fetching team by ID:", error);
-        return { success: false, error: error.message };
-      }
-
-      const { data: usersInTeamData, error: teamError } = await supabase()
-        .from("Users_Teams")
-        .select("user_id")
-        .eq("team_id", teamId);
-
-      if (teamError) {
-        console.error("Error fetching users in team:", teamError);
-        return { success: false, error: teamError.message };
-      }
-
-      const mappedData: Team | null = data
-        ? {
-            id: data.id,
-            name: data.name ?? "",
-            user_id: data.user_id ?? "",
-            members:
-              (usersInTeamData ?? [])
-                .map((user) => {
-                  return { id: user.user_id ?? "", displayName: "UNSET" };
-                })
-                .filter((id) => id !== null) || [],
-            totalSteps: await this.getTotalStepsForTeam(
-              (usersInTeamData ?? [])
-                .map((member) => member.user_id)
-                .filter((id) => id !== null)
-            ),
-          }
-        : null;
-
-      // Cache the result
-      CacheService.set(cacheKey, mappedData);
-
-      return { success: true, data: mappedData };
-    } catch (err) {
-      console.error("Unexpected error fetching team by ID:", err);
-      return {
-        success: false,
-        error: err instanceof Error ? err.message : "Unknown error occurred",
-      };
+    if (!mappedTeam) {
+      return { success: false, error: "Failed to map team data" };
     }
+
+    // This is a an extra transformation step to get the total steps for the team
+    // The result from this operation is cached for 5 minutes
+    mappedTeam.totalSteps = await this.getTotalStepsForTeam(
+      (mappedTeam.memberIds ?? [])
+        .map((member) => member)
+        .filter((id) => id !== null)
+    );
+
+    return { success: true, data: mappedTeam };
   }
 
   public static async getTeamByUserId(): Promise<{
@@ -177,7 +143,7 @@ export class TeamService {
     error?: string;
     data?: Team | null;
   }> {
-    const cacheKey = `get-team-by-user-id`;
+    const cacheKey = `team_service_get-team-by-user-id`;
     const cachedTeam = CacheService.get(cacheKey);
     if (cachedTeam) {
       return { success: true, data: cachedTeam as Team };
@@ -197,6 +163,10 @@ export class TeamService {
         .eq("user_id", user.data.user?.id)
         .single();
 
+      if (error && error.code === "PGRST116" && !data) {
+        return { success: false, error: "No team found for user" };
+      }
+
       if (error || !data || !data.team_id) {
         console.error("Error fetching team by user ID:", error);
         return {
@@ -215,17 +185,7 @@ export class TeamService {
         return { success: false, error: teamError };
       }
 
-      const mappedData: Team | null = teamData
-        ? {
-            id: teamData.id,
-            name: teamData.name ?? "",
-            user_id: teamData.user_id ?? "",
-            members: teamData.members || [],
-            totalSteps: await this.getTotalStepsForTeam(
-              (teamData?.members ?? []).map((member) => member.id)
-            ),
-          }
-        : null;
+      const mappedData = teamData;
 
       // Cache the result
       CacheService.set(cacheKey, mappedData);
