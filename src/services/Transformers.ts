@@ -67,7 +67,7 @@ export const competitionsTransformer = (
 export const stepsRecordTransformer = (data: StepsRecordDTO): StepsRecord => {
   return {
     id: data.id,
-    user_id: data.user_id,
+    user_id: data.user_id || "unknown",
     steps: data.steps || 0,
     date: data.date || "",
     created_at: data.created_at || "",
