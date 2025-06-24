@@ -62,7 +62,7 @@ export const useStatistics = (competitionId: number) => {
           // Filter teams that have members in the competition
           const filteredTeams = teamData.data.filter((team) =>
             team.memberIds?.some((memberId) =>
-              stepsData.data.some((record) => record.user_id === memberId)
+              stepsData.data?.some((record) => record.user_id === memberId)
             )
           );
           numberOfTeams = filteredTeams.length;

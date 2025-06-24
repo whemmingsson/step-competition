@@ -152,7 +152,7 @@ export class TeamService {
     try {
       const user = await getAuthenticatedUser();
 
-      if (!user || !user.data.user?.id) {
+      if (!user) {
         return { success: false, error: "User not authenticated" };
       }
 
@@ -160,7 +160,7 @@ export class TeamService {
       const { data, error } = await supabase()
         .from("Users_Teams")
         .select("id, user_id, team_id")
-        .eq("user_id", user.data.user?.id)
+        .eq("user_id", user.id)
         .single();
 
       if (error && error.code === "PGRST116" && !data) {
