@@ -4,6 +4,10 @@ import { StepService } from "./StepService";
 import CacheService from "./CacheService";
 import { getAuthenticatedUser } from "@/utils/AuthUtils";
 import { wrapWithCache } from "@/utils/CacheWrapper";
+import { executeQuery } from "./SupabaseApiService";
+import type { ServiceCallResult } from "@/types/ServiceCallResult";
+import type { TeamDTO } from "@/types/DTO/TeamDTO";
+import { teamsTransformer } from "@/utils/Transformers";
 
 /**
  * Service for user-related operations
@@ -81,73 +85,22 @@ export class TeamService {
    *
    * @returns Promise with the result of the operation
    */
-  static async getTeams(): Promise<{
-    success: boolean;
-    error?: string;
-    data?: Team[];
-  }> {
-    const cacheKey = `get-teams`;
-    const cachedTeams = CacheService.get(cacheKey);
-    if (cachedTeams) {
-      return { success: true, data: cachedTeams as Team[] };
-    }
+  static async getTeams(): Promise<ServiceCallResult<Team[]>> {
+    const cacheKey = `teams_service_get-teams`;
 
-    try {
-      const { data, error } = await supabase()
-        .from("Teams")
-        .select("id, name, user_id");
-
-      if (error) {
-        console.error("Error fetching teams:", error);
-        return { success: false, error: error.message };
-      }
-
-      const mappedData: Team[] =
-        data?.map((team) => ({
-          id: team.id,
-          name: team.name ?? "",
-          user_id: team.user_id ?? "",
-        })) ?? [];
-
-      const teamIds = mappedData.map((team) => team.id);
-      // Fetch number of users in each team
-      const usersInTeams = await supabase()
-        .from("Users_Teams")
-        .select("team_id, user_id")
-        .in("team_id", teamIds);
-
-      // Map users to teams
-      const usersMap: Record<number, string[]> = {};
-      if (usersInTeams.data) {
-        usersInTeams.data.forEach((user) => {
-          if (user.team_id !== null && user.team_id !== undefined) {
-            if (!usersMap[user.team_id]) {
-              usersMap[user.team_id] = [];
-            }
-            if (user.user_id !== null) {
-              usersMap[user.team_id].push(user.user_id);
-            }
-          }
-        });
-      }
-
-      mappedData.forEach((team) => {
-        const userIds = usersMap[team.id] || [];
-        team.numberOfMembers = userIds.length;
-        team.memberIds = userIds;
-      });
-
-      // Cache the result
-      CacheService.set(cacheKey, mappedData);
-
-      return { success: true, data: mappedData };
-    } catch (err) {
-      console.error("Unexpected error fetching teams:", err);
-      return {
-        success: false,
-        error: err instanceof Error ? err.message : "Unknown error occurred",
-      };
-    }
+    return await executeQuery<Team[], TeamDTO[]>(
+      async () => {
+        return await supabase().from("Teams").select(`
+          id, 
+          name, 
+          user_id,
+          Users_Teams(user_id)
+      `);
+      },
+      teamsTransformer,
+      cacheKey,
+      5
+    );
   }
 
   public static async getTeamById(teamId: number): Promise<{
@@ -160,7 +113,7 @@ export class TeamService {
         return { success: false, error: "Team ID is required" };
       }
 
-      const cacheKey = `get-team-by-id-${teamId}`;
+      const cacheKey = `teams_service_get-team-by-id-${teamId}`;
       const cachedTeam = CacheService.get(cacheKey);
       if (cachedTeam) {
         return { success: true, data: cachedTeam as Team };
