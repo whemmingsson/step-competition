@@ -2,6 +2,7 @@ import supabase from "@/supabase";
 import type { Team } from "@/types/Team";
 import { StepService } from "./StepService";
 import CacheService from "./CacheService";
+import { getAuthenticatedUser } from "@/utils/AuthUtils";
 
 /**
  * Service for user-related operations
@@ -238,7 +239,8 @@ export class TeamService {
     }
 
     try {
-      const user = await supabase().auth.getUser();
+      const user = await getAuthenticatedUser();
+
       if (!user || !user.data.user?.id) {
         return { success: false, error: "User not authenticated" };
       }
@@ -250,13 +252,12 @@ export class TeamService {
         .eq("user_id", user.data.user?.id)
         .single();
 
-      if (error) {
+      if (error || !data || !data.team_id) {
         console.error("Error fetching team by user ID:", error);
-        return { success: false, error: error.message };
-      }
-
-      if (!data || !data.team_id) {
-        return { success: true, data: null }; // No team found for user
+        return {
+          success: false,
+          error: error?.message || "No team found for user",
+        };
       }
 
       // Get team details
@@ -490,8 +491,6 @@ export class TeamService {
         .from("Teams")
         .delete()
         .eq("id", teamId);
-
-      console.log("Error, if any, deleting team:", error);
 
       if (error) {
         console.error("Error deleting team:", error);

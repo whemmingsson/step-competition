@@ -49,6 +49,33 @@ export const StatisticsPage = () => {
     }
   };
 
+  const CardList = [
+    {
+      title: "Total Steps",
+      value: select((data) => data.totalSteps),
+    },
+    {
+      title: "Avg steps per member",
+      value: select((data) => data.averagePerMember),
+    },
+    {
+      title: "Avg steps per day",
+      value: select((data) => data.averagePerDay),
+    },
+    {
+      title: "Avg steps per member & day",
+      value: select((data) => data.averagePerDayAndMember),
+    },
+    {
+      title: "Competing teams",
+      value: select((data) => data.numberOfTeams),
+    },
+    {
+      title: "Avg steps per team",
+      value: select((data) => data.averageStepsPerTeam),
+    },
+  ];
+
   return (
     <PageContainer>
       <BetaNotification />
@@ -64,30 +91,13 @@ export const StatisticsPage = () => {
             <div className="bg-muted p-6 rounded-lg text-center">
               <h3 className="text-2xl font-bold mb-2"></h3>
               <div className="grid grid-cols-2 grid-rows-3 gap-4 mt-4">
-                <NumberCard
-                  title="Total Steps"
-                  value={select((data) => data.totalSteps)}
-                />
-                <NumberCard
-                  title="Avg steps per member"
-                  value={select((data) => data.averagePerMember)}
-                />
-                <NumberCard
-                  title="Avg steps per day"
-                  value={select((data) => data.averagePerDay)}
-                />
-                <NumberCard
-                  title="Avg steps per member & day"
-                  value={select((data) => data.averagePerDayAndMember)}
-                />
-                <NumberCard
-                  title="Competing teams"
-                  value={select((data) => data.numberOfTeams)}
-                />
-                <NumberCard
-                  title="Avg steps per team"
-                  value={select((data) => data.averageStepsPerTeam)}
-                />
+                {CardList.map((card, index) => (
+                  <NumberCard
+                    key={index}
+                    title={card.title}
+                    value={card.value}
+                  />
+                ))}
               </div>
               <CumulativeStepsChart data={data?.cumilativeSteps || []} />
             </div>

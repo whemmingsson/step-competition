@@ -119,7 +119,6 @@ export const TeamPage = () => {
       );
 
       if (result.success) {
-        console.log("Left team successfully:", result);
         if (setUserTeam) {
           setUserTeam(null);
         }
@@ -156,7 +155,6 @@ export const TeamPage = () => {
         if (refetchTeams) refetchTeams();
         toast.success("Team deleted successfully!");
       } else {
-        console.log(result);
         console.error("Failed to delete team:", result.error);
       }
     } catch (error) {

@@ -37,7 +37,6 @@ export const UserStepsTable = ({
   };
 
   const handleUpdateRecord = async () => {
-    console.log("Updating record with ID:", editRecordId, updatedSteps);
     if (!editRecordId || updatedSteps === null) return;
 
     const result = await StepService.updateStepRecord(
@@ -85,7 +84,6 @@ export const UserStepsTable = ({
                     );
                   }}
                   onKeyDown={(e) => {
-                    console.log("Key pressed:", e.key);
                     if (e.key === "Enter") {
                       e.preventDefault(); // Prevent form submission
                       handleUpdateRecord();

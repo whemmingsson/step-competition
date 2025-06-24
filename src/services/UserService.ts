@@ -2,6 +2,10 @@ import supabase from "@/supabase";
 import type { User } from "@/types/User";
 import CacheService from "./CacheService";
 import type { ProfileMeta } from "@/types/ProfileMeta";
+import { executeQuery } from "./SupabaseApiService";
+import type { ProfileMetaDTO } from "@/types/DTO/ProfileMetaDTO";
+import { profileMetaTransformer } from "@/utils/Transformers";
+import { getAuthenticatedUser } from "@/utils/AuthUtils";
 
 /**
  * Service for user-related operations
@@ -89,52 +93,24 @@ export class UserService {
   static async getProfileMeta(
     userId: string
   ): Promise<{ success: boolean; error?: string; data?: ProfileMeta }> {
-    try {
-      if (!userId) {
-        return {
-          success: false,
-          error: "User ID is required",
-        };
-      }
-
-      const cacheKey = `user_service_profile_meta_${userId}`;
-      const cachedData = CacheService.get(cacheKey);
-
-      if (cachedData) {
-        return {
-          success: true,
-          data: cachedData as ProfileMeta,
-        };
-      }
-
-      const { data, error } = await supabase()
-        .from("Users_Meta")
-        .select("display_name, profile_image_url")
-        .eq("user_id", userId)
-        .single();
-
-      if (error) {
-        console.error("Error getting profile meta:", error);
-        return {
-          success: false,
-          error: error.message,
-        };
-      }
-
-      if (data) {
-        CacheService.set(cacheKey, data as ProfileMeta, 60);
-      }
-
-      return {
-        success: true,
-        data: data as ProfileMeta,
-      };
-    } catch (err) {
+    if (!userId) {
       return {
         success: false,
-        error: err instanceof Error ? err.message : "Unknown error occurred",
+        error: "User ID is required",
       };
     }
+
+    return await executeQuery<ProfileMeta, ProfileMetaDTO>(
+      async () => {
+        return await supabase()
+          .from("Users_Meta")
+          .select("display_name, profile_image_url")
+          .eq("user_id", userId)
+          .single();
+      },
+      profileMetaTransformer,
+      `user_service_profile_meta_${userId}`
+    );
   }
 
   static async getUser(): Promise<{ success: boolean; user: User | null }> {
@@ -149,14 +125,10 @@ export class UserService {
         };
       }
 
-      const { data, error } = await supabase().auth.getUser();
+      const { data, error } = await getAuthenticatedUser();
 
-      if (error) {
+      if (error || !data.user) {
         console.error("Error fetching user:", error);
-        return { success: false, user: null };
-      }
-
-      if (!data.user) {
         return { success: false, user: null };
       }
 
@@ -164,8 +136,8 @@ export class UserService {
 
       const user: User = {
         id: data.user.id,
-        displayName: meta.data?.display_name ?? null,
-        profileImageUrl: meta.data?.profile_image_url ?? null,
+        displayName: meta.data?.profileName ?? null,
+        profileImageUrl: meta.data?.profileImageUrl ?? null,
       };
 
       CacheService.set(cacheKey, user, 60);
@@ -192,7 +164,6 @@ export class UserService {
     imageUrl: string
   ): Promise<{ success: boolean; error?: string; data?: unknown }> {
     try {
-      console.log("Setting profile image URL for user:", userId, imageUrl);
       if (!userId || !imageUrl.trim()) {
         return {
           success: false,
@@ -221,8 +192,6 @@ export class UserService {
           .from("Users_Meta")
           .update({ profile_image_url: imageUrl })
           .eq("user_id", userId);
-
-        console.log("Update result:", data, error);
 
         if (error) {
           console.error("Error updating profile image URL:", error);
@@ -277,38 +246,35 @@ export class UserService {
   static async getNumberOfUsersInCompetition(
     competitionId: number
   ): Promise<number> {
-    try {
-      // Get all user_id entries for the competition
-      const { data, error } = await supabase()
-        .from("Steps")
-        .select("user_id")
-        .eq("competition_id", competitionId)
-        .gt("steps", 0);
-
-      if (error) {
-        console.error("Error fetching number of users in competition:", error);
-        return 0;
-      }
-
-      // Count distinct users with Set
-      if (!data || data.length === 0) return 0;
-
-      const uniqueUserIds = new Set<string>();
-
-      // Add each user_id to the Set (Sets only store unique values)
-      data.forEach((record) => {
-        if (record.user_id) {
-          uniqueUserIds.add(record.user_id);
-        }
-      });
-
-      return uniqueUserIds.size;
-    } catch (err) {
-      console.error(
-        "Unexpected error fetching number of users in competition:",
-        err
-      );
-      return 0;
+    interface T {
+      user_id: string | null;
     }
+
+    const { data } = await executeQuery<T[], T[]>(
+      async () => {
+        return await supabase()
+          .from("Steps")
+          .select("user_id")
+          .eq("competition_id", competitionId)
+          .gt("steps", 0);
+      },
+      null,
+      `user_service_competition_users_${competitionId}`,
+      5
+    );
+
+    // Count distinct users with Set
+    if (!data || data.length === 0) return 0;
+
+    const uniqueUserIds = new Set<string>();
+
+    // Add each user_id to the Set (Sets only store unique values)
+    data.forEach((record) => {
+      if (record.user_id) {
+        uniqueUserIds.add(record.user_id);
+      }
+    });
+
+    return uniqueUserIds.size;
   }
 }

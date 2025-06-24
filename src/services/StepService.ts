@@ -243,8 +243,8 @@ export class StepService {
         userMetaMap = usersData.reduce((acc, user) => {
           if (user.user_id) {
             const meta: ProfileMeta = {
-              display_name: user.display_name,
-              profile_image_url: user.profile_image_url,
+              profileName: user.display_name,
+              profileImageUrl: user.profile_image_url,
             };
             acc[user.user_id] = meta;
           }
@@ -264,8 +264,8 @@ export class StepService {
         }
         const meta = userMetaMap[user.userId];
         result.push({
-          displayName: meta?.display_name || "Unknown User",
-          profileImageUrl: meta?.profile_image_url || "",
+          displayName: meta?.profileName || "Unknown User",
+          profileImageUrl: meta?.profileImageUrl || "",
           totalSteps: user.totalSteps,
         });
       }
