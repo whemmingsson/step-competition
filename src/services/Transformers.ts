@@ -1,8 +1,10 @@
 import type { Competition } from "@/types/Competition";
 import type { CompetitionDTO } from "@/types/DTO/CompetitionDTO";
 import type { ProfileMetaDTO } from "@/types/DTO/ProfileMetaDTO";
+import type { StepsRecordDTO } from "@/types/DTO/StepsRecordDTO";
 import type { TeamDTO } from "@/types/DTO/TeamDTO";
 import type { ProfileMeta } from "@/types/ProfileMeta";
+import type { StepsRecord } from "@/types/StepsRecord";
 import type { Team } from "@/types/Team";
 import type { User } from "@/types/User";
 
@@ -60,4 +62,20 @@ export const competitionsTransformer = (
   data: CompetitionDTO[]
 ): Competition[] => {
   return data.map((competition) => competitionTransformer(competition));
+};
+
+export const stepsRecordTransformer = (data: StepsRecordDTO): StepsRecord => {
+  return {
+    id: data.id,
+    user_id: data.user_id,
+    steps: data.steps || 0,
+    date: data.date || "",
+    created_at: data.created_at || "",
+  };
+};
+
+export const stepsRecordsTransformer = (
+  data: StepsRecordDTO[]
+): StepsRecord[] => {
+  return data.map((record) => stepsRecordTransformer(record));
 };

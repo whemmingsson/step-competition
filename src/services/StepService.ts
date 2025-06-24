@@ -7,6 +7,8 @@ import type { StepsRecord } from "@/types/StepsRecord";
 import { wrapWithCache } from "@/utils/CacheWrapper";
 import type { ExecutorResult } from "@/types/apiExecutorTypes";
 import type { ServiceCallResult } from "@/types/ServiceCallResult";
+import { stepsRecordsTransformer } from "./Transformers";
+import { executeQuery } from "./SupabaseApiService";
 
 /**
  * Service for handling step-related database operations
@@ -83,7 +85,7 @@ export class StepService {
     const competitionId = LocalStorageService.getSelectedComptetionId();
 
     try {
-      const cacheKey = `step_service_user_steps_${uid}_${competitionId}`;
+      const cacheKey = `step_service_user-steps-${uid}-${competitionId}`;
       const cachedData = CacheService.get(cacheKey);
       if (cachedData) {
         return {
@@ -422,43 +424,20 @@ export class StepService {
     );
   }
 
-  static async getAllStepRecordsForCompetition(competetionId: number) {
-    const cacheKey = `step_service_all_steps_${competetionId}`;
-    const cachedData = CacheService.get(cacheKey);
-    if (cachedData) {
-      return {
-        success: true,
-        data: cachedData as { user_id: string; steps: number; date: string }[],
-      };
-    }
-
-    try {
-      const { data, error } = await supabase()
-        .from("Steps")
-        .select("*")
-        .eq("competition_id", competetionId);
-
-      if (error) {
-        console.error("Error fetching all step records:", error);
-        return {
-          success: false,
-          error: error.message,
-        };
-      }
-
-      CacheService.set(cacheKey, data, 10);
-
-      return {
-        success: true,
-        data: (data as StepsRecord[]) || [],
-      };
-    } catch (err) {
-      console.error("Unexpected error fetching all step records", err);
-      return {
-        success: false,
-        error: err instanceof Error ? err.message : "Unknown error occurred",
-      };
-    }
+  static async getAllStepRecordsForCompetition(
+    competetionId: number
+  ): Promise<ServiceCallResult<StepsRecord[]>> {
+    return await executeQuery(
+      async () => {
+        return await supabase()
+          .from("Steps")
+          .select("*")
+          .eq("competition_id", competetionId);
+      },
+      stepsRecordsTransformer,
+      `step_service_all-steps-${competetionId}`,
+      10
+    );
   }
 
   static async updateStepRecord(recordId: number, steps: number) {

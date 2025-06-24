@@ -3,9 +3,9 @@ import type { User } from "@/types/User";
 import CacheService from "./CacheService";
 import type { ProfileMeta } from "@/types/ProfileMeta";
 import { executeQuery } from "./SupabaseApiService";
-import type { ProfileMetaDTO } from "@/types/DTO/ProfileMetaDTO";
 import { profileMetaTransformer } from "@/services/Transformers";
 import { getAuthenticatedUser } from "@/utils/AuthUtils";
+import type { ServiceCallResult } from "@/types/ServiceCallResult";
 
 /**
  * Service for user-related operations
@@ -92,15 +92,8 @@ export class UserService {
    */
   static async getProfileMeta(
     userId: string
-  ): Promise<{ success: boolean; error?: string; data?: ProfileMeta }> {
-    if (!userId) {
-      return {
-        success: false,
-        error: "User ID is required",
-      };
-    }
-
-    return await executeQuery<ProfileMeta, ProfileMetaDTO>(
+  ): Promise<ServiceCallResult<ProfileMeta>> {
+    return await executeQuery(
       async () => {
         return await supabase()
           .from("Users_Meta")
@@ -115,7 +108,7 @@ export class UserService {
 
   static async getUser(): Promise<{ success: boolean; user: User | null }> {
     try {
-      const cacheKey = "user_service_current_user";
+      const cacheKey = "user_service_current-user";
       const cachedUser = CacheService.get<User>(cacheKey);
 
       if (cachedUser) {
@@ -259,7 +252,7 @@ export class UserService {
           .gt("steps", 0);
       },
       null,
-      `user_service_competition_users_${competitionId}`,
+      `user_service_competition-users-${competitionId}`,
       5
     );
 
@@ -268,7 +261,6 @@ export class UserService {
 
     const uniqueUserIds = new Set<string>();
 
-    // Add each user_id to the Set (Sets only store unique values)
     data.forEach((record) => {
       if (record.user_id) {
         uniqueUserIds.add(record.user_id);
