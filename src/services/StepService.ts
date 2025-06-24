@@ -5,7 +5,8 @@ import type { ProfileMeta } from "@/types/ProfileMeta";
 import type { StepsRecord } from "@/types/StepsRecord";
 
 import { wrapWithCache } from "@/utils/CacheWrapper";
-import type { ExecutorResult } from "./SupabaseApiService";
+import type { ExecutorResult } from "@/types/apiExecutorTypes";
+import type { ServiceCallResult } from "@/types/ServiceCallResult";
 
 /**
  * Service for handling step-related database operations
@@ -353,7 +354,7 @@ export class StepService {
    */
   static async getTotalStepsForListOfUsers(
     ids: string[]
-  ): Promise<{ success: boolean; error?: string; data?: number }> {
+  ): Promise<ServiceCallResult<number>> {
     const competitionId = LocalStorageService.getSelectedComptetionId();
 
     const cacheKey = `step_service_total_steps_${competitionId}_${ids.join(

@@ -1,27 +1,35 @@
 import CacheService from "@/services/CacheService";
-import type { ExecutorResult } from "@/services/SupabaseApiService";
+import type { ExecutorResult } from "@/types/apiExecutorTypes";
+import type { ServiceCallResult } from "@/types/ServiceCallResult";
 
-export const wrapWithCache = async <T, U>(
+export const wrapWithCache = async <TReturnType, ExecutorReturnType>(
   cacheKey: string,
   cacheTtlMinutes: number,
-  action: () => Promise<ExecutorResult<U>>
-): Promise<T> => {
+  action: () =>
+    | Promise<ExecutorResult<ExecutorReturnType>>
+    | Promise<ServiceCallResult<ExecutorReturnType>>
+): Promise<TReturnType> => {
   // Check if the result is already cached
   const cachedResult = CacheService.get(cacheKey);
   if (cachedResult) {
-    return cachedResult as T;
+    return cachedResult as TReturnType;
   }
 
   const result = await action();
 
   if (result.error) {
     console.error("Error executing action:", result.error);
-    throw new Error(result.error.message || "An unknown error occurred");
+    const errorMessage =
+      typeof result.error === "string"
+        ? result.error
+        : result.error.message || "An unknown error occurred";
+    throw new Error(errorMessage);
   }
 
-  const data = result.data as unknown as T;
+  const data = result.data as unknown as TReturnType;
 
-  if (!data) {
+  if (data === undefined || data === null) {
+    console.error("No data returned from action or type mismatch", data);
     throw new Error("No data returned from action, or type mismatch");
   }
 

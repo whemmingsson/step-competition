@@ -1,13 +1,10 @@
-import type { ApiCallResult } from "@/types/ApiCallResult";
+import type { ServiceCallResult } from "@/types/ServiceCallResult";
 import CacheService from "./CacheService";
-
-export interface ExecutorResult<TDto> {
-  data?: TDto | null; // The data returned from the executor function
-  error?: { message: string } | null; // Error message if the executor function fails
-  status?: number;
-}
-export type ExecutorFunc<TDto> = () => Promise<ExecutorResult<TDto>>;
-export type TransformerFunc<TDto, TViewModel> = (data: TDto) => TViewModel;
+import type {
+  ExecutorFunc,
+  ExecutorResult,
+  TransformerFunc,
+} from "@/types/apiExecutorTypes";
 
 export const executeQuery = async <TViewModel, TDto>(
   executorFunc: ExecutorFunc<TDto>,
@@ -15,7 +12,7 @@ export const executeQuery = async <TViewModel, TDto>(
   cacheKey: string | null,
   cacheDurationMinutes: number = 5,
   cacheClearFunc?: () => void
-): Promise<ApiCallResult<TViewModel>> => {
+): Promise<ServiceCallResult<TViewModel>> => {
   try {
     if (cacheKey) {
       // Check if the query is already cached

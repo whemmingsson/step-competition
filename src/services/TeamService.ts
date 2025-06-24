@@ -3,6 +3,7 @@ import type { Team } from "@/types/Team";
 import { StepService } from "./StepService";
 import CacheService from "./CacheService";
 import { getAuthenticatedUser } from "@/utils/AuthUtils";
+import { wrapWithCache } from "@/utils/CacheWrapper";
 
 /**
  * Service for user-related operations
@@ -11,22 +12,13 @@ export class TeamService {
   private static async getTotalStepsForTeam(
     userIdsInTeam: string[]
   ): Promise<number> {
-    const cacheKey = `get-total-steps-for-team-${userIdsInTeam.join(",")}`;
-    const cachedSteps = CacheService.get(cacheKey);
-    if (cachedSteps) {
-      return cachedSteps as number; // Return cached value if available
-    }
-
-    const result = await StepService.getTotalStepsForListOfUsers(userIdsInTeam);
-    if (!result.success) {
-      console.error("Error fetching total steps for team:", result.error);
-      return 0; // Return 0 if there's an error
-    }
-
-    // Cache the result for future use
-    CacheService.set(cacheKey, result.data || 0);
-
-    return result.data || 0; // Return the total steps or 0 if data is undefined
+    return await wrapWithCache<number, number>(
+      `get-total-steps-for-team-${userIdsInTeam.join(",")}`,
+      5,
+      async () => {
+        return await StepService.getTotalStepsForListOfUsers(userIdsInTeam);
+      }
+    );
   }
   /**
    * Create a new team

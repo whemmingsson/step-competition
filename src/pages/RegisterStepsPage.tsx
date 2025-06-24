@@ -67,14 +67,6 @@ export const RegisterStepsPage = () => {
   const { data: userTeam, loading: teamLoading } = useUserTeam();
   const { competitionId } = useCompetition();
 
-  console.log(
-    "Register steps page loading",
-    steps,
-    user,
-    userTeam,
-    competitionId
-  );
-
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
