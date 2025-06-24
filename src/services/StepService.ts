@@ -4,6 +4,9 @@ import CacheService from "./CacheService";
 import type { ProfileMeta } from "@/types/ProfileMeta";
 import type { StepsRecord } from "@/types/StepsRecord";
 
+import { wrapWithCache } from "@/utils/CacheWrapper";
+import type { ExecutorResult } from "./SupabaseApiService";
+
 /**
  * Service for handling step-related database operations
  */
@@ -410,46 +413,35 @@ export class StepService {
     }
   }
 
-  static async getTotalSteps(competetionId: number) {
-    const cacheKey = `step_service_total_steps_${competetionId}`;
-    const cachedData = CacheService.get(cacheKey);
-    if (cachedData) {
-      return {
-        success: true,
-        data: cachedData as number,
-      };
-    }
+  static async getTotalSteps(
+    competetionId: number
+  ): Promise<ExecutorResult<number>> {
+    return await wrapWithCache(
+      `step_service_total_steps_${competetionId}`,
+      10,
+      async () => {
+        const { data, error } = await supabase()
+          .from("Steps")
+          .select("steps")
+          .eq("competition_id", competetionId);
 
-    try {
-      const { data, error } = await supabase()
-        .from("Steps")
-        .select("steps")
-        .eq("competition_id", competetionId);
+        if (error) {
+          console.error("Error fetching total steps:", error);
+          return {
+            success: false,
+            error: error,
+          };
+        }
 
-      if (error) {
-        console.error("Error fetching total steps:", error);
+        const result =
+          data?.reduce((total, record) => total + (record.steps || 0), 0) || 0;
+
         return {
-          success: false,
-          error: error.message,
+          success: true,
+          data: result,
         };
       }
-
-      const result =
-        data?.reduce((total, record) => total + (record.steps || 0), 0) || 0;
-
-      CacheService.set(cacheKey, result, 10);
-
-      return {
-        success: true,
-        data: result,
-      };
-    } catch (err) {
-      console.error("Unexpected error fetching total steps", err);
-      return {
-        success: false,
-        error: err instanceof Error ? err.message : "Unknown error occurred",
-      };
-    }
+    );
   }
 
   static async getAllStepRecordsForCompetition(competetionId: number) {

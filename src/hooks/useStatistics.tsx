@@ -84,10 +84,6 @@ export const useStatistics = (competitionId: number) => {
         };
 
         setData(statistics);
-      } else {
-        console.error(
-          "Failed to fetch statistics data: No steps records found."
-        );
       }
       setIsLoading(false);
     };
