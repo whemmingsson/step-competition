@@ -33,10 +33,10 @@ import { useCompetitions } from "@/hooks/useCompetitions";
 import { useUser } from "@/context/user/UserContext";
 import { useUserTeam } from "@/hooks/useUserTeam";
 import { useCompetition } from "@/hooks/useComptetition";
-import { Link } from "react-router";
 import { useUserSteps } from "@/hooks/useUserSteps";
 import { CalendarField } from "@/components/forms/CalendarField";
 import { useAuth } from "@/context/auth/useAuth";
+import { AppLink } from "@/components/AppLink";
 
 // Form validation schema with competition field
 const formSchema = z.object({
@@ -235,9 +235,12 @@ export const RegisterStepsPage = () => {
                     ) : (
                       <span className="text-muted-foreground">
                         Not part of a team -{" "}
-                        <Link to="/team" className="font-bold hover:underline">
+                        <AppLink
+                          to="/team"
+                          className="font-bold hover:underline"
+                        >
                           Click here to create or join one
-                        </Link>
+                        </AppLink>
                       </span>
                     )}
                   </div>

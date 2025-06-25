@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { LogOut, Menu, Trash, X } from "lucide-react";
@@ -16,6 +16,7 @@ import {
   AlertDialogTitle,
 } from "./ui/alert-dialog";
 import { SitePages } from "@/navigation/NavigationConfig";
+import { AppLink } from "./AppLink";
 
 export const MainMenu = ({ className }: { className?: string }) => {
   const location = useLocation();
@@ -90,7 +91,7 @@ export const MainMenu = ({ className }: { className?: string }) => {
                 (item.path !== "/" && location.pathname.startsWith(item.path));
 
               return (
-                <Link
+                <AppLink
                   key={item.path}
                   to={item.path}
                   onClick={() => setMobileMenuOpen(false)}
@@ -102,7 +103,7 @@ export const MainMenu = ({ className }: { className?: string }) => {
                   )}
                 >
                   {item.name} {item.name === "Profile" && <DisplayNameBadge />}
-                </Link>
+                </AppLink>
               );
             })}
           </div>
@@ -121,7 +122,7 @@ export const MainMenu = ({ className }: { className?: string }) => {
                 (item.path !== "/" && location.pathname.startsWith(item.path));
 
               return (
-                <Link
+                <AppLink
                   key={item.path}
                   to={item.path}
                   className={cn(
@@ -135,7 +136,7 @@ export const MainMenu = ({ className }: { className?: string }) => {
                   {item.icon}
                   {item.name}
                   {item.name === "Profile" && <DisplayNameBadge />}
-                </Link>
+                </AppLink>
               );
             })}
           </div>

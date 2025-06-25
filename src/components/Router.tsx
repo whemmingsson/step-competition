@@ -27,11 +27,12 @@ export const Router = () => {
 
         {/* All authenticated routes use the same layout */}
         <Route element={<RequireAuth />}>
-          <Route element={<Layout />}>
+          <Route path="/" element={<Navigate to="/en" />} />
+          <Route element={<Layout />} path="/:lang">
             {SitePages.map((page) => (
               <Route
                 key={page.name}
-                path={page.path}
+                path={"/:lang" + page.path}
                 element={page.component}
               />
             ))}

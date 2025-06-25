@@ -23,8 +23,8 @@ export const Layout = () => {
       className="min-h-screen flex flex-col bg-cover bg-center bg-fixed"
       style={{
         backgroundImage: isMobile
-          ? "url('./resources/mobile.jpg')"
-          : "url('./resources/desktop.jpg')",
+          ? "url('./../resources/mobile.jpg')"
+          : "url('./../resources/desktop.jpg')",
       }}
     >
       {/* Semi-transparent overlay */}
