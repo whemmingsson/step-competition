@@ -1,4 +1,5 @@
 import { format } from "date-fns/format";
+import { enUS, sv } from "date-fns/locale";
 import { Button } from "../ui/button";
 import {
   FormControl,
@@ -12,6 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { CalendarIcon } from "lucide-react";
 import { Calendar } from "../ui/calendar";
 import { cn } from "@/lib/utils";
+import { useLang } from "@/hooks/useLang";
 
 interface CalendarFieldProps {
   label?: string; // Optional label for the calendar field
@@ -30,6 +32,8 @@ export const CalendarField = ({
   control,
   modifiers,
 }: CalendarFieldProps) => {
+  const lang = useLang();
+  const locale = lang === "sv" ? sv : enUS; // Set locale based on language
   return (
     <FormField
       control={control}
@@ -58,6 +62,7 @@ export const CalendarField = ({
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
               <Calendar
+                locale={locale}
                 weekStartsOn={1} // Monday as the first day of the week
                 mode="single"
                 selected={field.value}

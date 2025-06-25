@@ -37,26 +37,7 @@ import { useUserSteps } from "@/hooks/useUserSteps";
 import { CalendarField } from "@/components/forms/CalendarField";
 import { useAuth } from "@/context/auth/useAuth";
 import { AppLink } from "@/components/AppLink";
-
-// Form validation schema with competition field
-const formSchema = z.object({
-  competition: z.string({
-    required_error: "Please select a competition",
-  }),
-  steps: z
-    .number({ required_error: "Number of steps is required" })
-    .positive("Steps must be a positive number greater than zero")
-    .int("Steps must be a whole number"),
-  date: z
-    .date({
-      required_error: "Date is required",
-    })
-    .refine((date) => date <= new Date(), {
-      message: "Date cannot be in the future",
-    }),
-});
-
-type FormValues = z.infer<typeof formSchema>;
+import { useTranslate } from "@/hooks/useTranslate";
 
 export const RegisterStepsPage = () => {
   const { session } = useAuth();
@@ -66,6 +47,26 @@ export const RegisterStepsPage = () => {
   const { id: userId } = user || {};
   const { data: userTeam, loading: teamLoading } = useUserTeam();
   const { competitionId } = useCompetition();
+  const { translate } = useTranslate();
+
+  // Form validation schema with competition field
+  type FormValues = z.infer<typeof formSchema>;
+  const formSchema = z.object({
+    competition: z.string({
+      required_error: translate("home", "competitionRequired"),
+    }),
+    steps: z
+      .number({ required_error: translate("home", "stepsRequired") })
+      .positive(translate("home", "stepsPositive"))
+      .int(translate("home", "stepsInteger")),
+    date: z
+      .date({
+        required_error: translate("home", "dateRequired"),
+      })
+      .refine((date) => date <= new Date(), {
+        message: translate("home", "dateFuture"),
+      }),
+  });
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -87,17 +88,17 @@ export const RegisterStepsPage = () => {
 
   async function onSubmit(data: FormValues) {
     if (!userId) {
-      toast.error("User not authenticated. Please log in.");
+      toast.error(translate("home", "notAuthenticated"));
       return;
     }
 
     const result = await StepService.recordSteps(data.steps, userId, data.date);
     if (!result.success) {
-      toast.error(result.error || "Failed to register steps");
+      toast.error(result.error || translate("home", "registerFailed"));
       return;
     }
 
-    toast(`${data.steps} steps registered successfully! 🎉`);
+    toast(`${data.steps}${translate("home", "registerSuccess")} 🎉`);
 
     // Reset form
     form.reset({
@@ -123,7 +124,7 @@ export const RegisterStepsPage = () => {
       <Card className="w-full" style={{ background: "#ffffffee" }}>
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-center">
-            Register Your Daily Steps
+            {translate("home", "title")}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -137,7 +138,8 @@ export const RegisterStepsPage = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Select Competition <SetCompetitionBadge />
+                      {translate("home", "competitionLabel")}{" "}
+                      <SetCompetitionBadge />
                     </FormLabel>
                     <Select
                       onValueChange={(value) => {
@@ -175,7 +177,7 @@ export const RegisterStepsPage = () => {
                       </SelectContent>
                     </Select>
                     <FormDescription>
-                      Choose which competition to record steps for
+                      {translate("home", "competitionDescription")}
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -187,11 +189,11 @@ export const RegisterStepsPage = () => {
                 name="steps"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Number of Steps</FormLabel>
+                    <FormLabel>{translate("home", "stepsLabel")}</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
-                        placeholder="Enter your step count"
+                        placeholder={translate("home", "stepsPlaceholder")}
                         className="bg-white"
                         {...field}
                         onChange={(e) => {
@@ -204,7 +206,7 @@ export const RegisterStepsPage = () => {
                       />
                     </FormControl>
                     <FormDescription>
-                      Enter the total number of steps for this day
+                      {translate("home", "stepsDescription")}
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -214,44 +216,44 @@ export const RegisterStepsPage = () => {
               <CalendarField
                 control={form.control}
                 modifiers={modifiers}
-                label="Date"
-                description="Select the date for your step count"
+                label={translate("home", "dateLabel")}
+                description={translate("home", "dateDescription")}
               />
 
               {/* Team display section - outside of form validation */}
               <div className="pt-4 mt-4 border-t ">
                 <div className="flex flex-col space-y-1.5">
                   <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                    Contributing to Team
+                    {translate("home", "teamLabel")}
                   </label>
                   <div className="flex items-center gap-2 h-10 px-3 py-2 text-sm border rounded-md bg-white">
                     <Users className="h-4 w-4 opacity-70" />
                     {teamLoading ? (
                       <span className="text-muted-foreground">
-                        Loading team information...
+                        {translate("home", "teamLoading")}
                       </span>
                     ) : userTeam ? (
                       <span>{userTeam.name}</span>
                     ) : (
                       <span className="text-muted-foreground">
-                        Not part of a team -{" "}
+                        {translate("home", "teamEmpty")}{" "}
                         <AppLink
                           to="/team"
                           className="font-bold hover:underline"
                         >
-                          Click here to create or join one
+                          {translate("home", "teamJoinLink")}
                         </AppLink>
                       </span>
                     )}
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    Your steps also contribute to your team's total
+                    {translate("home", "teamDescription")}
                   </p>
                 </div>
               </div>
 
               <Button type="submit" className="w-full">
-                Register Steps
+                {translate("home", "submitButton")}
               </Button>
             </form>
           </Form>

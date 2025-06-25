@@ -1,3 +1,4 @@
+import { getTranslator } from "@/hooks/useTranslate";
 import { LeaderboardPage } from "@/pages/LeaderboardPage.";
 import { MyProgressPage } from "@/pages/MyProgressPage";
 import { ProfilePage } from "@/pages/ProfilePage";
@@ -60,3 +61,12 @@ export const SitePages: SitePage[] = [
     icon: <BarChart3 className={commonClassName} />,
   },
 ];
+
+export const getPagesConfig = (lang: string): SitePage[] => {
+  const { translate } = getTranslator(lang);
+
+  return SitePages.map((page) => ({
+    ...page,
+    name: translate("navigation", page.name.toLowerCase()) || page.name,
+  }));
+};

@@ -15,10 +15,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "./ui/alert-dialog";
-import { SitePages } from "@/navigation/NavigationConfig";
+import { getPagesConfig } from "@/navigation/NavigationConfig";
 import { AppLink } from "./AppLink";
+import { useLang } from "@/hooks/useLang";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 
 export const MainMenu = ({ className }: { className?: string }) => {
+  const lang = useLang();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -32,6 +35,8 @@ export const MainMenu = ({ className }: { className?: string }) => {
       window.location.href = "/";
     }
   }
+
+  const pages = getPagesConfig(lang);
 
   return (
     <nav
@@ -85,7 +90,7 @@ export const MainMenu = ({ className }: { className?: string }) => {
           )}
         >
           <div className="container mx-auto px-4 py-2 space-y-2">
-            {SitePages.map((item) => {
+            {pages.map((item) => {
               const isActive =
                 location.pathname === item.path ||
                 (item.path !== "/" && location.pathname.startsWith(item.path));
@@ -116,7 +121,7 @@ export const MainMenu = ({ className }: { className?: string }) => {
 
           {/* Center section - menu items */}
           <div className="flex items-center justify-center gap-1 md:gap-2 lg:gap-4">
-            {SitePages.map((item) => {
+            {pages.map((item) => {
               const isActive =
                 location.pathname === item.path ||
                 (item.path !== "/" && location.pathname.startsWith(item.path));
@@ -143,6 +148,7 @@ export const MainMenu = ({ className }: { className?: string }) => {
 
           {/* Right section - login/delete buttons */}
           <div className="flex items-center space-x-1 md:space-x-2 w-[150px] lg:w-[200px] justify-end mr-4">
+            <LanguageSwitcher />
             <Button
               variant="outline"
               onClick={handleLogout}
