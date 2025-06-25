@@ -95,13 +95,14 @@ export const MainMenu = ({ className }: { className?: string }) => {
                   to={item.path}
                   onClick={() => setMobileMenuOpen(false)}
                   className={cn(
-                    "block w-full text-center py-2 px-2 rounded-md",
+                    " w-full text-center py-2 px-2 flex gap-2 items.center justify-center text-sm font-medium transition-colors",
                     isActive
-                      ? "bg-blue-900 text-primary-foreground"
+                      ? "bg-black text-primary-foreground"
                       : "text-foreground/80"
                   )}
                 >
-                  {item.name} {item.name === "Profile" && <DisplayNameBadge />}
+                  {item.icon} {item.name}{" "}
+                  {item.name === "Profile" && <DisplayNameBadge />}
                 </Link>
               );
             })}
@@ -114,7 +115,7 @@ export const MainMenu = ({ className }: { className?: string }) => {
           <div className="w-[150px] lg:w-[200px] flex items-center"></div>
 
           {/* Center section - menu items */}
-          <div className="flex items-center justify-center gap-1 md:gap-2 lg:gap-4">
+          <div className="flex items-center justify-center h-full">
             {SitePages.map((item) => {
               const isActive =
                 location.pathname === item.path ||
@@ -124,12 +125,11 @@ export const MainMenu = ({ className }: { className?: string }) => {
                 <Link
                   key={item.path}
                   to={item.path}
+                  style={{ height: "calc(100% + 1px)" }}
                   className={cn(
-                    "inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 md:px-3 lg:px-3 py-2 text-sm md:text-sm font-medium transition-colors",
-                    "hover:bg-blue-900 hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-1 gap-1 lg:gap-2",
-                    isActive
-                      ? "bg-blue-900 text-primary-foreground"
-                      : "text-foreground/80"
+                    "inline-flex items-center justify-center whitespace-nowrap md:px-3 lg:px-4 text-sm md:text-sm font-medium transition-colors",
+                    "hover:border-b-3 hover:border-b-black focus-visible:outline-none focus-visible:ring-1 gap-1 lg:gap-2 border-b-3 border-transparent border-t-3 border-t-transparent ",
+                    isActive ? "bg-black text-white" : "text-foreground/80"
                   )}
                 >
                   {item.icon}
