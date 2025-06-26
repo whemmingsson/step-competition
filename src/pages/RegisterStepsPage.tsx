@@ -24,12 +24,12 @@ import { useEffect, useMemo } from "react";
 import { useCompetitions } from "@/hooks/useCompetitions";
 import { useUser } from "@/context/user/UserContext";
 import { useUserTeam } from "@/hooks/useUserTeam";
-import { useCompetition } from "@/hooks/useComptetition";
 import { Link } from "react-router";
 import { useUserSteps } from "@/hooks/useUserSteps";
 import { CalendarField } from "@/components/forms/CalendarField";
 import { useAuth } from "@/context/auth/useAuth";
 import { CompetitionSelectorField } from "@/components/forms/CompetitionSelectorField";
+import { useCurrentCompetition } from "@/hooks/useCurrentCompetition";
 
 // Form validation schema with competition field
 const formSchema = z.object({
@@ -58,12 +58,12 @@ export const RegisterStepsPage = () => {
   const { steps } = useUserSteps(session?.user.id, false); // Fetch user steps to ensure user is loaded
   const { id: userId } = user || {};
   const { data: userTeam, loading: teamLoading } = useUserTeam();
-  const { competitionId } = useCompetition();
+  const { competition } = useCurrentCompetition();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      competition: competitionId,
+      competition: competition?.id || "",
       steps: undefined,
       date: new Date(),
     },
@@ -96,7 +96,7 @@ export const RegisterStepsPage = () => {
     form.reset({
       steps: 0,
       date: new Date(),
-      competition: competitionId, // Reset to saved competition
+      competition: competition?.id ?? "", // Reset to saved competition
     });
   }
 
@@ -123,6 +123,7 @@ export const RegisterStepsPage = () => {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               <CompetitionSelectorField
+                currentCompetition={competition}
                 control={form.control}
                 competitions={competitions}
                 competitionLoading={competitionLoading}
@@ -193,7 +194,11 @@ export const RegisterStepsPage = () => {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full">
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={competitionLoading || !competition}
+              >
                 Register Steps
               </Button>
             </form>

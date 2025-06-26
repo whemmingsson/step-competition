@@ -22,7 +22,7 @@ export const InviteVerificationErrorPage = () => {
             Verification Failed
           </CardTitle>
           <CardDescription>
-            We couldn't verify your team invitation
+            We couldn't verify your competition invitation
           </CardDescription>
         </CardHeader>
 

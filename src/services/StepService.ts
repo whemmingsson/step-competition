@@ -71,6 +71,13 @@ export class StepService {
     // Only apply the competition filter if we have a value
     const competitionId = LocalStorageService.getSelectedComptetionId();
 
+    if (!competitionId) {
+      return {
+        success: false,
+        error: "No competition selected",
+      };
+    }
+
     try {
       const cacheKey = `step_service_user-steps-${uid}-${competitionId}`;
       const cachedData = CacheService.get(cacheKey);

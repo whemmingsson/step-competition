@@ -2,11 +2,16 @@ import { Outlet } from "react-router";
 import { MainMenu } from "./MainMenu";
 import { useEffect, useState } from "react";
 import { Footer } from "./Footer";
+import { useCompetition } from "@/hooks/useComptetition";
+import { NoCompetitionAlert } from "./NoCompetitionAlert";
 
 // Shared authenticated layout for ALL authenticated routes including home
 export const Layout = () => {
   // Track viewport width for responsive background switching
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const { competition, isLoading } = useCompetition();
+
+  const mode = import.meta.env.VITE_COMPETITION_MODE;
 
   // Update on resize
   useEffect(() => {
@@ -37,6 +42,11 @@ export const Layout = () => {
         {/* Main content area with auto scrolling */}
         <div className="flex-1 overflow-y-auto">
           <div className="container mx-auto max-w-full md:max-w-4xl px-4 py-6">
+            {!isLoading && mode === "invite-only" && !competition ? (
+              <NoCompetitionAlert />
+            ) : (
+              <></>
+            )}
             <Outlet />
           </div>
         </div>

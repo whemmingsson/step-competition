@@ -6,6 +6,7 @@ import {
   competitionTransformer,
 } from "@/services/Transformers";
 import type { ServiceCallResult } from "@/types/ServiceCallResult";
+import { LocalStorageService } from "./LocalStorageService";
 
 /**
  * Service for user-related operations
@@ -30,6 +31,23 @@ export class CompetitionService {
     );
   }
 
+  static async getCompetitionById(
+    id: string
+  ): Promise<ServiceCallResult<Competition>> {
+    return await executeQuery(
+      async () => {
+        return await supabase()
+          .from("Competitions")
+          .select("name, id, start_date, end_date")
+          .eq("id", parseInt(id))
+          .single();
+      },
+      competitionTransformer,
+      `competitions_service_get-competition-by-id-${id}`,
+      60
+    );
+  }
+
   static async verifyInviteToCompetition(
     inviteId: string,
     inviteKey: string
@@ -44,8 +62,8 @@ export class CompetitionService {
           .single();
       },
       competitionTransformer,
-      null,
-      null
+      `competitions_service_get-competition-by-id-${inviteId}`,
+      60
     );
 
     if (res.success && res.data) {
@@ -53,5 +71,18 @@ export class CompetitionService {
     }
 
     return false;
+  }
+
+  static async getCurrentCompetition(): Promise<
+    ServiceCallResult<Competition>
+  > {
+    const id = LocalStorageService.getSelectedComptetionId();
+    if (!id) {
+      return {
+        success: false,
+        error: "No competition selected",
+      };
+    }
+    return await this.getCompetitionById(id.toString());
   }
 }

@@ -15,18 +15,56 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import { Input } from "../ui/input";
 
 export interface CompetitionSelectorFieldProps {
+  currentCompetition?: Competition;
   competitions: Competition[];
   competitionLoading: boolean;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   control: any;
 }
 export const CompetitionSelectorField = ({
+  currentCompetition,
   competitions,
   competitionLoading,
   control,
 }: CompetitionSelectorFieldProps) => {
+  const competition = currentCompetition;
+
+  const mode = import.meta.env.VITE_COMPETITION_MODE;
+  if (mode === "invite-only") {
+    if (competition) {
+      return (
+        <FormField
+          name="competitionName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Competition Name</FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  value={competition?.name || ""}
+                  className="bg-muted/40 cursor-not-allowed"
+                  disabled
+                  readOnly
+                />
+              </FormControl>
+              <FormDescription>
+                This is the name of the competition you're participating in
+              </FormDescription>
+            </FormItem>
+          )}
+        />
+      );
+    }
+    return (
+      <p className="border-2 border-red-400 p-4 text-red-500">
+        No competition found
+      </p>
+    );
+  }
+
   return (
     <FormField
       disabled={competitionLoading}
