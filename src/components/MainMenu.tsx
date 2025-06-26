@@ -128,8 +128,10 @@ export const MainMenu = ({ className }: { className?: string }) => {
                   style={{ height: "calc(100% + 1px)" }}
                   className={cn(
                     "inline-flex items-center justify-center whitespace-nowrap md:px-3 lg:px-4 text-sm md:text-sm font-medium transition-colors",
-                    "hover:border-b-3 hover:border-b-black focus-visible:outline-none focus-visible:ring-1 gap-1 lg:gap-2 border-b-3 border-transparent border-t-3 border-t-transparent ",
-                    isActive ? "bg-black text-white" : "text-foreground/80"
+                    "hover:bg-gray-200 focus-visible:outline-none focus-visible:ring-1 gap-1 lg:gap-2 border-b-3 border-transparent border-t-3 border-t-transparent ",
+                    isActive
+                      ? "border-b-3 border-b-blue-950 "
+                      : "text-foreground/80"
                   )}
                 >
                   {item.icon}
