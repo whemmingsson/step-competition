@@ -13,6 +13,20 @@ export const Layout = () => {
 
   const mode = import.meta.env.VITE_COMPETITION_MODE;
 
+  // TODO: Ask JT how to address flickering alert on initial load since CoPilot doesn't understand the issue
+  let shouldRenderAlert = false;
+
+  // If competition is loading, don't render the alert
+  if (isLoading) {
+    shouldRenderAlert = false;
+  } else if (mode === "invite-only") {
+    // If competition is invite-only, show alert if no competition is set
+    shouldRenderAlert = !competition;
+  } else {
+    // For public competitions, do not show the alert
+    shouldRenderAlert = false;
+  }
+
   // Update on resize
   useEffect(() => {
     const handleResize = () => {
@@ -42,10 +56,8 @@ export const Layout = () => {
         {/* Main content area with auto scrolling */}
         <div className="flex-1 overflow-y-auto">
           <div className="container mx-auto max-w-full md:max-w-4xl px-4 py-6">
-            {!isLoading && mode === "invite-only" && !competition ? (
+            {shouldRenderAlert && mode === "invite-only" && (
               <NoCompetitionAlert />
-            ) : (
-              <></>
             )}
             <Outlet />
           </div>
