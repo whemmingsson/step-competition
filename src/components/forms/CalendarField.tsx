@@ -22,6 +22,8 @@ interface CalendarFieldProps {
   modifiers: {
     highlighted: (date: Date) => boolean;
   };
+  validFirstDay?: Date; // Optional valid first day for the calendar
+  validLastDay?: Date; // Optional valid last day for the calendar
 }
 
 export const CalendarField = ({
@@ -29,6 +31,8 @@ export const CalendarField = ({
   description,
   control,
   modifiers,
+  validFirstDay,
+  validLastDay,
 }: CalendarFieldProps) => {
   return (
     <FormField
@@ -63,7 +67,10 @@ export const CalendarField = ({
                 selected={field.value}
                 onSelect={field.onChange}
                 disabled={(date) =>
-                  date > new Date() || date < new Date("1900-01-01")
+                  date > new Date() ||
+                  date < new Date("1900-01-01") ||
+                  date < (validFirstDay ?? new Date("1900-01-01")) ||
+                  date > (validLastDay ?? new Date())
                 }
                 modifiers={modifiers}
                 modifiersClassNames={{

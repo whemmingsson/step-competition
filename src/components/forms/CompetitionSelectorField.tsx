@@ -44,7 +44,9 @@ export const CompetitionSelectorField = ({
               <FormControl>
                 <Input
                   {...field}
-                  value={competition?.name || ""}
+                  value={`${competition?.name || ""} (${
+                    competition.startDate
+                  } - ${competition.endDate})`}
                   className="bg-muted/40 cursor-not-allowed"
                   disabled
                   readOnly

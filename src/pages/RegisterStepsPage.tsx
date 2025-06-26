@@ -111,6 +111,20 @@ export const RegisterStepsPage = () => {
     };
   }, [steps]);
 
+  const validStartDate = useMemo(() => {
+    if (!competition) return new Date();
+
+    if (competition.startDate) return new Date(competition.startDate);
+    return new Date("1900-01-01");
+  }, [competition]);
+
+  const validEndDate = useMemo(() => {
+    if (!competition) return new Date();
+
+    if (competition.endDate) return new Date(competition.endDate);
+    return new Date("2100-01-01");
+  }, [competition]);
+
   return (
     <PageContainer>
       <Card className="w-full" style={{ background: "#ffffffee" }}>
@@ -163,6 +177,8 @@ export const RegisterStepsPage = () => {
                 modifiers={modifiers}
                 label="Date"
                 description="Select the date for your step count"
+                validFirstDay={validStartDate}
+                validLastDay={validEndDate}
               />
 
               {/* Team display section - outside of form validation */}
