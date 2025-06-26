@@ -7,6 +7,8 @@ import { RequireAuth } from "./RequireAuth";
 import { LoadingScreen } from "./LoadingScreen";
 import { SitePages } from "@/navigation/NavigationConfig";
 import { PromoPage } from "@/pages/PromoPage";
+import { CompetitionHandler } from "./CompetitionHandler";
+import { InviteVerificationErrorPage } from "@/pages/InviteVerificationErrorPage";
 
 export const Router = () => {
   const { isLoading } = useAuth();
@@ -21,26 +23,29 @@ export const Router = () => {
 
   return (
     <BrowserRouter basename={import.meta.env.VITE_BASE_PATH || "/"}>
-      <Routes>
-        {/* Login page - separate from other routes */}
-        <Route path="/login" element={<LoginPage />} />
+      <CompetitionHandler>
+        <Routes>
+          {/* Login page - separate from other routes */}
+          <Route path="/login" element={<LoginPage />} />
 
-        {/* All authenticated routes use the same layout */}
-        <Route element={<RequireAuth />}>
-          <Route element={<Layout />}>
-            {SitePages.map((page) => (
-              <Route
-                key={page.name}
-                path={page.path}
-                element={page.component}
-              />
-            ))}
+          {/* All authenticated routes use the same layout */}
+          <Route element={<RequireAuth />}>
+            <Route element={<Layout />}>
+              {SitePages.map((page) => (
+                <Route
+                  key={page.name}
+                  path={page.path}
+                  element={page.component}
+                />
+              ))}
+            </Route>
           </Route>
-        </Route>
+          <Route path="/error" element={<InviteVerificationErrorPage />} />
 
-        {/* Catch all route */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+          {/* Catch all route */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </CompetitionHandler>
     </BrowserRouter>
   );
 };

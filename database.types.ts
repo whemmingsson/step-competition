@@ -40,6 +40,7 @@ export type Database = {
           created_at: string
           end_date: string | null
           id: number
+          invite_key: string | null
           is_private: boolean | null
           name: string | null
           start_date: string | null
@@ -48,6 +49,7 @@ export type Database = {
           created_at?: string
           end_date?: string | null
           id?: number
+          invite_key?: string | null
           is_private?: boolean | null
           name?: string | null
           start_date?: string | null
@@ -56,6 +58,7 @@ export type Database = {
           created_at?: string
           end_date?: string | null
           id?: number
+          invite_key?: string | null
           is_private?: boolean | null
           name?: string | null
           start_date?: string | null

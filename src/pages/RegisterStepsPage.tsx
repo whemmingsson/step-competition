@@ -20,14 +20,6 @@ import { Users } from "lucide-react";
 import { StepService } from "@/services/StepService";
 import { PageContainer } from "@/components/PageContainer";
 import { useEffect, useMemo } from "react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { SetCompetitionBadge } from "@/components/SetCompetitionBadge";
 
 import { useCompetitions } from "@/hooks/useCompetitions";
 import { useUser } from "@/context/user/UserContext";
@@ -37,6 +29,7 @@ import { Link } from "react-router";
 import { useUserSteps } from "@/hooks/useUserSteps";
 import { CalendarField } from "@/components/forms/CalendarField";
 import { useAuth } from "@/context/auth/useAuth";
+import { CompetitionSelectorField } from "@/components/forms/CompetitionSelectorField";
 
 // Form validation schema with competition field
 const formSchema = z.object({
@@ -129,57 +122,10 @@ export const RegisterStepsPage = () => {
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              {/* Competition Select Field */}
-              <FormField
-                disabled={competitionLoading}
+              <CompetitionSelectorField
                 control={form.control}
-                name="competition"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Select Competition <SetCompetitionBadge />
-                    </FormLabel>
-                    <Select
-                      onValueChange={(value) => {
-                        field.onChange(value);
-                      }}
-                      defaultValue={field.value}
-                    >
-                      <FormControl className="bg-white">
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a competition" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {competitions.map((competition) => {
-                          let isActive = false;
-                          if (!competition.startDate || !competition.endDate) {
-                            isActive = false; // If no dates, assume inactive
-                          } else {
-                            const now = new Date();
-                            const start = new Date(competition.startDate);
-                            const end = new Date(competition.endDate);
-                            isActive = now >= start && now <= end;
-                          }
-                          return (
-                            <SelectItem
-                              className="bg-white"
-                              key={competition.id}
-                              value={competition.id}
-                              disabled={!isActive}
-                            >
-                              {competition.name}
-                            </SelectItem>
-                          );
-                        })}
-                      </SelectContent>
-                    </Select>
-                    <FormDescription>
-                      Choose which competition to record steps for
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                competitions={competitions}
+                competitionLoading={competitionLoading}
               />
 
               <FormField

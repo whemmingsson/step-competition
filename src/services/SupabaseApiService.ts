@@ -42,6 +42,7 @@ export const executeQuery = async <TViewModel, TDto>(
       return {
         success: false,
         error: result.error.message || "An unknown error occurred",
+        code: result.error.code || "API_ERROR",
       };
     }
 

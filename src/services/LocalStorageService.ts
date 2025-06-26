@@ -15,4 +15,20 @@ export class LocalStorageService {
     const value = parseInt(strValue, 10);
     return isNaN(value) ? null : value;
   }
+
+  static setSelectedCompetitionId(id: number): void {
+    this.setItem("selectedCompetition", id.toString());
+  }
+
+  static setCompetitionMode(mode: "public" | "invite-only"): void {
+    this.setItem("competitionMode", mode);
+  }
+
+  static getCompetitionMode(): "public" | "invite-only" | null {
+    const mode = this.getItem("competitionMode");
+    if (mode === "public" || mode === "invite-only") {
+      return mode;
+    }
+    return null;
+  }
 }
