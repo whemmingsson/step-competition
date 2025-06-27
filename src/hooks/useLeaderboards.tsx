@@ -36,7 +36,7 @@ export const useLeaderboards = (limit: number = 5) => {
       // Fetch user leaderboard
       (async () => {
         try {
-          const result = await StepService.getTopUsers(limit);
+          const result = await StepService.getTopUsers_v2(limit);
 
           if (result.success && result.data) {
             setUserLeaderboard(result.data as LeaderboardUser[]);

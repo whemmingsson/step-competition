@@ -3,9 +3,11 @@ import type { CompetitionDTO } from "@/types/DTO/CompetitionDTO";
 import type { ProfileMetaDTO } from "@/types/DTO/ProfileMetaDTO";
 import type { StepsRecordDTO } from "@/types/DTO/StepsRecordDTO";
 import type { TeamDTO } from "@/types/DTO/TeamDTO";
+import type { TopUserDTO } from "@/types/DTO/TopUserDTO";
 import type { ProfileMeta } from "@/types/ProfileMeta";
 import type { StepsRecord } from "@/types/StepsRecord";
 import type { Team } from "@/types/Team";
+import type { TopUser } from "@/types/TopUser";
 import type { AppUser } from "@/types/User";
 
 export const profileMetaTransformer = (data: ProfileMetaDTO): ProfileMeta => {
@@ -79,4 +81,16 @@ export const stepsRecordsTransformer = (
   data: StepsRecordDTO[]
 ): StepsRecord[] => {
   return data.map((record) => stepsRecordTransformer(record));
+};
+
+export const topUserTransformer = (data: TopUserDTO): TopUser => {
+  return {
+    displayName: data.display_name || "Unknown User",
+    profileImageUrl: data.profile_image_url || "",
+    totalSteps: data.total_steps || 0,
+  };
+};
+
+export const topUsersTransformer = (data: TopUserDTO[]): TopUser[] => {
+  return data.map((user) => topUserTransformer(user));
 };

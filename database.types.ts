@@ -9,31 +9,17 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      Competition_Codes: {
+      Admins: {
         Row: {
-          code: string | null
-          competition_id: number
-          id: number
+          user_id: string
         }
         Insert: {
-          code?: string | null
-          competition_id: number
-          id?: number
+          user_id: string
         }
         Update: {
-          code?: string | null
-          competition_id?: number
-          id?: number
+          user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "Competition_Codes_competition_id_fkey"
-            columns: ["competition_id"]
-            isOneToOne: false
-            referencedRelation: "Competitions"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       Competitions: {
         Row: {
@@ -183,7 +169,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_top_users_by_steps: {
+        Args: { p_limit: number; p_competition_id: number }
+        Returns: {
+          display_name: string
+          profile_image_url: string
+          total_steps: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

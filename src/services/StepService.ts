@@ -1,7 +1,6 @@
 import supabase from "@/supabase";
 import { LocalStorageService } from "./LocalStorageService";
 import CacheService from "./CacheService";
-import type { ProfileMeta } from "@/types/ProfileMeta";
 import type { StepsRecord } from "@/types/StepsRecord";
 
 import { wrapWithCache } from "@/utils/CacheWrapper";
@@ -10,10 +9,12 @@ import type { ServiceCallResult } from "@/types/ServiceCallResult";
 import {
   stepsRecordsTransformer,
   stepsRecordTransformer,
+  topUsersTransformer,
 } from "./Transformers";
 import { executeQuery } from "./SupabaseApiService";
 import { formatDate } from "@/utils/DateUtils";
 import { getAuthenticatedUser } from "@/utils/AuthUtils";
+import type { TopUser } from "@/types/TopUser";
 
 /**
  * Service for handling step-related database operations
@@ -164,14 +165,10 @@ export class StepService {
    * @param limit - Number of users to return (default 5)
    * @returns Promise with array of {username, totalSteps}
    */
-  static async getTopUsers(limit: number = 5): Promise<{
+  static async getTopUsers_v2(limit: number = 5): Promise<{
     success: boolean;
     error?: string;
-    data?: {
-      displayName: string;
-      totalSteps: number;
-      profileImageUrl: string;
-    }[];
+    data?: TopUser[];
   }> {
     const competitionId = LocalStorageService.getSelectedComptetionId();
 
@@ -182,84 +179,17 @@ export class StepService {
       };
     }
 
-    // Read from cache first
-    const cacheKey = `step_service_top_users_${competitionId}_${limit}`;
-    const cachedData = CacheService.get(cacheKey);
-
-    if (cachedData) {
-      return {
-        success: true,
-        data: cachedData as {
-          displayName: string;
-          totalSteps: number;
-          profileImageUrl: string;
-        }[],
-      };
-    }
-
-    try {
-      // Get all steps records
-      const { data: stepsData, error: stepsError } = await supabase()
-        .from("Steps")
-        .select("user_id, steps, Users_Meta(display_name, profile_image_url)")
-        .eq("competition_id", competitionId);
-
-      if (stepsError) {
-        throw stepsError;
-      }
-
-      const userTotals: Record<string, ProfileMeta> = {};
-      for (const record of stepsData) {
-        const userId = record.user_id;
-
-        if (!userId) {
-          console.warn("Skipping record with missing user_id:", record);
-          continue; // Skip records without user_id
-        }
-        if (!userTotals[userId]) {
-          const profileMeta: ProfileMeta = {
-            profileName: record.Users_Meta?.display_name || "Unknown User",
-            profileImageUrl: record.Users_Meta?.profile_image_url || "",
-            totalSteps: 0,
-          };
-          userTotals[userId] = profileMeta;
-        }
-        if (!userTotals[userId].totalSteps) {
-          userTotals[userId].totalSteps = 0;
-        }
-        userTotals[userId].totalSteps += record.steps ?? 0;
-      }
-
-      // Sort users by total steps and take top ones
-      const sortedUsers = Object.entries(userTotals)
-        .map(([userId, profileMeta]) => ({ userId, profileMeta }))
-        .sort(
-          (a, b) =>
-            (b.profileMeta.totalSteps as number) -
-            (a.profileMeta.totalSteps as number)
-        )
-        .slice(0, limit);
-
-      // Map to final result format
-      const result = sortedUsers.map(({ profileMeta }) => ({
-        displayName: profileMeta.profileName || "Unknown User",
-        totalSteps: profileMeta.totalSteps || 0,
-        profileImageUrl: profileMeta.profileImageUrl || "",
-      }));
-
-      CacheService.set(cacheKey, result, 5);
-
-      return {
-        success: true,
-        data: result,
-      };
-    } catch (err) {
-      console.error("Error fetching top users:", err);
-      return {
-        success: false,
-        error: err instanceof Error ? err.message : "Unknown error occurred",
-      };
-    }
+    return await executeQuery(
+      async () => {
+        return await supabase().rpc("get_top_users_by_steps", {
+          p_limit: limit,
+          p_competition_id: competitionId,
+        });
+      },
+      topUsersTransformer,
+      `step_service-get-top-users-${limit}`,
+      10
+    );
   }
 
   /**
