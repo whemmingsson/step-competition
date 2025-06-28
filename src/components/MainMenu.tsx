@@ -34,23 +34,35 @@ interface MobileMenuButtonsProps {
   mobileMenuOpen: boolean;
 }
 
+const AppName = () => {
+  const navigate = useNavigate();
+  return (
+    <span
+      className="whitespace-nowrap text-orange-600 cursor-pointer font-bold"
+      onClick={() => navigate("/")}
+    >
+      <span className="righteous">Stride</span>
+      <span className="orbitron">CHAMP</span>
+    </span>
+  );
+};
+
+// Fixed DesktopMenu component
 const DesktopMenu = ({
   handleLogout,
   setIsDeleteDialogOpen,
 }: DesktopMenuProps) => {
   const location = useLocation();
-  const navigate = useNavigate();
+
   return (
-    <div className="hidden md:flex w-full items-center justify-between h-12">
-      <div
-        className="w-[150px] lg:w-[200px] flex items-center cherry-bomb-one-regular text-3xl pl-2  font-bold cursor-pointer"
-        style={{ color: "#ff620f" }}
-        onClick={() => navigate("/")}
-      >
-        StrideChamp
+    <div className="hidden md:flex w-full items-center justify-between h-12 max-w-full overflow-hidden">
+      {/* Logo - more compact on smaller screens */}
+      <div className="flex-shrink-1 md:min-w-[120px] xl:min-w-[160px] flex items-center text-lg md:text-xl lg:text-2xl xl:text-3xl pl-1 md:pl-2  overflow-hidden">
+        <AppName />
       </div>
 
-      <div className="flex items-center justify-center h-full">
+      {/* Center navigation - more compact */}
+      <div className="flex flex-1 items-center justify-center h-full px-1">
         {SitePages.map((item) => {
           const isActive =
             location.pathname === item.path ||
@@ -60,42 +72,40 @@ const DesktopMenu = ({
             <Link
               key={item.path}
               to={item.path}
-              style={{ height: "calc(100% + 1px)" }}
+              style={{ height: "calc(100%)" }}
               className={cn(
-                "inline-flex items-center justify-center whitespace-nowrap md:px-3 lg:px-4 text-sm md:text-sm font-medium transition-colors",
-                "hover:bg-gray-200 focus-visible:outline-none focus-visible:ring-1 gap-1 lg:gap-2 border-b-3 border-transparent border-t-3 border-t-transparent ",
-                isActive
-                  ? "border-b-3 border-b-blue-950 "
-                  : "text-foreground/80"
+                "inline-flex items-center justify-center whitespace-nowrap md:px-1.5 lg:px-2 xl:px-4 text-xs md:text-sm font-medium transition-colors",
+                "hover:bg-gray-200 focus-visible:outline-none gap-0.5 md:gap-1 border-b-3 border-transparent border-t-3 border-t-transparent",
+                isActive ? "border-b-3 border-b-blue-950" : "text-foreground/80"
               )}
             >
               {item.icon}
-              {item.name}
+              <span className="hidden md:inline">{item.name}</span>
               {item.name === "Profile" && <DisplayNameBadge />}
             </Link>
           );
         })}
       </div>
 
-      {/* Right section - login/delete buttons */}
-      <div className="flex items-center space-x-1 md:space-x-2 w-[150px] lg:w-[200px] justify-end mr-4">
+      {/* Right buttons - more compact */}
+      <div className="flex-shrink-0 flex items-center space-x-1 justify-end pr-1 md:pr-2">
         <Button
           variant="outline"
           onClick={handleLogout}
           size="sm"
-          className="flex items-center gap-1 md:gap-2"
+          className="flex items-center p-1 md:p-1.5"
         >
           <LogOut className="h-3 w-3 md:h-4 md:w-4" />
-          <span className="hidden lg:inline">Logout</span>
+          <span className="hidden lg:inline ml-1">Logout</span>
         </Button>
         <Button
           variant="outline"
           onClick={() => setIsDeleteDialogOpen(true)}
           size="sm"
-          className="flex items-center gap-1 md:gap-2"
+          className="flex items-center p-1 md:p-1.5"
         >
           <Trash className="h-3 w-3 md:h-4 md:w-4" />
-          <span className="hidden lg:inline">Delete account</span>
+          <span className="hidden lg:inline ml-1">Delete</span>
         </Button>
       </div>
     </div>
@@ -147,8 +157,8 @@ const MobileMenuButtons = ({
 }: MobileMenuButtonsProps) => {
   return (
     <div className="flex justify-between items-center md:hidden">
-      <span className="text-2xl font-bold ml-4 cherry-bomb-one-regular">
-        StrideChamp
+      <span className="text-2xl font-bold ml-4">
+        <AppName />
       </span>
       <div className="flex items-center gap-2">
         <Button
@@ -202,7 +212,7 @@ export const MainMenu = () => {
   }
 
   return (
-    <nav className={`bg-background border-b sticky top-0 z-10 `}>
+    <nav className={`bg-background sticky top-0 z-10 `}>
       <div>
         <MobileMenuButtons
           mobileMenuOpen={mobileMenuOpen}
