@@ -231,8 +231,9 @@ export class TeamService {
 
       // Clear cache for this team
       CacheService.invalidate(`team_service_get-team-by-id-${teamId}`);
-      CacheService.invalidate(`team_service_get-teams-by-user-id`);
+      CacheService.invalidate(`team_service_get-team-by-user-id`);
       CacheService.invalidate(`team_service_get-teams`);
+      CacheService.invalidate(`team_service_get-top-teams-`);
 
       return { success: true };
     } catch (err) {
@@ -276,8 +277,9 @@ export class TeamService {
 
       // Clear cache for this team
       CacheService.invalidate(`team_service_get-team-by-id-${teamId}`);
-      CacheService.invalidate(`team_service_get-teams-by-user-id`);
+      CacheService.invalidate(`team_service_get-team-by-user-id`);
       CacheService.invalidate(`team_service_get-teams`);
+      CacheService.invalidate(`team_service_get-top-teams-`);
 
       return { success: true };
     } catch (err) {
