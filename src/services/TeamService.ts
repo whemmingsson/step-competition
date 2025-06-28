@@ -144,11 +144,7 @@ export class TeamService {
     return { success: true, data: mappedTeam };
   }
 
-  public static async getTeamByUserId(): Promise<{
-    success: boolean;
-    error?: string;
-    data?: Team | null;
-  }> {
+  public static async getTeamByUserId(): Promise<ServiceCallResult<Team>> {
     const cacheKey = `team_service_get-team-by-user-id`;
     const cachedTeam = CacheService.get(cacheKey);
     if (cachedTeam) {
@@ -196,7 +192,11 @@ export class TeamService {
       // Cache the result
       CacheService.set(cacheKey, mappedData);
 
-      return { success: true, data: mappedData };
+      return {
+        success: true,
+        data: mappedData as Team,
+        clearCache: () => CacheService.invalidate(cacheKey),
+      };
     } catch (err) {
       console.error("Unexpected error fetching team by user ID:", err);
       return {

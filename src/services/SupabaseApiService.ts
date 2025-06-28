@@ -74,6 +74,9 @@ export const executeQuery = async <TViewModel, TDto>(
     return {
       success: false,
       error: "No data returned from API",
+      clearCache: () => {
+        if (cacheKey) CacheService.invalidate(cacheKey);
+      },
     };
   } catch (error) {
     console.error("API call failed:", error);

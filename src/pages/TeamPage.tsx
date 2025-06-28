@@ -102,7 +102,9 @@ export const TeamPage = () => {
         setUserTeam(teamToJoin || null);
       }
 
-      if (refetchTeams) refetchTeams();
+      if (refetchTeams) {
+        refetchTeams();
+      }
       toast.success("Successfully joined team!");
     } catch (error) {
       console.error("Error joining team:", error);
@@ -122,7 +124,9 @@ export const TeamPage = () => {
         if (setUserTeam) {
           setUserTeam(null);
         }
-        if (refetchTeams) refetchTeams();
+        if (refetchTeams) {
+          refetchTeams();
+        }
         toast.success("Successfully left team!");
       } else {
         console.error("Failed to leave team:", result.error);
