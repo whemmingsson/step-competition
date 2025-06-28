@@ -5,7 +5,7 @@ import CacheService from "./CacheService";
 import { getAuthenticatedUser } from "@/utils/AuthUtils";
 import { wrapWithCache } from "@/utils/CacheWrapper";
 import { executeQuery } from "./SupabaseApiService";
-import type { ServiceCallResult } from "@/types/ServiceCallResult";
+import type { ServiceQueryResult } from "@/types/ServiceCallResult";
 import type { TeamDTO } from "@/types/DTO/TeamDTO";
 import {
   teamsTransformer,
@@ -14,6 +14,7 @@ import {
   topTeamsTransformer,
 } from "@/services/Transformers";
 import { LocalStorageService } from "./LocalStorageService";
+import type { ServiceMutationResult } from "@/types/ServiceMutationResult";
 
 /**
  * Service for user-related operations
@@ -23,7 +24,7 @@ export class TeamService {
     userIdsInTeam: string[]
   ): Promise<number> {
     return await wrapWithCache<number, number>(
-      `get-total-steps-for-team-${userIdsInTeam.join(",")}`,
+      `team_service_get-total-steps-for-team-${userIdsInTeam.join(",")}`,
       5,
       async () => {
         return await StepService.getTotalStepsForListOfUsers(userIdsInTeam);
@@ -40,11 +41,7 @@ export class TeamService {
   static async createTeam(
     userId: string,
     name: string
-  ): Promise<{
-    success: boolean;
-    error?: string;
-    data?: Team | null;
-  }> {
+  ): Promise<ServiceQueryResult<Team | null>> {
     try {
       if (!userId || !name.trim()) {
         return {
@@ -74,7 +71,7 @@ export class TeamService {
           }
         : null;
 
-      CacheService.invalidate(`get-teams`);
+      CacheService.invalidate(`team_service_get-teams`);
 
       return { success: true, data: mappedData };
     } catch (err) {
@@ -91,7 +88,7 @@ export class TeamService {
    *
    * @returns Promise with the result of the operation
    */
-  static async getTeams(): Promise<ServiceCallResult<Team[]>> {
+  static async getTeams(): Promise<ServiceQueryResult<Team[]>> {
     const cacheKey = `teams_service_get-teams`;
 
     return await executeQuery<Team[], TeamDTO[]>(
@@ -109,11 +106,9 @@ export class TeamService {
     );
   }
 
-  public static async getTeamById(teamId: number): Promise<{
-    success: boolean;
-    error?: string;
-    data?: Team | null;
-  }> {
+  public static async getTeamById(
+    teamId: number
+  ): Promise<ServiceQueryResult<Team>> {
     const cacheKey = `team_service_get-team-by-id-${teamId}`;
 
     const { data: mappedTeam } = await executeQuery<Team, TeamDTO>(
@@ -144,7 +139,7 @@ export class TeamService {
     return { success: true, data: mappedTeam };
   }
 
-  public static async getTeamByUserId(): Promise<ServiceCallResult<Team>> {
+  public static async getTeamByUserId(): Promise<ServiceQueryResult<Team>> {
     const cacheKey = `team_service_get-team-by-user-id`;
     const cachedTeam = CacheService.get(cacheKey);
     if (cachedTeam) {
@@ -216,7 +211,7 @@ export class TeamService {
   static async joinTeam(
     userId: string,
     teamId: number
-  ): Promise<{ success: boolean; error?: string }> {
+  ): Promise<ServiceMutationResult> {
     try {
       if (!userId || !teamId) {
         return {
@@ -235,9 +230,9 @@ export class TeamService {
       }
 
       // Clear cache for this team
-      CacheService.invalidate(`get-team-by-id-${teamId}`);
-      CacheService.invalidate(`get-teams-by-user-id`);
-      CacheService.invalidate(`get-teams`);
+      CacheService.invalidate(`team_service_get-team-by-id-${teamId}`);
+      CacheService.invalidate(`team_service_get-teams-by-user-id`);
+      CacheService.invalidate(`team_service_get-teams`);
 
       return { success: true };
     } catch (err) {
@@ -259,7 +254,7 @@ export class TeamService {
   static async leaveTeam(
     userId: string,
     teamId: number
-  ): Promise<{ success: boolean; error?: string }> {
+  ): Promise<ServiceMutationResult> {
     try {
       if (!userId || !teamId) {
         return {
@@ -280,9 +275,9 @@ export class TeamService {
       }
 
       // Clear cache for this team
-      CacheService.invalidate(`get-team-by-id-${teamId}`);
-      CacheService.invalidate(`get-teams-by-user-id`);
-      CacheService.invalidate(`get-teams`);
+      CacheService.invalidate(`team_service_get-team-by-id-${teamId}`);
+      CacheService.invalidate(`team_service_get-teams-by-user-id`);
+      CacheService.invalidate(`team_service_get-teams`);
 
       return { success: true };
     } catch (err) {
@@ -296,7 +291,7 @@ export class TeamService {
 
   static async getTopTeams_v2(
     limit: number
-  ): Promise<ServiceCallResult<Team[]>> {
+  ): Promise<ServiceQueryResult<Team[]>> {
     try {
       if (!limit || limit <= 0) {
         return { success: false, error: "Invalid number of teams to fetch" };
@@ -311,7 +306,7 @@ export class TeamService {
           });
         },
         topTeamsTransformer,
-        `get-top-teams-${limit}`,
+        `team_service_get-top-teams-${limit}`,
         5
       );
 
@@ -333,7 +328,7 @@ export class TeamService {
   static async deleteTeam(
     teamId: number,
     userId: string
-  ): Promise<{ success: boolean; error?: string }> {
+  ): Promise<ServiceMutationResult> {
     try {
       if (!teamId || !userId) {
         return { success: false, error: "Team ID and User ID are required" };
@@ -370,8 +365,8 @@ export class TeamService {
       }
 
       // Clear cache for this team
-      CacheService.invalidate(`get-team-by-id-${teamId}`);
-      CacheService.invalidate(`get-teams`);
+      CacheService.invalidate(`team_service_get-team-by-id-${teamId}`);
+      CacheService.invalidate(`team_service_get-teams`);
 
       return { success: true };
     } catch (err) {

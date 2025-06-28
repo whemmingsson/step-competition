@@ -5,7 +5,7 @@ import type { ProfileMeta } from "@/types/ProfileMeta";
 import { executeQuery } from "./SupabaseApiService";
 import { profileMetaTransformer } from "@/services/Transformers";
 import { getAuthenticatedUser } from "@/utils/AuthUtils";
-import type { ServiceCallResult } from "@/types/ServiceCallResult";
+import type { ServiceQueryResult } from "@/types/ServiceCallResult";
 import { wrapWithCacheSimple } from "@/utils/CacheWrapper";
 
 /**
@@ -93,7 +93,7 @@ export class UserService {
    */
   static async getProfileMeta(
     userId: string
-  ): Promise<ServiceCallResult<ProfileMeta>> {
+  ): Promise<ServiceQueryResult<ProfileMeta>> {
     return await executeQuery(
       async () => {
         return await supabase()

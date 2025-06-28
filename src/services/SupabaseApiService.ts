@@ -1,4 +1,4 @@
-import type { ServiceCallResult } from "@/types/ServiceCallResult";
+import type { ServiceQueryResult } from "@/types/ServiceCallResult";
 import CacheService from "./CacheService";
 import type {
   ExecutorFunc,
@@ -22,7 +22,7 @@ export const executeQuery = async <TViewModel, TDto>(
   cacheKey?: string | null,
   cacheDurationMinutes?: number | null,
   cacheClearFunc?: () => void
-): Promise<ServiceCallResult<TViewModel>> => {
+): Promise<ServiceQueryResult<TViewModel>> => {
   try {
     if (cacheKey) {
       // Check if the query is already cached

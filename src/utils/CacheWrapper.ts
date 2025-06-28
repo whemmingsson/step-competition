@@ -1,13 +1,13 @@
 import CacheService from "@/services/CacheService";
 import type { ExecutorResult } from "@/types/apiExecutorTypes";
-import type { ServiceCallResult } from "@/types/ServiceCallResult";
+import type { ServiceQueryResult } from "@/types/ServiceCallResult";
 
 export const wrapWithCache = async <TReturnType, ExecutorReturnType>(
   cacheKey: string,
   cacheTtlMinutes: number,
   action: () =>
     | Promise<ExecutorResult<ExecutorReturnType>>
-    | Promise<ServiceCallResult<ExecutorReturnType>>
+    | Promise<ServiceQueryResult<ExecutorReturnType>>
 ): Promise<TReturnType> => {
   // Check if the result is already cached
   const cachedResult = CacheService.get(cacheKey);

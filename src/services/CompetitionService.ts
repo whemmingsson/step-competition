@@ -5,7 +5,7 @@ import {
   competitionsTransformer,
   competitionTransformer,
 } from "@/services/Transformers";
-import type { ServiceCallResult } from "@/types/ServiceCallResult";
+import type { ServiceQueryResult } from "@/types/ServiceCallResult";
 import { LocalStorageService } from "./LocalStorageService";
 
 /**
@@ -17,7 +17,7 @@ export class CompetitionService {
    *
    * @returns Promise with the result of the operation
    */
-  static async getCompetitions(): Promise<ServiceCallResult<Competition[]>> {
+  static async getCompetitions(): Promise<ServiceQueryResult<Competition[]>> {
     return await executeQuery(
       async () => {
         return await supabase()
@@ -33,7 +33,7 @@ export class CompetitionService {
 
   static async getCompetitionById(
     id: string
-  ): Promise<ServiceCallResult<Competition>> {
+  ): Promise<ServiceQueryResult<Competition>> {
     return await executeQuery(
       async () => {
         return await supabase()
@@ -74,7 +74,7 @@ export class CompetitionService {
   }
 
   static async getCurrentCompetition(): Promise<
-    ServiceCallResult<Competition>
+    ServiceQueryResult<Competition>
   > {
     const id = LocalStorageService.getSelectedComptetionId();
     if (!id) {

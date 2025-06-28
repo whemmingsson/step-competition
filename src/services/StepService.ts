@@ -5,7 +5,7 @@ import type { StepsRecord } from "@/types/StepsRecord";
 
 import { wrapWithCache } from "@/utils/CacheWrapper";
 import type { ExecutorResult } from "@/types/apiExecutorTypes";
-import type { ServiceCallResult } from "@/types/ServiceCallResult";
+import type { ServiceQueryResult } from "@/types/ServiceCallResult";
 import {
   stepsRecordsTransformer,
   stepsRecordTransformer,
@@ -257,7 +257,7 @@ export class StepService {
    */
   static async getTotalStepsForListOfUsers(
     ids: string[]
-  ): Promise<ServiceCallResult<number>> {
+  ): Promise<ServiceQueryResult<number>> {
     const competitionId = LocalStorageService.getSelectedComptetionId();
 
     const cacheKey = `step_service_total_steps_${competitionId}_${ids.join(
@@ -350,7 +350,7 @@ export class StepService {
 
   static async getAllStepRecordsForCompetition(
     competetionId: number
-  ): Promise<ServiceCallResult<StepsRecord[]>> {
+  ): Promise<ServiceQueryResult<StepsRecord[]>> {
     return await executeQuery(
       async () => {
         return await supabase()
