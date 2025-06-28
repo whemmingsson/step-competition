@@ -18,6 +18,7 @@ export const CompetitionHandler = ({ children }: { children: JSX.Element }) => {
       );
       if (inviteSuccess) {
         LocalStorageService.setSelectedCompetitionId(parseInt(inviteId, 10));
+        LocalStorageService.setInviteKey(inviteKey);
         toast("Invite verified successfully! 🎉");
         setTimeout(() => {
           navigate("/");
@@ -34,7 +35,11 @@ export const CompetitionHandler = ({ children }: { children: JSX.Element }) => {
   useEffect(() => {
     const handleInvite = async () => {
       if (import.meta.env.VITE_COMPETITION_MODE === "invite-only") {
-        console.info("App is running in invite-only mode");
+        if (LocalStorageService.getInviteKey()) {
+          // Key is only set on successful invite verification
+          // Therefore, do not proceed if it already exists
+          return;
+        }
         if (inviteId && inviteKey) {
           await verifyInvite();
         } else {
@@ -42,7 +47,7 @@ export const CompetitionHandler = ({ children }: { children: JSX.Element }) => {
         }
       }
       if (import.meta.env.VITE_COMPETITION_MODE === "public") {
-        console.info("App is running in public mode");
+        // Do nothing for public mode
       }
     };
     handleInvite();

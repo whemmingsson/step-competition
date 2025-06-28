@@ -31,4 +31,12 @@ export class LocalStorageService {
     }
     return null;
   }
+
+  static setInviteKey(inviteKey: string) {
+    this.setItem("inviteKey", inviteKey);
+  }
+
+  static getInviteKey(): string | null {
+    return this.getItem("inviteKey");
+  }
 }
