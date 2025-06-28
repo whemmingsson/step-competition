@@ -169,6 +169,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_top_teams: {
+        Args: { p_limit: number; p_competition_id: number }
+        Returns: {
+          id: number
+          user_id: string
+          name: string
+          total_steps: number
+          member_count: number
+          avg_steps_per_member: number
+          member_ids: string
+        }[]
+      }
       get_top_users_by_steps: {
         Args: { p_limit: number; p_competition_id: number }
         Returns: {

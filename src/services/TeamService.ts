@@ -7,7 +7,13 @@ import { wrapWithCache } from "@/utils/CacheWrapper";
 import { executeQuery } from "./SupabaseApiService";
 import type { ServiceCallResult } from "@/types/ServiceCallResult";
 import type { TeamDTO } from "@/types/DTO/TeamDTO";
-import { teamsTransformer, teamTransformer } from "@/services/Transformers";
+import {
+  teamsTransformer,
+  teamTransformer,
+  topTeamsToTeamsTransformer,
+  topTeamsTransformer,
+} from "@/services/Transformers";
+import { LocalStorageService } from "./LocalStorageService";
 
 /**
  * Service for user-related operations
@@ -288,72 +294,33 @@ export class TeamService {
     }
   }
 
-  static async getTopTeams(
-    take: number
-  ): Promise<{ success: boolean; error?: string; data?: Team[] }> {
+  static async getTopTeams_v2(
+    limit: number
+  ): Promise<ServiceCallResult<Team[]>> {
     try {
-      const cacheKey = `get-top-teams-${take}`;
-      const cachedTeams = CacheService.get(cacheKey);
-      if (cachedTeams) {
-        return { success: true, data: cachedTeams as Team[] };
-      }
-
-      if (!take || take <= 0) {
+      if (!limit || limit <= 0) {
         return { success: false, error: "Invalid number of teams to fetch" };
       }
 
-      const { data, error } = await supabase()
-        .from("Teams")
-        .select("id, name, user_id");
+      const { data, error } = await executeQuery(
+        async () => {
+          return await supabase().rpc("get_top_teams", {
+            p_competition_id:
+              LocalStorageService.getSelectedComptetionId() ?? -1,
+            p_limit: limit,
+          });
+        },
+        topTeamsTransformer,
+        `get-top-teams-${limit}`,
+        5
+      );
 
-      if (error) {
+      if (!data || error) {
         console.error("Error fetching top teams:", error);
-        return { success: false, error: error.message };
+        return { success: false, error: error || "Failed to fetch teams" };
       }
 
-      const mappedData: Team[] =
-        data?.map((team) => ({
-          id: team.id,
-          name: team.name ?? "",
-          user_id: team.user_id ?? "",
-          members: [], // Initialize with an empty array, can be populated later
-          totalSteps: 0, // Placeholder for total steps
-        })) ?? [];
-
-      // Fetch total steps for each team
-      for (const team of mappedData) {
-        const usersInTeam = await supabase()
-          .from("Users_Teams")
-          .select("user_id")
-          .eq("team_id", team.id);
-
-        if (usersInTeam.error) {
-          console.error(
-            `Error fetching users in team ${team.id}:`,
-            usersInTeam.error
-          );
-          continue;
-        }
-
-        const userIds = usersInTeam.data
-          .map((user) => user.user_id)
-          .filter((id): id is string => id !== null);
-        team.totalSteps = await this.getTotalStepsForTeam(userIds);
-        team.members = userIds.map((id) => ({
-          id,
-          displayName: "UNSET", // Not relevant for this operation
-        }));
-        team.avgSteps = team.totalSteps / userIds.length || 0; // Calculate average steps
-      }
-
-      // Sort teams by total steps and limit to the requested number
-      mappedData.sort((a, b) => (b.totalSteps || 0) - (a.totalSteps || 0));
-      mappedData.splice(take);
-
-      // Cache the result
-      CacheService.set(cacheKey, mappedData);
-
-      return { success: true, data: mappedData };
+      return { success: true, data: topTeamsToTeamsTransformer(data) };
     } catch (err) {
       console.error("Unexpected error fetching top teams:", err);
       return {

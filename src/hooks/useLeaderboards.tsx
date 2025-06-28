@@ -54,13 +54,10 @@ export const useLeaderboards = (limit: number = 5) => {
       // Fetch team leaderboard
       (async () => {
         try {
-          const result = await TeamService.getTopTeams(limit);
+          const result = await TeamService.getTopTeams_v2(limit);
 
           if (result.success && result.data) {
-            const sorted = result.data.sort(
-              (a, b) => (b?.avgSteps ?? 0) - (a?.avgSteps ?? 0)
-            );
-            setTeamLeaderboard(sorted);
+            setTeamLeaderboard(result.data);
           } else {
             setTeamError(
               result.error || "Failed to load team leaderboard data"
