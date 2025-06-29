@@ -45,6 +45,16 @@ export const UserHistoryCard = ({
     }
   };
 
+  // Grouped steps by date
+  const groupedSteps = steps.reduce((acc, step) => {
+    const date = new Date(step.date).toLocaleDateString();
+    if (!acc[date]) {
+      acc[date] = [];
+    }
+    acc[date].push(step);
+    return acc;
+  }, {} as Record<string, StepsRecord[]>);
+
   return (
     <Card className="w-full" style={{ background: "#ffffffed" }}>
       <CardHeader>
@@ -106,7 +116,7 @@ export const UserHistoryCard = ({
           <>
             {viewMode === "table" ? (
               <UserStepsTable
-                steps={steps}
+                groupedSteps={groupedSteps}
                 handleDeleteClick={handleDeleteClick}
                 refetch={refetch}
               />

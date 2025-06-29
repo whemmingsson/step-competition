@@ -93,15 +93,11 @@ export class StepService {
         };
       }
 
-      // Fetch all step data for the user
-      let query = supabase().from("Steps").select("*").eq("user_id", uid);
-
-      if (competitionId) {
-        query = query.eq("competition_id", competitionId);
-      }
-
-      // Execute the query to get all raw data
-      const { data, error } = await query;
+      const { data, error } = await supabase()
+        .from("Steps")
+        .select("*")
+        .eq("user_id", uid)
+        .eq("competition_id", competitionId);
 
       if (error) {
         throw error;
@@ -126,8 +122,7 @@ export class StepService {
           .map(([date, steps], i) => ({ date, steps, id: i }))
           .sort(
             (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-          )
-          .slice(0, 7); // Get only the last 7 days
+          );
 
         CacheService.set(cacheKey, groupedData);
 
@@ -145,8 +140,7 @@ export class StepService {
           }))
           .sort(
             (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-          )
-          .slice(0, 7) || [];
+          ) || [];
 
       CacheService.set(cacheKey, rawData);
       return { success: true, data: rawData };
@@ -187,7 +181,7 @@ export class StepService {
         });
       },
       topUsersTransformer,
-      `step_service-get-top-users-${limit}`,
+      `step_service_get-top-users-${limit}`,
       10
     );
   }
@@ -260,7 +254,7 @@ export class StepService {
   ): Promise<ServiceQueryResult<number>> {
     const competitionId = LocalStorageService.getSelectedComptetionId();
 
-    const cacheKey = `step_service_total_steps_${competitionId}_${ids.join(
+    const cacheKey = `step_service_total-steps-'${competitionId}-${ids.join(
       ","
     )}`;
     const cachedData = CacheService.get(cacheKey);
@@ -321,7 +315,7 @@ export class StepService {
     competetionId: number
   ): Promise<ExecutorResult<number>> {
     return await wrapWithCache(
-      `step_service_total_steps_${competetionId}`,
+      `step_service_total-steps-${competetionId}`,
       10,
       async () => {
         const { data, error } = await supabase()
