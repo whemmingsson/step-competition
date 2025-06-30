@@ -5,7 +5,7 @@ import type { StepsRecord } from "@/types/StepsRecord";
 
 import { wrapWithCache } from "@/utils/CacheWrapper";
 import type { ExecutorResult } from "@/types/apiExecutorTypes";
-import type { ServiceQueryResult } from "@/types/ServiceCallResult";
+import type { ServiceQueryResult } from "@/types/ServiceQueryResult";
 import {
   stepsRecordsTransformer,
   stepsRecordTransformer,
@@ -15,6 +15,7 @@ import { executeQuery } from "./SupabaseApiService";
 import { formatDate } from "@/utils/DateUtils";
 import { getAuthenticatedUser } from "@/utils/AuthUtils";
 import type { TopUser } from "@/types/TopUser";
+import type { UpdateScheme } from "@/types/UpdateScheme";
 
 /**
  * Service for handling step-related database operations
@@ -37,28 +38,77 @@ export class StepService {
   static async recordSteps(
     steps: number,
     uid: string,
-    date: Date
-  ): Promise<{ success: boolean; error?: string; data?: StepsRecord }> {
-    return await executeQuery(
-      async () => {
-        return await supabase()
-          .from("Steps")
-          .insert([
-            {
-              user_id: uid,
+    date: Date,
+    updateScheme: UpdateScheme
+  ): Promise<ServiceQueryResult<StepsRecord>> {
+    if (updateScheme === "new") {
+      return await executeQuery(
+        async () => {
+          return await supabase()
+            .from("Steps")
+            .insert([
+              {
+                user_id: uid,
+                steps: steps,
+                date: formatDate(date),
+                competition_id: LocalStorageService.getSelectedComptetionId(),
+              },
+            ])
+            .select() // TODO: Fix the query executor to handle inserts without select
+            .single();
+        },
+        stepsRecordTransformer,
+        null,
+        null,
+        this.clearServiceCache
+      );
+    }
+
+    const updateSteps = async (steps: number) => {
+      return await executeQuery(
+        async () => {
+          return await supabase()
+            .from("Steps")
+            .update({
               steps: steps,
-              date: formatDate(date),
-              competition_id: LocalStorageService.getSelectedComptetionId(),
-            },
-          ])
-          .select() // TODO: Fix the query executor to handle inserts without select
-          .single();
-      },
-      stepsRecordTransformer,
-      null,
-      null,
-      this.clearServiceCache
-    );
+            })
+            .eq("user_id", uid)
+            .eq("date", formatDate(date))
+            .eq(
+              "competition_id",
+              LocalStorageService.getSelectedComptetionId() ?? -1 // Use a default invalid ID if null
+            )
+            .select()
+            .single();
+        },
+        stepsRecordTransformer,
+        null,
+        null,
+        this.clearServiceCache
+      );
+    };
+
+    if (updateScheme === "overwrite") {
+      return await updateSteps(steps);
+    }
+
+    const { data, error } = await this.getStepsForDate(uid, date);
+
+    if (error) {
+      console.error("Error fetching step record for date:", error);
+      return {
+        success: false,
+        error: error,
+      };
+    }
+
+    if (data) {
+      // If record exists, update it
+      return await updateSteps(steps + (data.steps || 0));
+    } else {
+      // If no record exists, create a new one
+      return await this.recordSteps(steps, uid, date, "new");
+    }
   }
 
   /**
@@ -394,5 +444,28 @@ export class StepService {
         error: err instanceof Error ? err.message : "Unknown error occurred",
       };
     }
+  }
+
+  static async getStepsForDate(
+    userId: string,
+    date: Date
+  ): Promise<ServiceQueryResult<StepsRecord>> {
+    return await executeQuery(
+      async () => {
+        return await supabase()
+          .from("Steps")
+          .select("*")
+          .eq("user_id", userId)
+          .eq("date", formatDate(date))
+          .eq(
+            "competition_id",
+            LocalStorageService.getSelectedComptetionId() ?? -1 // Use a default invalid ID if null
+          )
+          .single();
+      },
+      stepsRecordTransformer,
+      `step_service_steps-for-date-${userId}-${formatDate(date)}`,
+      1
+    );
   }
 }

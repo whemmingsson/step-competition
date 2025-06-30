@@ -1,4 +1,4 @@
-import type { ServiceQueryResult } from "@/types/ServiceCallResult";
+import type { ServiceQueryResult } from "@/types/ServiceQueryResult";
 import CacheService from "./CacheService";
 import type {
   ExecutorFunc,

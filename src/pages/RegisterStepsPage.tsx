@@ -60,7 +60,7 @@ export const RegisterStepsPage = () => {
   const { id: userId } = user || {};
   const { data: userTeam, loading: teamLoading } = useUserTeam();
   const { competition } = useCurrentCompetition();
-  const [updateScheme, setUpdateScheme] = useState<UpdateScheme>("overwrite");
+  const [updateScheme, setUpdateScheme] = useState<UpdateScheme>("new");
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -86,7 +86,12 @@ export const RegisterStepsPage = () => {
       return;
     }
 
-    const result = await StepService.recordSteps(data.steps, userId, data.date);
+    const result = await StepService.recordSteps(
+      data.steps,
+      userId,
+      data.date,
+      updateScheme
+    );
     if (!result.success) {
       toast.error(result.error || "Failed to register steps");
       return;

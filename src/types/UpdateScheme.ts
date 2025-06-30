@@ -1,1 +1,1 @@
-export type UpdateScheme = "overwrite" | "add";
+export type UpdateScheme = "overwrite" | "add" | "new";

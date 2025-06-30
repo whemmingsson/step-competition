@@ -5,7 +5,7 @@ import type { ProfileMeta } from "@/types/ProfileMeta";
 import { executeQuery } from "./SupabaseApiService";
 import { profileMetaTransformer } from "@/services/Transformers";
 import { getAuthenticatedUser } from "@/utils/AuthUtils";
-import type { ServiceQueryResult } from "@/types/ServiceCallResult";
+import type { ServiceQueryResult } from "@/types/ServiceQueryResult";
 import { wrapWithCacheSimple } from "@/utils/CacheWrapper";
 
 /**

@@ -5,7 +5,7 @@ import CacheService from "./CacheService";
 import { getAuthenticatedUser } from "@/utils/AuthUtils";
 import { wrapWithCache } from "@/utils/CacheWrapper";
 import { executeQuery } from "./SupabaseApiService";
-import type { ServiceQueryResult } from "@/types/ServiceCallResult";
+import type { ServiceQueryResult } from "@/types/ServiceQueryResult";
 import type { TeamDTO } from "@/types/DTO/TeamDTO";
 import {
   teamsTransformer,

@@ -1,6 +1,6 @@
 import CacheService from "@/services/CacheService";
 import type { ExecutorResult } from "@/types/apiExecutorTypes";
-import type { ServiceQueryResult } from "@/types/ServiceCallResult";
+import type { ServiceQueryResult } from "@/types/ServiceQueryResult";
 
 export const wrapWithCache = async <TReturnType, ExecutorReturnType>(
   cacheKey: string,

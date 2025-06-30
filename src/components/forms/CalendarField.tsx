@@ -46,7 +46,12 @@ export const CalendarField = ({
   const [selectedDay, setSelectedDay] = useState<Date | undefined>(undefined);
   const [dateHasData, setDateHasData] = useState(false);
   const [dateSelectionMode, setDateSelectionMode] =
-    useState<UpdateScheme>("overwrite");
+    useState<UpdateScheme>("new");
+
+  const setScheme = (scheme: UpdateScheme) => {
+    setUpdateScheme?.(scheme);
+    setDateSelectionMode(scheme);
+  };
 
   // Update your date selection handler
   const onSelect = (
@@ -60,14 +65,17 @@ export const CalendarField = ({
     // Check if the day has data using modifiers
     if (!date) {
       setDateHasData(false);
+      setScheme("new");
       return;
     }
 
     const hasData = modifiers.highlighted?.(date) ?? false;
     setDateHasData(hasData);
-
-    // Reset to default mode when selecting a new date
-    setDateSelectionMode("overwrite");
+    if (hasData) {
+      setScheme("overwrite");
+    } else {
+      setScheme("new");
+    }
   };
   return (
     <div>
@@ -132,10 +140,7 @@ export const CalendarField = ({
           <RadioGroup
             value={dateSelectionMode}
             onValueChange={(value) => {
-              // Local state
-              setDateSelectionMode(value as UpdateScheme);
-              // Parent state
-              setUpdateScheme?.(value as UpdateScheme);
+              setScheme(value as UpdateScheme);
             }}
             className="flex flex-col space-y-2"
           >

@@ -5,7 +5,7 @@ import {
   competitionsTransformer,
   competitionTransformer,
 } from "@/services/Transformers";
-import type { ServiceQueryResult } from "@/types/ServiceCallResult";
+import type { ServiceQueryResult } from "@/types/ServiceQueryResult";
 import { LocalStorageService } from "./LocalStorageService";
 
 /**
