@@ -19,7 +19,7 @@ import { toast } from "sonner";
 import { Users } from "lucide-react";
 import { StepService } from "@/services/StepService";
 import { PageContainer } from "@/components/PageContainer";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useCallback, useState } from "react";
 
 import { useCompetitions } from "@/hooks/useCompetitions";
 import { useUser } from "@/context/user/UserContext";
@@ -30,6 +30,7 @@ import { CalendarField } from "@/components/forms/CalendarField";
 import { useAuth } from "@/context/auth/useAuth";
 import { CompetitionSelectorField } from "@/components/forms/CompetitionSelectorField";
 import { useCurrentCompetition } from "@/hooks/useCurrentCompetition";
+import type { UpdateScheme } from "@/types/UpdateScheme";
 
 // Form validation schema with competition field
 const formSchema = z.object({
@@ -59,6 +60,7 @@ export const RegisterStepsPage = () => {
   const { id: userId } = user || {};
   const { data: userTeam, loading: teamLoading } = useUserTeam();
   const { competition } = useCurrentCompetition();
+  const [updateScheme, setUpdateScheme] = useState<UpdateScheme>("overwrite");
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -125,6 +127,15 @@ export const RegisterStepsPage = () => {
     return new Date("2100-01-01");
   }, [competition]);
 
+  const getStepsForDate = useCallback(
+    (date: Date) => {
+      const dateKey = format(date, "yyyy-MM-dd");
+      const step = steps.find((s) => format(s.date, "yyyy-MM-dd") === dateKey);
+      return step ? step.steps : 0;
+    },
+    [steps]
+  );
+
   return (
     <PageContainer>
       <Card className="w-full" style={{ background: "#ffffffee" }}>
@@ -179,6 +190,8 @@ export const RegisterStepsPage = () => {
                 description="Select the date for your step count"
                 validFirstDay={validStartDate}
                 validLastDay={validEndDate}
+                setUpdateScheme={(v: UpdateScheme) => setUpdateScheme(v)}
+                getStepsForDate={getStepsForDate}
               />
 
               {/* Team display section - outside of form validation */}
