@@ -8,7 +8,7 @@ export const useCompetition = () => {
   const [competition, setCompetition] = useState<Competition>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const selectedCompetitionId = LocalStorageService.getSelectedComptetionId();
+  const selectedCompetitionId = LocalStorageService.getSelectedCompetitionId();
 
   useEffect(() => {
     async function fetchCompetitions() {

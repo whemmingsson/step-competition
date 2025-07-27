@@ -1,10 +1,12 @@
 import type { Competition } from "@/types/Competition";
 import type { CompetitionDTO } from "@/types/DTO/CompetitionDTO";
+import type { GoalDTO } from "@/types/DTO/GoalDTO";
 import type { ProfileMetaDTO } from "@/types/DTO/ProfileMetaDTO";
 import type { StepsRecordDTO } from "@/types/DTO/StepsRecordDTO";
 import type { TeamDTO } from "@/types/DTO/TeamDTO";
 import type { TopTeamDTO } from "@/types/DTO/TopTeamDTO";
 import type { TopUserDTO } from "@/types/DTO/TopUserDTO";
+import type { Goal } from "@/types/Goal";
 import type { ProfileMeta } from "@/types/ProfileMeta";
 import type { StepsRecord } from "@/types/StepsRecord";
 import type { Team } from "@/types/Team";
@@ -129,4 +131,13 @@ export const topTeamsToTeamsTransformer = (data: TopTeam[]): Team[] => {
     avgSteps: team.avgSteps || 0,
     memberIds: team.memberIds || [],
   }));
+};
+
+export const goalTransformer = (data: GoalDTO): Goal => {
+  return {
+    competitionId: data.competition_id ?? null,
+    userId: data.user_id || null,
+    goalsMeters: data.goals_meters ?? null,
+    goalsSteps: data.goals_steps ?? null,
+  };
 };
