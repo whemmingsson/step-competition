@@ -47,6 +47,7 @@ export const CalendarField = ({
   const [dateHasData, setDateHasData] = useState(false);
   const [dateSelectionMode, setDateSelectionMode] =
     useState<UpdateScheme>("new");
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const setScheme = (scheme: UpdateScheme) => {
     setUpdateScheme?.(scheme);
@@ -61,6 +62,9 @@ export const CalendarField = ({
     //setSelectedDay(day);
     field.onChange(date); // Update the form field value with the selected date
     setSelectedDay(date);
+
+    // Close the popover when a date is selected
+    setIsPopoverOpen(false);
 
     // Check if the day has data using modifiers
     if (!date) {
@@ -85,7 +89,7 @@ export const CalendarField = ({
         render={({ field }) => (
           <FormItem className="flex flex-col">
             <FormLabel>{label}</FormLabel>
-            <Popover>
+            <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
               <PopoverTrigger asChild>
                 <FormControl>
                   <Button
