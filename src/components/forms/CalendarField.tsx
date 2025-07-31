@@ -147,7 +147,7 @@ export const CalendarField = ({
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="overwrite" id="overwrite" />
               <Label htmlFor="overwrite" className="font-normal">
-                Overwrite existing data
+                Overwrite existing steps
                 <p className="text-xs text-muted-foreground mt-0.5">
                   Replace the previously recorded steps for this date
                 </p>
@@ -156,7 +156,7 @@ export const CalendarField = ({
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="add" id="add" />
               <Label htmlFor="add" className="font-normal">
-                Add to existing data
+                Add to existing steps
                 <p className="text-xs text-muted-foreground mt-0.5">
                   Add these steps to your current total for this date
                 </p>

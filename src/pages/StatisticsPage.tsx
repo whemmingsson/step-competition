@@ -4,8 +4,10 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useCompetition } from "@/hooks/useComptetition";
 import { useStatistics } from "@/hooks/useStatistics";
+import { cn } from "@/lib/utils";
 import type { Statistics } from "@/types/Statistics";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, BarChart3, TableIcon } from "lucide-react";
+import { useState } from "react";
 
 const NumberCard = ({ title, value }: { title: string; value: string }) => (
   <div className="bg-background rounded-md p-4">
@@ -31,7 +33,10 @@ export const BetaNotification = () => {
   );
 };
 
+type ViewMode = "metrics" | "chart";
+
 export const StatisticsPage = () => {
+  const [viewMode, setViewMode] = useState<ViewMode>("metrics");
   const { competition, isLoading: competitionLoading } = useCompetition();
   const { data, isLoading } = useStatistics(
     competition?.id ? Number(competition.id) : 0
@@ -87,19 +92,53 @@ export const StatisticsPage = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
+          <div className="flex border-b mb-4">
+            <button
+              onClick={() => setViewMode("metrics")}
+              className={cn(
+                "px-4 py-2 font-medium text-sm flex items-center gap-1",
+                viewMode === "metrics"
+                  ? "border-b-2 border-primary text-primary"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <TableIcon className="h-4 w-4" />
+              Key metrics
+            </button>
+            <button
+              onClick={() => setViewMode("chart")}
+              className={cn(
+                "px-4 py-2 font-medium text-sm flex items-center gap-1",
+                viewMode === "chart"
+                  ? "border-b-2 border-primary text-primary"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <BarChart3 className="h-4 w-4" />
+              Cumulative steps chart
+            </button>
+          </div>
           <div className="space-y-6">
             <div className="bg-muted p-6 rounded-lg text-center">
-              <h3 className="text-2xl font-bold mb-2"></h3>
-              <div className="grid grid-cols-2 grid-rows-3 gap-4 mt-4">
-                {CardList.map((card, index) => (
-                  <NumberCard
-                    key={index}
-                    title={card.title}
-                    value={card.value}
-                  />
-                ))}
-              </div>
-              <CumulativeStepsChart data={data?.cumilativeSteps || []} />
+              {viewMode === "metrics" && (
+                <>
+                  <h3 className="text-2xl font-bold mb-2">Key metrics</h3>
+                  <div className="grid grid-cols-2 grid-rows-3 gap-4 mt-4">
+                    {CardList.map((card, index) => (
+                      <NumberCard
+                        key={index}
+                        title={card.title}
+                        value={card.value}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
+              {viewMode === "chart" && (
+                <>
+                  <CumulativeStepsChart data={data?.cumilativeSteps || []} />
+                </>
+              )}
             </div>
           </div>
         </CardContent>
