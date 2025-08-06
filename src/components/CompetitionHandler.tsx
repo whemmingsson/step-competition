@@ -1,14 +1,25 @@
 import { CompetitionService } from "@/services/CompetitionService";
 import { LocalStorageService } from "@/services/LocalStorageService";
 import { useCallback, useEffect, type JSX } from "react";
-import { useNavigate, useSearchParams } from "react-router";
+import { useNavigate } from "react-router";
 import { toast } from "sonner";
 
 export const CompetitionHandler = ({ children }: { children: JSX.Element }) => {
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const inviteId = searchParams.get("inviteId");
-  const inviteKey = searchParams.get("inviteKey");
+
+  // Workaround for HashRouter - parse URL parameters manually
+  const getUrlParams = () => {
+    const url = window.location.href;
+    const urlObj = new URL(url);
+    return {
+      inviteId: urlObj.searchParams.get("inviteId"),
+      inviteKey: urlObj.searchParams.get("inviteKey"),
+    };
+  };
+
+  const { inviteId, inviteKey } = getUrlParams();
+
+  console.log(inviteId, inviteKey);
 
   const verifyInvite = useCallback(async () => {
     if (inviteId && inviteKey) {
@@ -21,10 +32,22 @@ export const CompetitionHandler = ({ children }: { children: JSX.Element }) => {
         LocalStorageService.setInviteKey(inviteKey);
         toast("Invite verified successfully! 🎉");
         setTimeout(() => {
+          // Clear URL parameters when navigating to root
+          window.history.replaceState(
+            null,
+            "",
+            window.location.pathname + window.location.hash.split("?")[0]
+          );
           navigate("/");
         }, 2000);
       } else {
         console.error("Invalid invite ID or key");
+        // Clear URL parameters when navigating to error page
+        window.history.replaceState(
+          null,
+          "",
+          window.location.pathname + window.location.hash.split("?")[0]
+        );
         navigate("/error");
       }
     } else {
