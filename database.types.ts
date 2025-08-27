@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.12 (cd3cf9e)"
@@ -23,6 +23,33 @@ export type Database = {
         }
         Update: {
           user_id?: string
+        }
+        Relationships: []
+      }
+      Badges: {
+        Row: {
+          created_at: string
+          description: string | null
+          icon_url: string | null
+          id: number
+          steps: number | null
+          type: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          icon_url?: string | null
+          id?: number
+          steps?: number | null
+          type?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          icon_url?: string | null
+          id?: number
+          steps?: number | null
+          type?: string | null
         }
         Relationships: []
       }
@@ -119,6 +146,32 @@ export type Database = {
         }
         Relationships: []
       }
+      Users_Badges: {
+        Row: {
+          badge_id: number
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          badge_id: number
+          created_at?: string
+          user_id?: string
+        }
+        Update: {
+          badge_id?: number
+          created_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "Users_Badges_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "Badges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       Users_Goals: {
         Row: {
           competition_id: number
@@ -206,24 +259,41 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      get_top_teams: {
-        Args: { p_limit: number; p_competition_id: number }
-        Returns: {
-          id: number
-          user_id: string
-          name: string
-          total_steps: number
-          member_count: number
-          avg_steps_per_member: number
-          member_ids: string
-        }[]
-      }
-      get_top_users_by_steps: {
-        Args: { p_limit: number; p_competition_id: number }
+      get_team_members: {
+        Args: { team_id_param: number }
         Returns: {
           display_name: string
           profile_image_url: string
+          user_id: string
+        }[]
+      }
+      get_top_teams: {
+        Args: { p_competition_id: number; p_limit: number }
+        Returns: {
+          avg_steps_per_member: number
+          id: number
+          member_count: number
+          member_ids: string
+          name: string
           total_steps: number
+          user_id: string
+        }[]
+      }
+      get_top_users_by_steps: {
+        Args: { p_competition_id: number; p_limit: number }
+        Returns: {
+          badge_icons: string
+          display_name: string
+          profile_image_url: string
+          total_steps: number
+        }[]
+      }
+      get_user_leaderboard_position: {
+        Args: { in_competition_id: number; in_user_id: string }
+        Returns: {
+          total: number
+          user_id: string
+          user_position: number
         }[]
       }
     }

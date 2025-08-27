@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, HashRouter } from "react-router-dom";
 import { useAuth } from "../context/auth/useAuth";
 
 import { LoginPage } from "@/pages/LoginPage";
@@ -22,7 +22,7 @@ export const Router = () => {
   }
 
   return (
-    <BrowserRouter basename={import.meta.env.VITE_BASE_PATH || "/"}>
+    <HashRouter basename={import.meta.env.VITE_BASE_PATH || "/"}>
       <CompetitionHandler>
         <Routes>
           {/* Login page - separate from other routes */}
@@ -46,6 +46,6 @@ export const Router = () => {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </CompetitionHandler>
-    </BrowserRouter>
+    </HashRouter>
   );
 };

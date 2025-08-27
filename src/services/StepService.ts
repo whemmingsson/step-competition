@@ -468,4 +468,19 @@ export class StepService {
       1
     );
   }
+
+  static async getUserLeaderboardPosition(
+    userId: string
+  ): Promise<number | null> {
+    const result = await supabase().rpc("get_user_leaderboard_position", {
+      in_user_id: userId,
+      in_competition_id: LocalStorageService.getSelectedComptetionId() ?? -1,
+    });
+
+    if (!result || !result.data || result.data.length === 0) {
+      return null;
+    }
+
+    return result.data[0]?.user_position ?? -1;
+  }
 }

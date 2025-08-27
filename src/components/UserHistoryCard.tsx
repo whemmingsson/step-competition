@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BarChart3, Table as TableIcon } from "lucide-react";
+import { BarChart3, Medal, Table as TableIcon } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -11,27 +11,32 @@ import { cn } from "@/lib/utils";
 import type { StepsRecord } from "@/types/StepsRecord";
 import { UserStepsChart } from "./charts/UserStepsChart";
 import { UserStepsTable } from "./UserStepsTable";
+import { BadgesList } from "./BadgesList";
 
 interface UserHistoryCardProps {
   steps: StepsRecord[];
   totalSteps: number;
   avgStepsPerDay?: number; // Optional, can be calculated if needed
+  userPositionInLeaderboard?: number;
   loading: boolean;
   error: string | null;
   handleDeleteClick: (record: StepsRecord) => void;
   refetch?: () => Promise<void>; // Optional refetch function
+  badgeIcons?: string[]; // Array of badge icon URLs or identifiers
 }
 
-type ViewMode = "table" | "chart";
+type ViewMode = "table" | "chart" | "badges";
 
 export const UserHistoryCard = ({
   steps,
   totalSteps,
   avgStepsPerDay = 0, // Default to 0 if not provided
+  userPositionInLeaderboard = 0, // Default to 0 if not provided
   loading,
   error,
   handleDeleteClick,
   refetch,
+  badgeIcons,
 }: UserHistoryCardProps) => {
   const [viewMode, setViewMode] = useState<ViewMode>("table");
 
@@ -68,7 +73,7 @@ export const UserHistoryCard = ({
       </CardHeader>
 
       <CardContent>
-        <div className="grid grid-cols-2 gap-4 mt-2 mb-6 text-center">
+        <div className="grid grid-cols-3 gap-4 mt-2 mb-6 text-center">
           <div className="bg-background rounded-md p-4">
             <p className="text-sm text-muted-foreground">Total steps</p>
             <p className="text-2xl font-bold">{select(totalSteps)}</p>
@@ -76,6 +81,10 @@ export const UserHistoryCard = ({
           <div className="bg-background rounded-md p-4">
             <p className="text-sm text-muted-foreground">Avg. steps per day</p>
             <p className="text-2xl font-bold">{select(avgStepsPerDay)}</p>
+          </div>
+          <div className="bg-background rounded-md p-4">
+            <p className="text-sm text-muted-foreground">Pos. in leaderboard</p>
+            <p className="text-2xl font-bold">{userPositionInLeaderboard}</p>
           </div>
         </div>
 
@@ -104,6 +113,18 @@ export const UserHistoryCard = ({
             <BarChart3 className="h-4 w-4" />
             Chart
           </button>
+          <button
+            onClick={() => setViewMode("badges")}
+            className={cn(
+              "px-4 py-2 font-medium text-sm flex items-center gap-1",
+              viewMode === "badges"
+                ? "border-b-2 border-primary text-primary"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <Medal className="h-4 w-4" />
+            Badges
+          </button>
         </div>
 
         {error ? (
@@ -114,16 +135,24 @@ export const UserHistoryCard = ({
           </div>
         ) : (
           <>
-            {viewMode === "table" ? (
+            {viewMode === "table" && (
               <UserStepsTable
                 groupedSteps={groupedSteps}
                 handleDeleteClick={handleDeleteClick}
                 refetch={refetch}
               />
-            ) : (
+            )}
+            {viewMode === "chart" && (
               <div className="border-2 border-dashed border-muted-foreground/20 rounded-lg p-4 text-center">
                 <UserStepsChart stepsData={steps} />
               </div>
+            )}
+            {viewMode === "badges" && (
+              <BadgesList
+                badgeIconUrls={badgeIcons}
+                showNoBadgesText={false}
+                badgeSize={32}
+              />
             )}
           </>
         )}

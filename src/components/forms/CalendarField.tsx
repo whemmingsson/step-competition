@@ -47,6 +47,7 @@ export const CalendarField = ({
   const [dateHasData, setDateHasData] = useState(false);
   const [dateSelectionMode, setDateSelectionMode] =
     useState<UpdateScheme>("new");
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const setScheme = (scheme: UpdateScheme) => {
     setUpdateScheme?.(scheme);
@@ -61,6 +62,9 @@ export const CalendarField = ({
     //setSelectedDay(day);
     field.onChange(date); // Update the form field value with the selected date
     setSelectedDay(date);
+
+    // Close the popover when a date is selected
+    setIsPopoverOpen(false);
 
     // Check if the day has data using modifiers
     if (!date) {
@@ -85,7 +89,7 @@ export const CalendarField = ({
         render={({ field }) => (
           <FormItem className="flex flex-col">
             <FormLabel>{label}</FormLabel>
-            <Popover>
+            <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
               <PopoverTrigger asChild>
                 <FormControl>
                   <Button
@@ -147,7 +151,7 @@ export const CalendarField = ({
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="overwrite" id="overwrite" />
               <Label htmlFor="overwrite" className="font-normal">
-                Overwrite existing data
+                Overwrite existing steps
                 <p className="text-xs text-muted-foreground mt-0.5">
                   Replace the previously recorded steps for this date
                 </p>
@@ -156,7 +160,7 @@ export const CalendarField = ({
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="add" id="add" />
               <Label htmlFor="add" className="font-normal">
-                Add to existing data
+                Add to existing steps
                 <p className="text-xs text-muted-foreground mt-0.5">
                   Add these steps to your current total for this date
                 </p>

@@ -1,4 +1,6 @@
+import type { Badge } from "@/types/Badge";
 import type { Competition } from "@/types/Competition";
+import type { BadgeDTO } from "@/types/DTO/BadgeDTO";
 import type { CompetitionDTO } from "@/types/DTO/CompetitionDTO";
 import type { GoalDTO } from "@/types/DTO/GoalDTO";
 import type { ProfileMetaDTO } from "@/types/DTO/ProfileMetaDTO";
@@ -40,13 +42,10 @@ export const teamTransformer = (data: TeamDTO | null): Team => {
     name: data.name || "",
     user_id: data.user_id || null,
     memberIds: data.Users_Teams.map((member) => member.user_id || ""),
+    members: [],
   } as Team;
 
   result.numberOfMembers = result.memberIds?.length || 0;
-  result.members =
-    result.memberIds?.map(
-      (id) => ({ displayName: "UNSET", id: id } as AppUser)
-    ) || [];
   return result;
 };
 
@@ -92,6 +91,9 @@ export const topUserTransformer = (data: TopUserDTO): TopUser => {
     displayName: data.display_name || "Unknown User",
     profileImageUrl: data.profile_image_url || "",
     totalSteps: data.total_steps || 0,
+    badgeIcons: data.badge_icons
+      ? data.badge_icons.split(";").map((icon) => icon.trim())
+      : [],
   };
 };
 
@@ -140,4 +142,17 @@ export const goalTransformer = (data: GoalDTO): Goal => {
     goalsMeters: data.goals_meters ?? null,
     goalsSteps: data.goals_steps ?? null,
   };
+};
+
+export const badgeTransformer = (data: BadgeDTO): Badge => {
+  return {
+    iconUrl: data.icon_url ?? "",
+    type: data.type ?? "",
+    description: data.description ?? "",
+    steps: data.steps ?? 0,
+  };
+};
+
+export const badgesTransformer = (data: BadgeDTO[]): Badge[] => {
+  return data.map((badge) => badgeTransformer(badge));
 };

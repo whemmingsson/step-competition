@@ -1,12 +1,16 @@
-export const ProfileImage = ({
+export const CircleImage = ({
   url,
   name,
+    size = 8,
 }: {
   url?: string | null;
   name?: string;
+  size?: number;
 }) => {
+
+  const sizeClass = `w-${size} h-${size} `;
   return (
-    <div className="relative w-8 h-8">
+    <div className={`relative ${sizeClass}`}>
       {url ? (
         <img
           src={url}

@@ -15,6 +15,7 @@ import {
 } from "@/services/Transformers";
 import { LocalStorageService } from "./LocalStorageService";
 import type { ServiceMutationResult } from "@/types/ServiceMutationResult";
+import type {AppUser} from "@/types/User.ts";
 
 /**
  * Service for user-related operations
@@ -115,7 +116,7 @@ export class TeamService {
       async () => {
         return await supabase()
           .from("Teams")
-          .select("id, name, user_id, Users_Teams(user_id)")
+          .select("id, name, user_id, Users_Teams(user_id))")
           .eq("id", teamId)
           .single();
       },
@@ -127,6 +128,12 @@ export class TeamService {
     if (!mappedTeam) {
       return { success: false, error: "Failed to map team data" };
     }
+
+    const { data: teamMembers } = await supabase()
+        .rpc('get_team_members', { team_id_param: teamId });
+    teamMembers?.forEach(member =>{
+      mappedTeam.members?.push({ id: member.user_id, displayName: member.display_name, profileImageUrl: member.profile_image_url } as AppUser);
+    })
 
     // This is a an extra transformation step to get the total steps for the team
     // The result from this operation is cached for 5 minutes

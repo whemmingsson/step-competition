@@ -8,12 +8,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { PageContainer } from "@/components/PageContainer";
-import { ProfileImage } from "@/components/ProfileImage";
+import { CircleImage } from "@/components/CircleImage.tsx";
 import { useLeaderboards } from "@/hooks/useLeaderboards";
+import { BadgesList } from "@/components/BadgesList";
 
 export const LeaderboardPage = () => {
   const { userLeaderboard, teamLeaderboard, isLoading, userError, teamError } =
-    useLeaderboards(5);
+    useLeaderboards(10);
 
   // Medal emoji based on position
   const getMedal = (position: number) => {
@@ -50,6 +51,7 @@ export const LeaderboardPage = () => {
                 <TableRow>
                   <TableHead className="w-[100px]">Rank</TableHead>
                   <TableHead>User</TableHead>
+                  <TableHead>Badges</TableHead>
                   <TableHead className="text-right">Total Steps</TableHead>
                 </TableRow>
               </TableHeader>
@@ -70,11 +72,14 @@ export const LeaderboardPage = () => {
                           : "flex items-center gap-x-2"
                       }
                     >
-                      <ProfileImage
+                      <CircleImage
                         name={user.displayName}
                         url={user.profileImageUrl}
                       />{" "}
                       {user.displayName}
+                    </TableCell>
+                    <TableCell>
+                      <BadgesList badgeIconUrls={user.badgeIcons} />
                     </TableCell>
                     <TableCell
                       className={`text-right ${

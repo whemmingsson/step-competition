@@ -47,7 +47,7 @@ export const Layout = () => {
       }}
     >
       {/* Semi-transparent overlay */}
-      <div className="absolute inset-0 bg-black/40 pointer-events-none" />
+      <div className="fixed inset-0 bg-black/40 pointer-events-none" />
 
       {/* Content layer (above overlay) */}
       <div className="relative z-10 flex flex-col min-h-screen">

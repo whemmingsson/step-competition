@@ -35,6 +35,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {UserList} from "@/components/UserList.tsx";
 
 export const TeamPage = () => {
   const userContext = useUser();
@@ -218,6 +219,7 @@ export const TeamPage = () => {
                   </div>
                 </div>
               </div>
+              <UserList members={userTeam.members}/>
               <Button
                 variant="outline"
                 onClick={handleLeaveTeam}
