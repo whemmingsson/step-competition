@@ -39,4 +39,8 @@ export class LocalStorageService {
   static getInviteKey(): string | null {
     return this.getItem("inviteKey");
   }
+
+  static clear(): void {
+    localStorage.clear();
+  }
 }

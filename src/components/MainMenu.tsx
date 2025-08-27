@@ -28,6 +28,7 @@ import {
 } from "./ui/alert-dialog";
 import { SitePages } from "@/navigation/NavigationConfig";
 import { AlertDialogAction } from "@radix-ui/react-alert-dialog";
+import { LocalStorageService } from "@/services/LocalStorageService";
 
 interface DesktopMenuProps {
   handleLogout: () => Promise<void>;
@@ -247,6 +248,11 @@ export const MainMenu = () => {
     }
   }
 
+  async function handleLeave() {
+    LocalStorageService.clear();
+    await supabase().auth.signOut();
+  }
+
   return (
     <nav className={`bg-background sticky top-0 z-10 `}>
       <div>
@@ -340,7 +346,7 @@ export const MainMenu = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Nevermind</AlertDialogCancel>
-            <AlertDialogAction>Confirm</AlertDialogAction>
+            <AlertDialogAction onClick={handleLeave}>Confirm</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
