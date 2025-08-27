@@ -1,14 +1,25 @@
 import { CompetitionService } from "@/services/CompetitionService";
 import { LocalStorageService } from "@/services/LocalStorageService";
 import { useCallback, useEffect, type JSX } from "react";
-import { useNavigate, useSearchParams } from "react-router";
+import { useNavigate } from "react-router";
 import { toast } from "sonner";
 
 export const CompetitionHandler = ({ children }: { children: JSX.Element }) => {
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const inviteId = searchParams.get("inviteId");
-  const inviteKey = searchParams.get("inviteKey");
+
+  // Workaround for HashRouter - parse URL parameters manually
+  const getUrlParams = () => {
+    const url = window.location.href;
+    const urlObj = new URL(url);
+    return {
+      inviteId: urlObj.searchParams.get("inviteId"),
+      inviteKey: urlObj.searchParams.get("inviteKey"),
+    };
+  };
+
+  const { inviteId, inviteKey } = getUrlParams();
+
+  console.log(inviteId, inviteKey);
 
   const verifyInvite = useCallback(async () => {
     if (inviteId && inviteKey) {
@@ -20,11 +31,25 @@ export const CompetitionHandler = ({ children }: { children: JSX.Element }) => {
         LocalStorageService.setSelectedCompetitionId(parseInt(inviteId, 10));
         LocalStorageService.setInviteKey(inviteKey);
         toast("Invite verified successfully! 🎉");
+
+        // Clear URL parameters after successful verification
+        const url = new URL(window.location.href);
+        url.searchParams.delete("inviteId");
+        url.searchParams.delete("inviteKey");
+        window.history.replaceState(null, "", url.toString());
+
         setTimeout(() => {
           navigate("/");
         }, 2000);
       } else {
         console.error("Invalid invite ID or key");
+
+        // Clear URL parameters on error as well
+        const url = new URL(window.location.href);
+        url.searchParams.delete("inviteId");
+        url.searchParams.delete("inviteKey");
+        window.history.replaceState(null, "", url.toString());
+
         navigate("/error");
       }
     } else {
