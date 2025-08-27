@@ -1,3 +1,4 @@
+import { LabPage } from "@/pages/LabPage";
 import { LeaderboardPage } from "@/pages/LeaderboardPage.";
 import { MyProgressPage } from "@/pages/MyProgressPage";
 import { ProfilePage } from "@/pages/ProfilePage";
@@ -18,6 +19,7 @@ interface SitePage {
   path: string;
   component: React.JSX.Element;
   icon: React.JSX.Element;
+  hideFromMenu?: boolean;
 }
 
 const commonClassName = "h-5 w-5";
@@ -58,5 +60,12 @@ export const SitePages: SitePage[] = [
     path: "/stats",
     component: <StatisticsPage />,
     icon: <BarChart3 className={commonClassName} />,
+  },
+  {
+    name: "Lab",
+    path: "/lab",
+    component: <LabPage />,
+    icon: <></>,
+    hideFromMenu: true,
   },
 ];

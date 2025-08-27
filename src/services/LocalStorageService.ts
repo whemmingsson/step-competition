@@ -7,7 +7,7 @@ export class LocalStorageService {
     localStorage.setItem(key, value);
   }
 
-  static getSelectedComptetionId(): number | null {
+  static getSelectedCompetitionId(): number | null {
     const strValue = this.getItem("selectedCompetition");
 
     if (!strValue) return null;

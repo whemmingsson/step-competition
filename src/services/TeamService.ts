@@ -310,7 +310,7 @@ export class TeamService {
         async () => {
           return await supabase().rpc("get_top_teams", {
             p_competition_id:
-              LocalStorageService.getSelectedComptetionId() ?? -1,
+              LocalStorageService.getSelectedCompetitionId() ?? -1,
             p_limit: limit,
           });
         },

@@ -53,7 +53,7 @@ export class UserService {
         }
 
         // Cache the new display name
-        const cacheKey = `display_name_${userId}`;
+        const cacheKey = `user_service_display_name_${userId}`;
         CacheService.set(cacheKey, displayName, 60);
 
         return { success: true, data };
@@ -250,5 +250,22 @@ export class UserService {
     });
 
     return uniqueUserIds.size;
+  }
+
+  static async setStepLength(
+    userId: string,
+    stepLength: number
+  ): Promise<void> {
+    const { error } = await supabase()
+      .from("Users_Meta")
+      .update({ step_length: stepLength })
+      .eq("user_id", userId);
+
+    if (error) {
+      throw new Error(`Failed to set step length: ${error.message}`);
+    }
+
+    // Clear cache for this user
+    // this.clearServiceCache();
   }
 }

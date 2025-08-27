@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 export const useCurrentCompetition = () => {
   const [competition, setCompetition] = useState<Competition>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const selectedCompetitionId = LocalStorageService.getSelectedComptetionId();
+  const selectedCompetitionId = LocalStorageService.getSelectedCompetitionId();
 
   useEffect(() => {
     async function fetchCompetition() {
