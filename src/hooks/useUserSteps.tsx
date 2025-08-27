@@ -17,6 +17,9 @@ export function useUserSteps(
   const [steps, setSteps] = useState<StepsRecord[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [userPositionInLeaderboard, setUserPositionInLeaderboard] = useState<
+    number | null
+  >(null);
 
   const fetchUserSteps = async () => {
     if (!userId) return;
@@ -40,8 +43,29 @@ export function useUserSteps(
     }
   };
 
+  const fetchUserLeaderboardPosition = async () => {
+    if (!userId) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const result = await StepService.getUserLeaderboardPosition(userId);
+
+      if (result) {
+        setUserPositionInLeaderboard(result);
+      }
+    } catch (err) {
+      setError("An unexpected error occurred");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchUserSteps();
+    fetchUserLeaderboardPosition();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -63,6 +87,7 @@ export function useUserSteps(
     error,
     totalSteps,
     avgStepsPerDay,
+    userPositionInLeaderboard: userPositionInLeaderboard || 0,
     refetch: fetchUserSteps,
     setSteps, // Expose setSteps for manual updates if needed
   };

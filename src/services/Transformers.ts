@@ -38,13 +38,10 @@ export const teamTransformer = (data: TeamDTO | null): Team => {
     name: data.name || "",
     user_id: data.user_id || null,
     memberIds: data.Users_Teams.map((member) => member.user_id || ""),
+    members: []
   } as Team;
 
   result.numberOfMembers = result.memberIds?.length || 0;
-  result.members =
-    result.memberIds?.map(
-      (id) => ({ displayName: "UNSET", id: id } as AppUser)
-    ) || [];
   return result;
 };
 
