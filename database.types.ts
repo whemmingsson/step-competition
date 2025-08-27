@@ -279,6 +279,7 @@ export type Database = {
       get_top_users_by_steps: {
         Args: { p_competition_id: number; p_limit: number }
         Returns: {
+          badge_icons: string
           display_name: string
           profile_image_url: string
           total_steps: number

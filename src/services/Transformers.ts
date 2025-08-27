@@ -38,7 +38,7 @@ export const teamTransformer = (data: TeamDTO | null): Team => {
     name: data.name || "",
     user_id: data.user_id || null,
     memberIds: data.Users_Teams.map((member) => member.user_id || ""),
-    members: []
+    members: [],
   } as Team;
 
   result.numberOfMembers = result.memberIds?.length || 0;
@@ -87,6 +87,9 @@ export const topUserTransformer = (data: TopUserDTO): TopUser => {
     displayName: data.display_name || "Unknown User",
     profileImageUrl: data.profile_image_url || "",
     totalSteps: data.total_steps || 0,
+    badgeIcons: data.badge_icons
+      ? data.badge_icons.split(";").map((icon) => icon.trim())
+      : [],
   };
 };
 

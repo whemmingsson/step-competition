@@ -10,12 +10,10 @@ import {
 import { PageContainer } from "@/components/PageContainer";
 import { CircleImage } from "@/components/CircleImage.tsx";
 import { useLeaderboards } from "@/hooks/useLeaderboards";
-import {useUserBadges} from "@/hooks/useUserBadges.tsx";
 
 export const LeaderboardPage = () => {
   const { userLeaderboard, teamLeaderboard, isLoading, userError, teamError } =
     useLeaderboards(10);
-  const badgeIcons = useUserBadges();
 
   // Medal emoji based on position
   const getMedal = (position: number) => {
@@ -80,11 +78,8 @@ export const LeaderboardPage = () => {
                       {user.displayName}
                     </TableCell>
                     <TableCell>
-                      {badgeIcons?.map((icon) => (
-                          <CircleImage
-                              name=""
-                              url={icon}
-                          />
+                      {user.badgeIcons?.map((icon) => (
+                        <CircleImage name="" url={icon} />
                       ))}
                     </TableCell>
                     <TableCell
@@ -94,7 +89,6 @@ export const LeaderboardPage = () => {
                     >
                       {user.totalSteps.toLocaleString()}
                     </TableCell>
-
                   </TableRow>
                 ))}
               </TableBody>
