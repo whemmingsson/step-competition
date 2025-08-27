@@ -10,6 +10,7 @@ import {
 import { PageContainer } from "@/components/PageContainer";
 import { CircleImage } from "@/components/CircleImage.tsx";
 import { useLeaderboards } from "@/hooks/useLeaderboards";
+import { BadgesList } from "@/components/BadgesList";
 
 export const LeaderboardPage = () => {
   const { userLeaderboard, teamLeaderboard, isLoading, userError, teamError } =
@@ -78,9 +79,7 @@ export const LeaderboardPage = () => {
                       {user.displayName}
                     </TableCell>
                     <TableCell>
-                      {user.badgeIcons?.map((icon) => (
-                        <CircleImage name="" url={icon} />
-                      ))}
+                      <BadgesList badgeIconUrls={user.badgeIcons} />
                     </TableCell>
                     <TableCell
                       className={`text-right ${

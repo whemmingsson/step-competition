@@ -1,4 +1,6 @@
+import type { Badge } from "@/types/Badge";
 import type { Competition } from "@/types/Competition";
+import type { BadgeDTO } from "@/types/DTO/BadgeDTO";
 import type { CompetitionDTO } from "@/types/DTO/CompetitionDTO";
 import type { ProfileMetaDTO } from "@/types/DTO/ProfileMetaDTO";
 import type { StepsRecordDTO } from "@/types/DTO/StepsRecordDTO";
@@ -129,4 +131,17 @@ export const topTeamsToTeamsTransformer = (data: TopTeam[]): Team[] => {
     avgSteps: team.avgSteps || 0,
     memberIds: team.memberIds || [],
   }));
+};
+
+export const badgeTransformer = (data: BadgeDTO): Badge => {
+  return {
+    iconUrl: data.icon_url ?? "",
+    type: data.type ?? "",
+    description: data.description ?? "",
+    steps: data.steps ?? 0,
+  };
+};
+
+export const badgesTransformer = (data: BadgeDTO[]): Badge[] => {
+  return data.map((badge) => badgeTransformer(badge));
 };

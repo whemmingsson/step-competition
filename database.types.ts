@@ -29,6 +29,7 @@ export type Database = {
       Badges: {
         Row: {
           created_at: string
+          description: string | null
           icon_url: string | null
           id: number
           steps: number | null
@@ -36,6 +37,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          description?: string | null
           icon_url?: string | null
           id?: number
           steps?: number | null
@@ -43,6 +45,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          description?: string | null
           icon_url?: string | null
           id?: number
           steps?: number | null

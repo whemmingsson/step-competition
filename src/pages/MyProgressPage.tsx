@@ -18,7 +18,7 @@ import {
 import { UserHistoryCard } from "@/components/UserHistoryCard";
 import type { StepsRecord } from "@/types/StepsRecord";
 import { useUserSteps } from "@/hooks/useUserSteps";
-import {useUserBadges} from "@/hooks/useUserBadges.tsx";
+import { useUserBadges } from "@/hooks/useUserBadges.tsx";
 
 export const MyProgressPage = () => {
   const { session } = useAuth();
@@ -33,7 +33,7 @@ export const MyProgressPage = () => {
     refetch,
     setSteps,
   } = useUserSteps(userId, false);
-  const badgeIcons = useUserBadges()
+  const badgeIcons = useUserBadges();
 
   // Add state for deletion confirmation
   const [recordToDelete, setRecordToDelete] = useState<StepsRecord | null>(
