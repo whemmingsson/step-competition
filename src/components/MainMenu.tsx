@@ -2,18 +2,7 @@ import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import {
-  ArrowBigRight,
-  ArrowUpRight,
-  CornerUpRight,
-  LogOut,
-  LucideAirVent,
-  LucideALargeSmall,
-  Menu,
-  Trash,
-  WavesIcon,
-  X,
-} from "lucide-react";
+import { CornerUpRight, LogOut, Menu, Trash, X } from "lucide-react";
 
 import { DisplayNameBadge } from "./DisplayNameBadge";
 import supabase from "@/supabase";
