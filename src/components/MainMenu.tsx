@@ -63,7 +63,7 @@ const DesktopMenu = ({
 
       {/* Center navigation - more compact */}
       <div className="flex flex-1 items-center justify-center h-full px-1">
-        {SitePages.map((item) => {
+        {SitePages.filter((page) => !page.hideFromMenu).map((item) => {
           const isActive =
             location.pathname === item.path ||
             (item.path !== "/" && location.pathname.startsWith(item.path));
@@ -122,7 +122,7 @@ const MobileMenu = ({ mobileMenuOpen, setMobileMenuOpen }: MobileMenuProps) => {
       )}
     >
       <div className="container mx-auto px-4 py-2 space-y-2">
-        {SitePages.map((item) => {
+        {SitePages.filter((page) => !page.hideFromMenu).map((item) => {
           const isActive =
             location.pathname === item.path ||
             (item.path !== "/" && location.pathname.startsWith(item.path));

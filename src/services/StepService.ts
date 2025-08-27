@@ -51,7 +51,7 @@ export class StepService {
                 user_id: uid,
                 steps: steps,
                 date: formatDate(date),
-                competition_id: LocalStorageService.getSelectedComptetionId(),
+                competition_id: LocalStorageService.getSelectedCompetitionId(),
               },
             ])
             .select() // TODO: Fix the query executor to handle inserts without select
@@ -76,7 +76,7 @@ export class StepService {
             .eq("date", formatDate(date))
             .eq(
               "competition_id",
-              LocalStorageService.getSelectedComptetionId() ?? -1 // Use a default invalid ID if null
+              LocalStorageService.getSelectedCompetitionId() ?? -1 // Use a default invalid ID if null
             )
             .select()
             .single();
@@ -120,7 +120,7 @@ export class StepService {
    */
   static async getUserSteps(uid: string, groupByDate: boolean = true) {
     // Only apply the competition filter if we have a value
-    const competitionId = LocalStorageService.getSelectedComptetionId();
+    const competitionId = LocalStorageService.getSelectedCompetitionId();
 
     if (!competitionId) {
       return {
@@ -214,7 +214,7 @@ export class StepService {
     error?: string;
     data?: TopUser[];
   }> {
-    const competitionId = LocalStorageService.getSelectedComptetionId();
+    const competitionId = LocalStorageService.getSelectedCompetitionId();
 
     if (!competitionId) {
       return {
@@ -268,7 +268,7 @@ export class StepService {
         .eq("user_id", user.id)
         .eq(
           "competition_id",
-          LocalStorageService.getSelectedComptetionId() ?? -1 // Use a default invalid ID if null
+          LocalStorageService.getSelectedCompetitionId() ?? -1 // Use a default invalid ID if null
         );
 
       if (error) {
@@ -302,7 +302,7 @@ export class StepService {
   static async getTotalStepsForListOfUsers(
     ids: string[]
   ): Promise<ServiceQueryResult<number>> {
-    const competitionId = LocalStorageService.getSelectedComptetionId();
+    const competitionId = LocalStorageService.getSelectedCompetitionId();
 
     const cacheKey = `step_service_total-steps-'${competitionId}-${ids.join(
       ","
@@ -459,7 +459,7 @@ export class StepService {
           .eq("date", formatDate(date))
           .eq(
             "competition_id",
-            LocalStorageService.getSelectedComptetionId() ?? -1 // Use a default invalid ID if null
+            LocalStorageService.getSelectedCompetitionId() ?? -1 // Use a default invalid ID if null
           )
           .single();
       },
@@ -474,7 +474,7 @@ export class StepService {
   ): Promise<number | null> {
     const result = await supabase().rpc("get_user_leaderboard_position", {
       in_user_id: userId,
-      in_competition_id: LocalStorageService.getSelectedComptetionId() ?? -1,
+      in_competition_id: LocalStorageService.getSelectedCompetitionId() ?? -1,
     });
 
     if (!result || !result.data || result.data.length === 0) {

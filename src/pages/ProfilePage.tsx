@@ -6,6 +6,7 @@ import { useUserDisplayName } from "@/hooks/useUserDisplayName";
 import { UserService } from "@/services/UserService";
 import { useState } from "react";
 import { toast } from "sonner";
+import { UserGoalCard } from "@/components/UserGoalCard";
 
 export const ProfilePage = () => {
   const { refreshUser, user } = useUser();
@@ -72,6 +73,7 @@ export const ProfilePage = () => {
         userId={userId}
         profileImageUrl={user?.profileImageUrl || undefined}
       />
+      <UserGoalCard />
     </PageContainer>
   );
 };

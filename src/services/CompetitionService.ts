@@ -76,7 +76,7 @@ export class CompetitionService {
   static async getCurrentCompetition(): Promise<
     ServiceQueryResult<Competition>
   > {
-    const id = LocalStorageService.getSelectedComptetionId();
+    const id = LocalStorageService.getSelectedCompetitionId();
     if (!id) {
       return {
         success: false,
