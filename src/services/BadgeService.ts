@@ -54,7 +54,7 @@ export class BadgeService {
     userId: string,
     badgeId: string
   ): Promise<ServiceQueryResult<void>> {
-    const { data, error } = await supabase()
+    const { error } = await supabase()
       .from("Users_Badges")
       .insert([{ user_id: userId, badge_id: Number(badgeId) }]);
 

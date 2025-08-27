@@ -474,7 +474,7 @@ export class StepService {
   ): Promise<number | null> {
     const result = await supabase().rpc("get_user_leaderboard_position", {
       in_user_id: userId,
-      in_competition_id: LocalStorageService.getSelectedComptetionId() ?? -1,
+      in_competition_id: LocalStorageService.getSelectedCompetitionId() ?? -1,
     });
 
     if (!result || !result.data || result.data.length === 0) {
