@@ -2,7 +2,18 @@ import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { LogOut, Menu, Trash, X } from "lucide-react";
+import {
+  ArrowBigRight,
+  ArrowUpRight,
+  CornerUpRight,
+  LogOut,
+  LucideAirVent,
+  LucideALargeSmall,
+  Menu,
+  Trash,
+  WavesIcon,
+  X,
+} from "lucide-react";
 
 import { DisplayNameBadge } from "./DisplayNameBadge";
 import supabase from "@/supabase";
@@ -16,10 +27,12 @@ import {
   AlertDialogTitle,
 } from "./ui/alert-dialog";
 import { SitePages } from "@/navigation/NavigationConfig";
+import { AlertDialogAction } from "@radix-ui/react-alert-dialog";
 
 interface DesktopMenuProps {
   handleLogout: () => Promise<void>;
   setIsDeleteDialogOpen: (open: boolean) => void;
+  setLeaveDialogOpen: (open: boolean) => void;
 }
 
 interface MobileMenuProps {
@@ -30,6 +43,7 @@ interface MobileMenuProps {
 interface MobileMenuButtonsProps {
   handleLogout: () => Promise<void>;
   setIsDeleteDialogOpen: (open: boolean) => void;
+  setLeaveDialogOpen: (open: boolean) => void;
   setMobileMenuOpen: (open: boolean) => void;
   mobileMenuOpen: boolean;
 }
@@ -51,6 +65,7 @@ const AppName = () => {
 const DesktopMenu = ({
   handleLogout,
   setIsDeleteDialogOpen,
+  setLeaveDialogOpen,
 }: DesktopMenuProps) => {
   const location = useLocation();
 
@@ -97,6 +112,15 @@ const DesktopMenu = ({
         >
           <LogOut className="h-3 w-3 md:h-4 md:w-4" />
           <span className="hidden lg:inline ml-1">Logout</span>
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() => setLeaveDialogOpen(true)}
+          size="sm"
+          className="flex items-center p-1 md:p-1.5"
+        >
+          <CornerUpRight className="h-3 w-3 md:h-4 md:w-4" />
+          <span className="hidden lg:inline ml-1">Leave</span>
         </Button>
         <Button
           variant="outline"
@@ -153,6 +177,7 @@ const MobileMenuButtons = ({
   setMobileMenuOpen,
   handleLogout,
   setIsDeleteDialogOpen,
+  setLeaveDialogOpen,
   mobileMenuOpen,
 }: MobileMenuButtonsProps) => {
   return (
@@ -169,6 +194,16 @@ const MobileMenuButtons = ({
           title="Logout"
         >
           <LogOut className="h-5 w-5" />
+        </Button>
+
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setLeaveDialogOpen(true)}
+          className="text-foreground/80 hover:text-foreground"
+          title="Logout"
+        >
+          <CornerUpRight className="h-5 w-5" />
         </Button>
 
         <Button
@@ -200,6 +235,7 @@ const MobileMenuButtons = ({
 export const MainMenu = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isLeaveDialogOpen, setLeaveDialogOpen] = useState(false);
 
   async function handleLogout(): Promise<void> {
     const { error } = await supabase().auth.signOut();
@@ -219,6 +255,7 @@ export const MainMenu = () => {
           setMobileMenuOpen={setMobileMenuOpen}
           handleLogout={handleLogout}
           setIsDeleteDialogOpen={setIsDeleteDialogOpen}
+          setLeaveDialogOpen={setLeaveDialogOpen}
         />
 
         <MobileMenu
@@ -228,6 +265,7 @@ export const MainMenu = () => {
 
         <DesktopMenu
           setIsDeleteDialogOpen={setIsDeleteDialogOpen}
+          setLeaveDialogOpen={setLeaveDialogOpen}
           handleLogout={handleLogout}
         />
       </div>
@@ -248,7 +286,8 @@ export const MainMenu = () => {
               >
                 {import.meta.env.VITE_CONTACT_EMAIL}
               </a>{" "}
-              with your display name and we will delete your account for you.{" "}
+              with your email you used to register/login, and we will delete
+              your account for you.{" "}
               <span className="font-bold">
                 Please note that this action is irreversible and will remove all
                 your data from our system.
@@ -257,6 +296,51 @@ export const MainMenu = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>OK</AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={isLeaveDialogOpen} onOpenChange={setLeaveDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Leave the current competition</AlertDialogTitle>
+            <AlertDialogDescription>
+              Don't want to participate in the competition any more, but still
+              want to keep your data? No problems - click Confirm below.
+              <br />
+              <span className="font-bold">
+                You will be logged out from the app and you will no longer
+                participate in the competition. If you want to rejoin later you
+                need the original invite link. <br />
+                <br />
+                Please note that this will NOT remove any data from the
+                platform.
+              </span>
+              <br />
+              <br />
+              If you instead want to clear all your data from our platform,
+              please send an email to{" "}
+              <a
+                href={`mailto:${import.meta.env.VITE_CONTACT_EMAIL}`}
+                className="underline"
+              >
+                {import.meta.env.VITE_CONTACT_EMAIL}
+              </a>{" "}
+              with your email and we will delete your account for you. <br />
+              <span className="font-bold">
+                Please note that deleting your data is an irreversible option.
+              </span>
+              <br />
+              <br />
+              <span className="italic">
+                Removing the data for the current compteition only is currently
+                not possible
+              </span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Nevermind</AlertDialogCancel>
+            <AlertDialogAction>Confirm</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
