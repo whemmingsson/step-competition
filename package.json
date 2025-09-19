@@ -8,9 +8,11 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "supatypes": "npx supabase gen types typescript --project-id \"gswgzevutihdakefrpzd\" --schema public > database.types.ts"
+    "supatypes": "npx supabase gen types typescript --project-id \"gswgzevutihdakefrpzd\" --schema public > database.types.ts",
+    "supa-types": ".\\supabase.exe gen types typescript --project-id \"gswgzevutihdakefrpzd\" --schema public > database.types.ts"
   },
   "dependencies": {
+    "@esbuild/win32-x64": "^0.25.10",
     "@hookform/resolvers": "^5.0.1",
     "@radix-ui/react-alert-dialog": "^1.1.14",
     "@radix-ui/react-hover-card": "^1.1.14",

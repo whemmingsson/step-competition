@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@esbuild/win32-x64':
+        specifier: ^0.25.10
+        version: 0.25.10
       '@hookform/resolvers':
         specifier: ^5.0.1
         version: 5.0.1(react-hook-form@7.56.4(react@19.1.0))
@@ -373,6 +376,12 @@ packages:
     resolution: {integrity: sha512-onOJ02pqs9h1iMJ1PQphR+VZv8qBMQ77Klcsqv9CNW2w6yLqoURLcgERAIurY6QE63bbLuqgP9ATqajFLK5AMQ==}
     engines: {node: '>=18'}
     cpu: [ia32]
+    os: [win32]
+
+  '@esbuild/win32-x64@0.25.10':
+    resolution: {integrity: sha512-9KpxSVFCu0iK1owoez6aC/s/EdUQLDN3adTxGCqxMVhrPDj6bt5dbrHDXUuq+Bs2vATFBBrQS5vdQ/Ed2P+nbw==}
+    engines: {node: '>=18'}
+    cpu: [x64]
     os: [win32]
 
   '@esbuild/win32-x64@0.25.5':
@@ -2420,6 +2429,8 @@ snapshots:
 
   '@esbuild/win32-ia32@0.25.5':
     optional: true
+
+  '@esbuild/win32-x64@0.25.10': {}
 
   '@esbuild/win32-x64@0.25.5':
     optional: true

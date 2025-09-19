@@ -83,6 +83,30 @@ export type Database = {
         }
         Relationships: []
       }
+      Feature_Flags: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          enabled: boolean
+          id: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string | null
+          enabled?: boolean
+          id?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          enabled?: boolean
+          id?: number
+        }
+        Relationships: []
+      }
       Steps: {
         Row: {
           competition_id: number | null
